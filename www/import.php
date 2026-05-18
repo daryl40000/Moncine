@@ -16,6 +16,7 @@ use Moncine\ImportCsv;
 use Moncine\ImportOds;
 use Moncine\ImportPostersZip;
 use Moncine\TmdbConfig;
+use Moncine\UploadLimits;
 use Moncine\View;
 
 $message = '';
@@ -44,6 +45,13 @@ if (isset($_GET['tmdb_test'])) {
     $msg = (string) ($_GET['tmdb_test_msg'] ?? '');
     $tmdbMessage = ($_GET['tmdb_test'] === 'ok' ? '✓ ' : '✗ ') . $msg;
 }
+if (isset($_GET['csrf_error'])) {
+    $errors[] = Csrf::REJECT_MESSAGE;
+    $errors[] = 'Si vous envoyiez un gros fichier (ZIP affiches), la cause est souvent la limite PHP '
+        . '(post_max_size = ' . UploadLimits::postMaxSizeLabel()
+        . ', upload_max_filesize = ' . UploadLimits::uploadMaxFilesizeLabel()
+        . ') — pas un problème de droits sur le dossier posters/.';
+}
 if (isset($_GET['enrich_done'])) {
     $processed = (int) ($_GET['processed'] ?? 0);
     $enriched = (int) ($_GET['enriched'] ?? 0);
@@ -67,86 +75,88 @@ if (isset($_GET['enrich_done'])) {
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'import_posters_zip') {
-    if (!Csrf::validateFromPost($_POST)) {
-        header('Location: /import.php?csrf_error=1');
-        exit;
-    }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (UploadLimits::postBodyWasDiscarded()) {
+        $errors[] = UploadLimits::postTooLargeMessage();
+    } elseif (($_POST['action'] ?? '') === 'import_posters_zip') {
+        if (!Csrf::validateFromPost($_POST)) {
+            header('Location: /import.php?csrf_error=1');
+            exit;
+        }
 
-    if (!CatalogAdmin::canAccess()) {
-        $errors[] = 'L’import des affiches ZIP est réservé à l’administrateur.';
-    } else {
-        $uploadError = (int) ($_FILES['posters_zip']['error'] ?? UPLOAD_ERR_NO_FILE);
-        if (!isset($_FILES['posters_zip']) || $uploadError !== UPLOAD_ERR_OK) {
-            $errors[] = match ($uploadError) {
-                UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Archive trop volumineuse (maximum '
-                    . (int) (MONCINE_POSTERS_ZIP_MAX_BYTES / 1024 / 1024) . ' Mo).',
-                UPLOAD_ERR_NO_FILE => 'Aucune archive ZIP sélectionnée.',
-                default => 'Erreur lors de l’envoi du fichier ZIP.',
-            };
-        } elseif ((int) $_FILES['posters_zip']['size'] > MONCINE_POSTERS_ZIP_MAX_BYTES) {
-            $errors[] = 'Archive trop volumineuse (maximum '
-                . (int) (MONCINE_POSTERS_ZIP_MAX_BYTES / 1024 / 1024) . ' Mo).';
+        if (!CatalogAdmin::canAccess()) {
+            $errors[] = 'L’import des affiches ZIP est réservé à l’administrateur.';
         } else {
-            $ext = strtolower(pathinfo((string) ($_FILES['posters_zip']['name'] ?? ''), PATHINFO_EXTENSION));
-            if ($ext !== 'zip') {
-                $errors[] = 'Le fichier doit être une archive .zip.';
+            $uploadError = (int) ($_FILES['posters_zip']['error'] ?? UPLOAD_ERR_NO_FILE);
+            if (!isset($_FILES['posters_zip']) || $uploadError !== UPLOAD_ERR_OK) {
+                $errors[] = match ($uploadError) {
+                    UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Archive trop volumineuse (maximum '
+                        . (int) (MONCINE_POSTERS_ZIP_MAX_BYTES / 1024 / 1024) . ' Mo).',
+                    UPLOAD_ERR_NO_FILE => 'Aucune archive ZIP sélectionnée.',
+                    default => 'Erreur lors de l’envoi du fichier ZIP.',
+                };
+            } elseif ((int) $_FILES['posters_zip']['size'] > MONCINE_POSTERS_ZIP_MAX_BYTES) {
+                $errors[] = 'Archive trop volumineuse (maximum '
+                    . (int) (MONCINE_POSTERS_ZIP_MAX_BYTES / 1024 / 1024) . ' Mo).';
             } else {
-                $result = (new ImportPostersZip())->importFromPath(
-                    (string) $_FILES['posters_zip']['tmp_name']
-                );
-                $posterZipMessage = sprintf(
-                    '%d affiche(s) importée(s).',
-                    $result['imported']
-                );
-                if ($result['skipped'] > 0) {
-                    $posterZipMessage .= ' ' . $result['skipped'] . ' ignorée(s).';
+                $ext = strtolower(pathinfo((string) ($_FILES['posters_zip']['name'] ?? ''), PATHINFO_EXTENSION));
+                if ($ext !== 'zip') {
+                    $errors[] = 'Le fichier doit être une archive .zip.';
+                } else {
+                    $result = (new ImportPostersZip())->importFromPath(
+                        (string) $_FILES['posters_zip']['tmp_name']
+                    );
+                    $posterZipMessage = sprintf(
+                        '%d affiche(s) importée(s).',
+                        $result['imported']
+                    );
+                    if ($result['skipped'] > 0) {
+                        $posterZipMessage .= ' ' . $result['skipped'] . ' ignorée(s).';
+                    }
+                    $errors = array_merge($errors, $result['errors']);
                 }
-                $errors = array_merge($errors, $result['errors']);
             }
         }
-    }
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
-    if (!Csrf::validateFromPost($_POST)) {
-        header('Location: /import.php?csrf_error=1');
-        exit;
-    }
-
-    $replaceAll = isset($_POST['replace_all']);
-
-    $uploadError = (int) ($_FILES['csv_file']['error'] ?? UPLOAD_ERR_NO_FILE);
-    if (!isset($_FILES['csv_file']) || $uploadError !== UPLOAD_ERR_OK) {
-        $errors[] = match ($uploadError) {
-            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Fichier trop volumineux (maximum '
-                . (int) (MONCINE_CSV_MAX_BYTES / 1024 / 1024) . ' Mo).',
-            UPLOAD_ERR_NO_FILE => 'Aucun fichier sélectionné.',
-            default => 'Erreur lors de l\'envoi du fichier.',
-        };
-    } elseif ((int) $_FILES['csv_file']['size'] > MONCINE_CSV_MAX_BYTES) {
-        $errors[] = 'Fichier trop volumineux (maximum '
-            . (int) (MONCINE_CSV_MAX_BYTES / 1024 / 1024) . ' Mo).';
-    } else {
-        $tmp = $_FILES['csv_file']['tmp_name'];
-
-        if ($replaceAll) {
-            (new FilmRepository())->deleteAll();
+    } elseif (!isset($_POST['action'])) {
+        if (!Csrf::validateFromPost($_POST)) {
+            header('Location: /import.php?csrf_error=1');
+            exit;
         }
 
-        $ext = strtolower(pathinfo((string) ($_FILES['csv_file']['name'] ?? ''), PATHINFO_EXTENSION));
-        if ($ext === 'ods') {
-            $result = (new ImportOds())->importFromPath($tmp);
+        $replaceAll = isset($_POST['replace_all']);
+
+        $uploadError = (int) ($_FILES['csv_file']['error'] ?? UPLOAD_ERR_NO_FILE);
+        if (!isset($_FILES['csv_file']) || $uploadError !== UPLOAD_ERR_OK) {
+            $errors[] = match ($uploadError) {
+                UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Fichier trop volumineux (maximum '
+                    . (int) (MONCINE_CSV_MAX_BYTES / 1024 / 1024) . ' Mo).',
+                UPLOAD_ERR_NO_FILE => 'Aucun fichier sélectionné.',
+                default => 'Erreur lors de l\'envoi du fichier.',
+            };
+        } elseif ((int) $_FILES['csv_file']['size'] > MONCINE_CSV_MAX_BYTES) {
+            $errors[] = 'Fichier trop volumineux (maximum '
+                . (int) (MONCINE_CSV_MAX_BYTES / 1024 / 1024) . ' Mo).';
         } else {
-            $result = (new ImportCsv())->importFromPath($tmp);
-        }
+            $tmp = $_FILES['csv_file']['tmp_name'];
 
-        $message = sprintf(
-            '%d entrée(s) importée(s) ou mise(s) à jour. %d vision(s) enregistrée(s) dans l’historique.',
-            $result['imported'],
-            $result['vues']
-        );
-        $errors = array_merge($errors, $result['errors']);
+            if ($replaceAll) {
+                (new FilmRepository())->deleteAll();
+            }
+
+            $ext = strtolower(pathinfo((string) ($_FILES['csv_file']['name'] ?? ''), PATHINFO_EXTENSION));
+            if ($ext === 'ods') {
+                $result = (new ImportOds())->importFromPath($tmp);
+            } else {
+                $result = (new ImportCsv())->importFromPath($tmp);
+            }
+
+            $message = sprintf(
+                '%d entrée(s) importée(s) ou mise(s) à jour. %d vision(s) enregistrée(s) dans l’historique.',
+                $result['imported'],
+                $result['vues']
+            );
+            $errors = array_merge($errors, $result['errors']);
+        }
     }
 }
 
@@ -171,4 +181,6 @@ View::render('import', [
     'enrichPending' => $enrichPending,
     'hasTmdbKey' => $hasTmdbKey,
     'enrichBatchSize' => MONCINE_ENRICH_BATCH_SIZE,
+    'phpPostMaxSize' => UploadLimits::postMaxSizeLabel(),
+    'phpUploadMaxSize' => UploadLimits::uploadMaxFilesizeLabel(),
 ]);

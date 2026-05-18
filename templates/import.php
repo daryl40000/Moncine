@@ -187,7 +187,11 @@
             Format attendu : même archive que « ZIP affiches locales » (dossier <code>posters/</code>
             ou fichiers <code>123.jpg</code> à la racine). Taille max.
             <?= (int) (MONCINE_POSTERS_ZIP_MAX_BYTES / 1024 / 1024) ?> Mo.
-            Vous pouvez aussi copier le dossier <code>posters/</code> à la main sur le serveur.
+            Limites PHP actuelles sur ce serveur :
+            post_max_size = <strong><?= Moncine\View::escape((string) ($phpPostMaxSize ?? '?')) ?></strong>,
+            upload_max_filesize = <strong><?= Moncine\View::escape((string) ($phpUploadMaxSize ?? '?')) ?></strong>
+            (il faut au moins 85M pour un gros ZIP — mettre à jour le paquet Moncine puis redémarrer PHP-FPM).
+            Vous pouvez aussi copier le dossier <code>posters/</code> en SSH vers <code>www/posters/</code>.
         </p>
         <form method="post" enctype="multipart/form-data" class="import-form">
             <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
