@@ -14,10 +14,12 @@ use Moncine\FilmEnricher;
 use Moncine\FilmRepository;
 use Moncine\ImportCsv;
 use Moncine\ImportOds;
+use Moncine\ImportPostersZip;
 use Moncine\TmdbConfig;
 use Moncine\View;
 
 $message = '';
+$posterZipMessage = '';
 $errors = [];
 $tmdbMessage = '';
 $enrichMessage = '';
@@ -62,6 +64,47 @@ if (isset($_GET['enrich_done'])) {
         $enrichMessage .= ' Il reste ' . $remaining . ' film(s) à traiter — relancez le bouton.';
     } else {
         $enrichMessage .= ' Enrichissement terminé pour tous vos films.';
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'import_posters_zip') {
+    if (!Csrf::validateFromPost($_POST)) {
+        header('Location: /import.php?csrf_error=1');
+        exit;
+    }
+
+    if (!CatalogAdmin::canAccess()) {
+        $errors[] = 'L’import des affiches ZIP est réservé à l’administrateur.';
+    } else {
+        $uploadError = (int) ($_FILES['posters_zip']['error'] ?? UPLOAD_ERR_NO_FILE);
+        if (!isset($_FILES['posters_zip']) || $uploadError !== UPLOAD_ERR_OK) {
+            $errors[] = match ($uploadError) {
+                UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Archive trop volumineuse (maximum '
+                    . (int) (MONCINE_POSTERS_ZIP_MAX_BYTES / 1024 / 1024) . ' Mo).',
+                UPLOAD_ERR_NO_FILE => 'Aucune archive ZIP sélectionnée.',
+                default => 'Erreur lors de l’envoi du fichier ZIP.',
+            };
+        } elseif ((int) $_FILES['posters_zip']['size'] > MONCINE_POSTERS_ZIP_MAX_BYTES) {
+            $errors[] = 'Archive trop volumineuse (maximum '
+                . (int) (MONCINE_POSTERS_ZIP_MAX_BYTES / 1024 / 1024) . ' Mo).';
+        } else {
+            $ext = strtolower(pathinfo((string) ($_FILES['posters_zip']['name'] ?? ''), PATHINFO_EXTENSION));
+            if ($ext !== 'zip') {
+                $errors[] = 'Le fichier doit être une archive .zip.';
+            } else {
+                $result = (new ImportPostersZip())->importFromPath(
+                    (string) $_FILES['posters_zip']['tmp_name']
+                );
+                $posterZipMessage = sprintf(
+                    '%d affiche(s) importée(s).',
+                    $result['imported']
+                );
+                if ($result['skipped'] > 0) {
+                    $posterZipMessage .= ' ' . $result['skipped'] . ' ignorée(s).';
+                }
+                $errors = array_merge($errors, $result['errors']);
+            }
+        }
     }
 }
 
@@ -117,6 +160,7 @@ $hasTmdbKey = TmdbConfig::hasApiKey();
 View::render('import', [
     'pageTitle' => 'Importer',
     'message' => $message,
+    'posterZipMessage' => $posterZipMessage,
     'errors' => $errors,
     'tmdbMessage' => $tmdbMessage,
     'enrichMessage' => $enrichMessage,

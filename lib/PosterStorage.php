@@ -89,6 +89,41 @@ final class PosterStorage
     }
 
     /**
+     * Enregistre une image locale pour une œuvre (import ZIP ou copie manuelle).
+     * Met à jour le fichier dans www/posters/ et retourne le chemin web (/posters/…).
+     */
+    public function importBinaryForOeuvre(int $oeuvreId, string $binary): string
+    {
+        if ($oeuvreId <= 0 || $binary === '') {
+            return '';
+        }
+
+        $maxBytes = defined('MONCINE_POSTER_MAX_BYTES') ? (int) MONCINE_POSTER_MAX_BYTES : 2_097_152;
+        if (strlen($binary) > $maxBytes) {
+            return '';
+        }
+
+        $mime = $this->detectImageMime($binary);
+        if ($mime === null) {
+            return '';
+        }
+
+        self::ensureDirectory();
+        $ext = self::ALLOWED_MIME[$mime];
+        $webPath = self::webPathForOeuvre($oeuvreId, $ext);
+        $this->removeLocalFilesForOeuvre($oeuvreId);
+
+        $filePath = self::postersFilesystemDir() . '/' . $oeuvreId . '.' . $ext;
+        if (@file_put_contents($filePath, $binary) === false) {
+            return '';
+        }
+
+        @chmod($filePath, 0644);
+
+        return $webPath;
+    }
+
+    /**
      * Si l’URL est distante, la télécharge ; si déjà locale, la conserve.
      */
     public function ensureLocalForOeuvre(int $oeuvreId, string $posterUrl): string

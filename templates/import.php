@@ -10,6 +10,10 @@
         <div class="alert alert-success"><?= Moncine\View::escape($message) ?></div>
     <?php endif; ?>
 
+    <?php if (!empty($posterZipMessage)): ?>
+        <div class="alert alert-success"><?= Moncine\View::escape($posterZipMessage) ?></div>
+    <?php endif; ?>
+
     <?php if (!empty($enrichMessage)): ?>
         <div class="alert alert-success"><?= Moncine\View::escape($enrichMessage) ?></div>
     <?php endif; ?>
@@ -170,12 +174,29 @@
 <section class="export-panel">
     <h2>Affiches locales</h2>
     <p class="lead">
-        Les affiches sont stockées par <strong>ID catalogue</strong> dans <code>www/posters/</code>.
+        Les affiches sont stockées par <strong>ID catalogue</strong> dans <code>www/posters/</code>
+        (fichiers <code>123.jpg</code> = œuvre n°123). Importez le catalogue CSV <strong>avant</strong> le ZIP.
     </p>
     <p>
-        <a href="/ranger-affiches.php" class="btn btn-secondary">Gérer les affiches locales</a>
-        <?php if (!empty($canManageCatalog)): ?>
-            <span class="hint"> — ou export ZIP ci-dessus (catalogue admin).</span>
-        <?php endif; ?>
+        <a href="/ranger-affiches.php" class="btn btn-secondary">Télécharger depuis TMDB (par lots)</a>
     </p>
+
+    <?php if (!empty($canManageCatalog)): ?>
+        <h3>Importer une archive ZIP</h3>
+        <p class="hint">
+            Format attendu : même archive que « ZIP affiches locales » (dossier <code>posters/</code>
+            ou fichiers <code>123.jpg</code> à la racine). Taille max.
+            <?= (int) (MONCINE_POSTERS_ZIP_MAX_BYTES / 1024 / 1024) ?> Mo.
+            Vous pouvez aussi copier le dossier <code>posters/</code> à la main sur le serveur.
+        </p>
+        <form method="post" enctype="multipart/form-data" class="import-form">
+            <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
+            <input type="hidden" name="action" value="import_posters_zip">
+            <label for="posters_zip">Archive ZIP des affiches</label>
+            <input type="file" name="posters_zip" id="posters_zip" accept=".zip,application/zip" required>
+            <button type="submit" class="btn btn-primary">Importer le ZIP</button>
+        </form>
+    <?php else: ?>
+        <p class="hint">L’import ZIP est réservé à l’administrateur (après import du catalogue).</p>
+    <?php endif; ?>
 </section>

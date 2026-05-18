@@ -2,10 +2,15 @@
 
 ## Principe
 
-1. **Exporter** depuis `Moncine (origine)` (CSV + dossier `www/posters/` si affiches locales).
+1. **Exporter** depuis `Moncine (origine)` (CSV / ODS + affiches locales).
 2. **Installer** le paquet Moncine (base vide, schéma paquet).
-3. **Importer** via la page Importer (format à étendre pour envies + historique).
+3. **Importer** sur `/import.php` dans cet ordre :
+   - **Catalogue** (CSV ou ODS admin) — crée les œuvres et leurs ID
+   - **Bibliothèque** par utilisateur (CSV ou ODS léger)
+   - **ZIP affiches** (admin) — archive `posters/123.jpg` ou export « ZIP affiches locales »
 4. Vérifier les comptages, puis basculer l’URL.
+
+Alternative aux affiches : copier le dossier `www/posters/` sur le serveur (mêmes noms `123.jpg`), puis lancer « Gérer les affiches locales » ou réimporter le ZIP.
 
 Pas de copie directe de `moncine.db` : le schéma évoluera (comptes, foyers, champs déplacés).
 
@@ -15,6 +20,7 @@ Pas de copie directe de `moncine.db` : le schéma évoluera (comptes, foyers, ch
 - [ ] Export wishlist (Mes envies) — colonne statut `wishlist` / `mes envies`
 - [ ] Export historique (visions + notes)
 - [ ] Sauvegarde `data/` et `www/posters/`
+- [ ] Import catalogue → bibliothèque → ZIP affiches (ou copie `posters/`)
 - [ ] Import sur paquet neuf
 - [ ] Test sur URL de préproduction
 

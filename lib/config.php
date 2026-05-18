@@ -51,3 +51,6 @@ define('MONCINE_CSV_MAX_BYTES', 5 * 1024 * 1024);
 
 // Affiche téléchargée (2 Mo max)
 define('MONCINE_POSTER_MAX_BYTES', 2 * 1024 * 1024);
+
+// Archive ZIP d’affiches à l’import (admin)
+define('MONCINE_POSTERS_ZIP_MAX_BYTES', 80 * 1024 * 1024);
