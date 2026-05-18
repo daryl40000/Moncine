@@ -24,6 +24,7 @@ final class CollectionExportSchema
      * @var array<string, string>
      */
     public const FILM_COLUMNS = [
+        'oeuvre_id' => 'ID catalogue',
         'titre' => 'Titre',
         'titre_original' => 'Titre original',
         'realisateur' => 'Réalisateur',
@@ -54,6 +55,15 @@ final class CollectionExportSchema
      * @var array<string, list<string>>
      */
     public const FILM_COLUMN_ALIASES = [
+        'oeuvre_id' => [
+            'id catalogue',
+            'oeuvre_id',
+            'oeuvre id',
+            'id oeuvre',
+            'id film',
+            'film_id',
+            'id',
+        ],
         'titre' => ['titre', 'title', 'nom', 'film'],
         'titre_original' => ['titre original', 'titre_original', 'original title', 'original_title'],
         'realisateur' => ['realisateur', 'director', 'auteur'],
@@ -149,7 +159,7 @@ final class CollectionExportSchema
     {
         return array_values(array_filter(
             array_keys(self::FILM_COLUMNS),
-            static fn (string $key): bool => !in_array($key, ['vu', 'note', 'statut'], true)
+            static fn (string $key): bool => !in_array($key, ['vu', 'note', 'statut', 'oeuvre_id'], true)
         ));
     }
 
@@ -180,6 +190,9 @@ final class CollectionExportSchema
 
         foreach (self::FILM_COLUMNS as $key => $_label) {
             $row[] = match ($key) {
+                'oeuvre_id' => (int) ($film['oeuvre_id'] ?? $film['id'] ?? 0) > 0
+                    ? (string) (int) ($film['oeuvre_id'] ?? $film['id'])
+                    : '',
                 'duree_min' => self::formatDureeForExport((int) ($film['duree_min'] ?? 0)),
                 'support_physique' => SupportPhysique::label((string) ($film['support_physique'] ?? '')),
                 'vu' => self::formatVueDateForExport((string) ($film['derniere_vue'] ?? '')),

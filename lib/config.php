@@ -32,6 +32,9 @@ define('MONCINE_APP_NAME', 'Moncine');
 
 // Version affichée / paquet (semver)
 define('MONCINE_PACKAGE_VERSION', '2.1.0-dev');
+
+// Repère affiché sur la page import (vérifier que le serveur a bien le dernier code).
+define('MONCINE_IMPORT_ENGINE_BUILD', '2026-05-17-catalog-ids');
 define('MONCINE_PACKAGE_EDITION', 'yunohost');
 
 // Encodage CSV attendu à l'import (UTF-8 recommandé)

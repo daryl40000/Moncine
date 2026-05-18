@@ -185,6 +185,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $result['imported'],
                 $result['vues']
             );
+            if (!empty($result['format_label'])) {
+                $message .= ' Format détecté : ' . $result['format_label'] . '.';
+            }
+            if (!empty($result['catalog_cleared'])) {
+                $message .= ' Catalogue réinitialisé avant import.';
+            }
+            if (empty($result['has_id_column'])) {
+                $errors[] = 'Aucune colonne « ID catalogue » détectée dans le fichier : '
+                    . 'les numéros des œuvres ne peuvent pas être conservés (affiches décalées).';
+            }
             $errors = array_merge($errors, $result['errors']);
         }
     }
@@ -214,4 +224,5 @@ View::render('import', [
     'enrichBatchSize' => MONCINE_ENRICH_BATCH_SIZE,
     'phpPostMaxSize' => UploadLimits::postMaxSizeLabel(),
     'phpUploadMaxSize' => UploadLimits::uploadMaxFilesizeLabel(),
+    'importEngineBuild' => MONCINE_IMPORT_ENGINE_BUILD,
 ]);

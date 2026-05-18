@@ -31,8 +31,15 @@ final class ImportFormatTest extends TestCase
                 ImportFormat::KIND_CATALOG,
                 CatalogExportSchema::headers(),
             ],
-            'export complet legacy' => [
+            'export complet legacy (sans colonne ID)' => [
                 ImportFormat::KIND_LEGACY,
+                array_values(array_filter(
+                    CollectionExportSchema::filmHeaders(),
+                    static fn (string $label): bool => $label !== 'ID catalogue'
+                )),
+            ],
+            'export complet avec ID => catalogue' => [
+                ImportFormat::KIND_CATALOG,
                 CollectionExportSchema::filmHeaders(),
             ],
             'hybride oeuvre_id + statut sans métadonnées catalogue' => [

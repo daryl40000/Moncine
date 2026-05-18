@@ -472,7 +472,7 @@ final class CatalogFilmRepository
         [$oeuvrePayload, $libraryPayload] = $this->splitCatalogPayload($payload, $data);
 
         if ($existing === null && $oeuvreExisting === null) {
-            $oeuvreId = $this->oeuvres->insert($this->completeOeuvrePayload($oeuvrePayload));
+            $oeuvreId = $this->insertOeuvreFromImport($oeuvrePayload, $data);
             $this->cacheOeuvrePosterIfRemote($oeuvreId, (string) ($oeuvrePayload['poster_url'] ?? ''));
             $this->bibliotheque->insert($this->userId(), $oeuvreId, $libraryPayload);
 
@@ -1712,6 +1712,44 @@ final class CatalogFilmRepository
      * @param array<string, mixed> $oeuvre
      * @return array<string, mixed>
      */
+    /**
+     * @param array<string, mixed> $oeuvrePayload
+     * @param array<string, mixed> $importRow
+     */
+    private function insertOeuvreFromImport(array $oeuvrePayload, array $importRow): int
+    {
+        $complete = $this->completeOeuvrePayload($oeuvrePayload);
+        $requestedId = max(0, (int) ($importRow['oeuvre_id'] ?? 0));
+
+        if ($requestedId <= 0) {
+            return $this->oeuvres->insert($complete);
+        }
+
+        $duplicate = $this->oeuvres->findByTitreAndRealisateur(
+            (string) ($complete['titre'] ?? ''),
+            (string) ($complete['realisateur'] ?? '')
+        );
+        if ($duplicate !== null && (int) ($duplicate['id'] ?? 0) !== $requestedId) {
+            $wrongId = (int) $duplicate['id'];
+            if ($this->oeuvres->countBibliothequeLinks($wrongId) === 0) {
+                $this->oeuvres->deleteById($wrongId);
+            } else {
+                throw new \RuntimeException(
+                    'ID catalogue ' . $requestedId . ' demandé pour « ' . ($complete['titre'] ?? '') . ' », '
+                    . 'mais l’ID ' . $wrongId . ' existe déjà (bibliothèque liée).'
+                );
+            }
+        }
+
+        if ($this->oeuvres->findById($requestedId) === null) {
+            $this->oeuvres->insertWithId($requestedId, $complete);
+
+            return $requestedId;
+        }
+
+        return $this->oeuvres->insert($complete);
+    }
+
     private function completeOeuvrePayload(array $oeuvre): array
     {
         foreach (CatalogSchema::OEUVRE_FIELDS as $field) {

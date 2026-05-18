@@ -56,7 +56,7 @@ final class ImportOds
         $filmsTable = $this->findTable($tables, ['bibliotheque', 'films', 'film']);
         if ($filmsTable !== null) {
             [$header, $rows] = $filmsTable;
-            $filmResult = $this->runner->importFilmsSheet($rows, $header);
+            $filmResult = $this->runner->importFilmsSheet($rows, $header, $replaceCatalog);
             $result = ImportRunner::mergeResults($result, $filmResult);
         } elseif ($catalogTable === null) {
             $result['errors'][] = 'Feuille « Bibliotheque » ou « Catalogue » introuvable.';

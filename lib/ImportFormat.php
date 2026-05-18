@@ -54,4 +54,24 @@ final class ImportFormat
             default => 'export complet (ancien format)',
         };
     }
+
+    /**
+     * Infos affichées après import pour comprendre pourquoi les ID changent ou non.
+     *
+     * @param list<string|null> $header
+     * @return array{format: string, has_id_column: bool, label: string}
+     */
+    public static function analyzeHeader(array $header): array
+    {
+        $format = self::detectFromHeader($header);
+        $catalogMap = ImportFilmRows::mapHeaders($header, CatalogExportSchema::COLUMN_ALIASES);
+        $legacyMap = ImportFilmRows::mapHeaders($header, CollectionExportSchema::FILM_COLUMN_ALIASES);
+        $hasId = isset($catalogMap['oeuvre_id']) || isset($legacyMap['oeuvre_id']);
+
+        return [
+            'format' => $format,
+            'has_id_column' => $hasId,
+            'label' => self::label($format),
+        ];
+    }
 }

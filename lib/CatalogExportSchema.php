@@ -42,6 +42,8 @@ final class CatalogExportSchema
             'oeuvre_id',
             'oeuvre id',
             'id oeuvre',
+            'id film',
+            'film_id',
             'id',
             'id moncine',
         ],

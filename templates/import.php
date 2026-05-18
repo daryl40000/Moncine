@@ -5,6 +5,10 @@
         et le <strong>catalogue partagé</strong> (métadonnées des œuvres, réservé à l’administrateur).
         La bibliothèque référence chaque film par son <strong>ID catalogue</strong>.
     </p>
+    <p class="hint">
+        Moteur d’import serveur : <strong><?= Moncine\View::escape((string) ($importEngineBuild ?? '?')) ?></strong>
+        (si cette date ne change pas après mise à jour du paquet, le code n’est pas déployé).
+    </p>
 
     <?php if (!empty($message)): ?>
         <div class="alert alert-success"><?= Moncine\View::escape($message) ?></div>

@@ -23,11 +23,15 @@ final class ImportRunner
      */
     public function importFilmsSheet(array $dataRows, array $header, bool $replaceCatalog = false): array
     {
-        return match (ImportFormat::detectFromHeader($header)) {
+        $analysis = ImportFormat::analyzeHeader($header);
+
+        $result = match ($analysis['format']) {
             ImportFormat::KIND_LIBRARY => $this->importLibrarySheet($dataRows, $header),
             ImportFormat::KIND_CATALOG => $this->importCatalogSheet($dataRows, $header, $replaceCatalog),
-            default => $this->importLegacyFilmsSheet($dataRows, $header),
+            default => $this->importLegacyFilmsSheet($dataRows, $header, $replaceCatalog),
         };
+
+        return $this->withImportMeta($result, $analysis, $replaceCatalog);
     }
 
     /**
@@ -174,7 +178,9 @@ final class ImportRunner
                 . 'de l’ancienne instance (pas un export réalisé après la première importation).';
         }
 
-        return ['imported' => $imported, 'vues' => 0, 'errors' => $errors];
+        $sheet = ['imported' => $imported, 'vues' => 0, 'errors' => $errors, 'has_id_column' => true];
+
+        return $this->withSheetMeta($sheet, ImportFormat::KIND_CATALOG, $replaceCatalog);
     }
 
     /**
@@ -184,7 +190,7 @@ final class ImportRunner
      * @param list<string|null> $header
      * @return array{imported: int, vues: int, errors: list<string>}
      */
-    private function importLegacyFilmsSheet(array $dataRows, array $header): array
+    private function importLegacyFilmsSheet(array $dataRows, array $header, bool $replaceCatalog = false): array
     {
         $map = ImportFilmRows::mapHeaders($header);
         if (!isset($map['titre'])) {
@@ -192,13 +198,26 @@ final class ImportRunner
                 'imported' => 0,
                 'vues' => 0,
                 'errors' => ['Colonne « Titre » introuvable dans l’en-tête.'],
+                'format' => ImportFormat::KIND_LEGACY,
             ];
+        }
+
+        $catalogCleared = false;
+        if ($replaceCatalog && CatalogAdmin::canAccess()) {
+            (new CatalogAdmin())->clearCatalogForImport();
+            $catalogCleared = true;
         }
 
         $imported = 0;
         $vues = 0;
         $errors = [];
         $line = 1;
+        $idsFromFile = 0;
+
+        if (!isset($map['oeuvre_id']) && $replaceCatalog) {
+            $errors[] = 'Export « ancien format » sans colonne ID : les numéros seront recréés (1, 2, 3…). '
+                . 'Ajoutez une colonne « ID catalogue » / « ID » depuis l’ancienne base, ou utilisez l’export « CSV catalogue » admin.';
+        }
 
         foreach ($dataRows as $row) {
             $line++;
@@ -214,6 +233,10 @@ final class ImportRunner
 
                 $vuRaw = (string) ($parsed['_vu'] ?? '');
                 $noteRaw = (string) ($parsed['_note'] ?? '');
+                if ((int) ($parsed['oeuvre_id'] ?? 0) > 0) {
+                    $idsFromFile++;
+                }
+
                 $importColumns = (array) ($parsed['_import_columns'] ?? array_keys($map));
                 unset($parsed['_vu'], $parsed['_note'], $parsed['_import_columns']);
 
@@ -242,7 +265,18 @@ final class ImportRunner
             }
         }
 
-        return ['imported' => $imported, 'vues' => $vues, 'errors' => $errors];
+        if ($idsFromFile > 0) {
+            $this->oeuvres->syncAutoincrementSequence();
+        }
+
+        $sheet = [
+            'imported' => $imported,
+            'vues' => $vues,
+            'errors' => $errors,
+            'has_id_column' => isset($map['oeuvre_id']),
+        ];
+
+        return $this->withSheetMeta($sheet, ImportFormat::KIND_LEGACY, $replaceCatalog, $catalogCleared);
     }
 
     /**
@@ -375,6 +409,54 @@ final class ImportRunner
             'imported' => ($a['imported'] ?? 0) + ($b['imported'] ?? 0),
             'vues' => ($a['vues'] ?? 0) + ($b['vues'] ?? 0),
             'errors' => array_merge($a['errors'] ?? [], $b['errors'] ?? []),
+            'format' => $b['format'] ?? $a['format'] ?? '',
+            'format_label' => $b['format_label'] ?? $a['format_label'] ?? '',
+            'has_id_column' => (bool) ($b['has_id_column'] ?? $a['has_id_column'] ?? false),
+            'catalog_cleared' => (bool) ($b['catalog_cleared'] ?? $a['catalog_cleared'] ?? false),
         ];
+    }
+
+    /**
+     * @param array<string, mixed> $result
+     * @param array{format: string, has_id_column: bool, label: string} $analysis
+     * @return array<string, mixed>
+     */
+    private function withImportMeta(array $result, array $analysis, bool $replaceCatalog): array
+    {
+        $result['format'] = $analysis['format'];
+        $result['format_label'] = $analysis['label'];
+        $result['has_id_column'] = $analysis['has_id_column'];
+        $result['catalog_cleared'] = (bool) ($result['catalog_cleared'] ?? false)
+            || ($replaceCatalog && in_array(
+                $analysis['format'],
+                [ImportFormat::KIND_CATALOG, ImportFormat::KIND_LEGACY],
+                true
+            ));
+        if (!array_key_exists('has_id_column', $result)) {
+            $result['has_id_column'] = $analysis['has_id_column'];
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array<string, mixed> $result
+     * @return array<string, mixed>
+     */
+    private function withSheetMeta(
+        array $result,
+        string $format,
+        bool $replaceCatalog,
+        bool $catalogCleared = false
+    ): array {
+        $result['format'] = $format;
+        $result['format_label'] = ImportFormat::label($format);
+        $result['catalog_cleared'] = $catalogCleared
+            || ($replaceCatalog && in_array($format, [ImportFormat::KIND_CATALOG, ImportFormat::KIND_LEGACY], true));
+        if (!array_key_exists('has_id_column', $result)) {
+            $result['has_id_column'] = false;
+        }
+
+        return $result;
     }
 }

@@ -77,6 +77,7 @@ final class ImportFilmRows
         }
 
         $data = [
+            'oeuvre_id' => self::intCell($row, $map, 'oeuvre_id'),
             'titre' => self::getCell($row, $map, 'titre'),
             'realisateur' => isset($map['realisateur']) ? self::getCell($row, $map, 'realisateur') : '',
             '_import_columns' => array_keys($map),
@@ -194,6 +195,24 @@ final class ImportFilmRows
         }
 
         return trim((string) ($row[$map[$key]] ?? ''));
+    }
+
+    /**
+     * @param list<string|null> $row
+     * @param array<string, int> $map
+     */
+    public static function intCell(array $row, array $map, string $key): int
+    {
+        if (!isset($map[$key])) {
+            return 0;
+        }
+
+        $raw = trim((string) ($row[$map[$key]] ?? ''));
+        if ($raw === '' || !preg_match('/^\d+$/', $raw)) {
+            return 0;
+        }
+
+        return max(0, (int) $raw);
     }
 
     public static function normalizeHeader(string $label): string
