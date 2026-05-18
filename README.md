@@ -66,7 +66,8 @@ Paquet installable (format v2) à la racine du dépôt : `manifest.toml`, `scrip
 **Installation sur un serveur YunoHost :** voir [doc/packaging-yunohost.md](doc/packaging-yunohost.md).
 
 ```bash
-sudo yunohost app install /chemin/vers/Moncine -a moncine.votredomaine.tld -p /
+sudo yunohost app install /chemin/vers/Moncine --force \
+  -a "domain=moncine.votredomaine.tld&path=/&init_main_permission=visitors"
 ```
 
 Variables utiles sur le serveur :

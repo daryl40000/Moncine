@@ -6,30 +6,51 @@
 
 MONCINE_PACKAGE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Crée ou met à jour moncine.db via le même mécanisme qu’en développement local.
+# Droits sur data/ et moncine.db (lecture/écriture pour PHP-FPM = utilisateur $app).
+moncine_fix_data_permissions() {
+    if [[ -z "${data_dir:-}" || ! -d "${data_dir}" ]]; then
+        return
+    fi
+    chown -R "${app}:www-data" "${data_dir}"
+    chmod 750 "${data_dir}"
+    find "${data_dir}" -maxdepth 1 -type f \( -name 'moncine.db' -o -name 'moncine.db-*' \) -exec chmod 660 {} + 2>/dev/null || true
+}
+
+# Crée ou met à jour moncine.db (toujours en tant que $app, jamais en root).
 moncine_run_migrate() {
     local migrate_php="${install_dir}/lib/cli/migrate.php"
     if [[ ! -f "${migrate_php}" ]]; then
         ynh_exit 1 --message="migrate.php introuvable dans ${install_dir}/lib/cli/"
     fi
-    export MONCINE_DATA_PATH="${data_dir}"
+
+    moncine_prepare_data_dir
+
+    local base_url=""
     if [[ -n "${domain:-}" ]]; then
-        export MONCINE_BASE_URL="https://${domain}${path}"
+        base_url="https://${domain}${path}"
     fi
-    ynh_print_info "Application des migrations SQL Moncine…"
-    php "${migrate_php}" || ynh_exit 1 --message="Échec des migrations Moncine"
+
+    ynh_print_info "Application des migrations SQL Moncine (utilisateur ${app})…"
+    sudo -u "${app}" env \
+        MONCINE_DATA_PATH="${data_dir}" \
+        MONCINE_BASE_URL="${base_url}" \
+        php "${migrate_php}" \
+        || ynh_exit 1 --message="Échec des migrations Moncine"
+
+    moncine_fix_data_permissions
 }
 
-# Copie le code PHP depuis ce dépôt vers /var/www/moncine (pas de téléchargement tarball ici).
+# Copie le code PHP depuis ce dépôt vers /var/www/moncine (install depuis chemin local).
 moncine_copy_sources() {
     local dest="${1:?}"
 
-    if [[ -d "${MONCINE_PACKAGE_ROOT}/www" ]]; then
-        mkdir -p "${dest}/www/posters"
-        # --exclude posters/ : ne pas effacer les affiches déjà téléchargées à l’upgrade.
-        rsync -a --delete --exclude 'posters/' \
-            "${MONCINE_PACKAGE_ROOT}/www/" "${dest}/www/"
+    if [[ ! -d "${MONCINE_PACKAGE_ROOT}/www" ]]; then
+        ynh_exit 1 --message="Paquet incomplet : ${MONCINE_PACKAGE_ROOT}/www introuvable (réinstallez depuis le dossier Moncine complet)."
     fi
+
+    mkdir -p "${dest}/www/posters"
+    rsync -a --delete --exclude 'posters/' \
+        "${MONCINE_PACKAGE_ROOT}/www/" "${dest}/www/"
 
     local item
     for item in lib sql doc; do
@@ -42,6 +63,5 @@ moncine_copy_sources() {
 # Dossier persistant YunoHost : base SQLite + clé TMDB (hors /var/www).
 moncine_prepare_data_dir() {
     mkdir -p "${data_dir}"
-    chown -R "${app}:www-data" "${data_dir}"
-    chmod 750 "${data_dir}"
+    moncine_fix_data_permissions
 }

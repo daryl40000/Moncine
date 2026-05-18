@@ -15,13 +15,11 @@ ynh_script_progression "Mise à jour des fichiers de l'application…"
 moncine_copy_sources "${install_dir}"
 chown -R "${app}:www-data" "${install_dir}"
 
-moncine_prepare_data_dir
+ynh_script_progression "Migrations SQL…"
+moncine_run_migrate
 
 ynh_script_progression "Reconfiguration PHP-FPM et NGINX…"
 ynh_config_add_phpfpm
 ynh_config_add_nginx
-
-ynh_script_progression "Migrations SQL…"
-moncine_run_migrate
 
 ynh_script_progression "Mise à jour de ${app} terminée."
