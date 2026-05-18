@@ -31,8 +31,11 @@
 ## Mise à jour du code
 
 ```bash
+cd /tmp/Moncine && git pull
 sudo yunohost app upgrade moncine --force -u /tmp/Moncine
 ```
+
+Le paquet copie `www/`, `lib/`, `sql/`, `doc/` et **`templates/`** vers `/var/www/moncine/`.
 
 ## Infos sur l’app installée
 
@@ -47,6 +50,7 @@ Le dossier des données est en général `/home/yunohost.app/moncine/` (`MONCINE
 | Problème | Solution |
 |----------|----------|
 | **500 — readonly database** | Corrigé dans le paquet : migrations en `sudo -u moncine`. Réinstallez après mise à jour du dépôt. |
+| **Template introuvable** | Dossier `templates/` manquant → `git pull` puis `yunohost app upgrade moncine -u /tmp/Moncine` |
 | **500 autre** | `sudo tail -30 /var/log/nginx/VOTRE-DOMAINE-error.log` |
 | Dossier data | `ls -la /home/yunohost.app/moncine/` — `moncine.db` doit être `moncine:www-data` |
 | Test manuel | `sudo -u moncine env MONCINE_DATA_PATH=/home/yunohost.app/moncine php /var/www/moncine/lib/cli/migrate.php` |

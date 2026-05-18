@@ -52,6 +52,12 @@ moncine_copy_sources() {
     rsync -a --delete --exclude 'posters/' \
         "${MONCINE_PACKAGE_ROOT}/www/" "${dest}/www/"
 
+    # templates/ : pages HTML (obligatoire — View::render cherche MONCINE_ROOT/templates/)
+    if [[ ! -d "${MONCINE_PACKAGE_ROOT}/templates" ]]; then
+        ynh_exit 1 --message="Paquet incomplet : ${MONCINE_PACKAGE_ROOT}/templates introuvable."
+    fi
+    rsync -a --delete "${MONCINE_PACKAGE_ROOT}/templates/" "${dest}/templates/"
+
     local item
     for item in lib sql doc; do
         if [[ -d "${MONCINE_PACKAGE_ROOT}/${item}" ]]; then
