@@ -1,6 +1,9 @@
 <?php
 /**
  * Connexion, session utilisateur et contrôle d’accès web.
+ *
+ * Chaque page dans www/ charge bootstrap.php, qui appelle enforceWebAccess().
+ * Flux typique : visiteur → page publique OU login OU premier compte OU page protégée.
  */
 
 declare(strict_types=1);
@@ -20,6 +23,10 @@ final class Auth
         '/reinitialiser-mot-de-passe.php',
     ];
 
+    /**
+     * Barrière d’entrée pour toutes les pages web (sauf CLI).
+     * Ordre volontaire : assets/login → installation → compte requis.
+     */
     public static function enforceWebAccess(): void
     {
         if (PHP_SAPI === 'cli') {
@@ -31,6 +38,7 @@ final class Auth
             return;
         }
 
+        // Aucun compte avec mot de passe : redirection vers la création du premier admin.
         if (self::needsSetup()) {
             header('Location: /premier-compte.php');
             exit;
@@ -38,6 +46,7 @@ final class Auth
 
         if (!self::isLoggedIn()) {
             $target = '/connexion.php';
+            // Après connexion, renvoyer l’utilisateur vers la page qu’il voulait voir.
             if ($path !== '/' && $path !== '') {
                 $target .= '?redirect=' . rawurlencode($path);
             }
@@ -56,6 +65,10 @@ final class Auth
         return self::currentUserId() > 0;
     }
 
+    /**
+     * Identifiant de l’utilisateur connecté, ou 0.
+     * On relit la base à chaque fois : un compte désactivé entre-temps ne doit plus rester connecté.
+     */
     public static function currentUserId(): int
     {
         self::ensureSession();
@@ -110,6 +123,7 @@ final class Auth
         }
 
         self::ensureSession();
+        // Nouvel identifiant de session : limite le vol de cookie (fixation de session).
         session_regenerate_id(true);
         $_SESSION[self::SESSION_USER_ID] = (int) $user['id'];
         $repo->updateLastLogin((int) $user['id']);
@@ -119,6 +133,7 @@ final class Auth
         return true;
     }
 
+    /** Vide la session et invalide le cookie côté navigateur. */
     public static function logout(): void
     {
         self::ensureSession();
@@ -165,6 +180,7 @@ final class Auth
         return in_array($path, self::PUBLIC_PATHS, true);
     }
 
+    /** Une seule session PHP pour le questionnaire « Ce soir » et la connexion. */
     private static function ensureSession(): void
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {

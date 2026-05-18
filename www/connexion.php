@@ -1,6 +1,8 @@
 <?php
 /**
  * Connexion à Moncine.
+ *
+ * Page publique (bootstrap laisse passer). Après POST réussi, redirection vers ?redirect= ou /.
  */
 
 declare(strict_types=1);

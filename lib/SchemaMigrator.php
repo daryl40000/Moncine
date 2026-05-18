@@ -73,6 +73,7 @@ final class SchemaMigrator
                     try {
                         $this->pdo->exec($statement);
                     } catch (PDOException $e) {
+                        // Migration relancée après échec partiel : colonne déjà ajoutée → on ignore.
                         if (!str_contains($e->getMessage(), 'duplicate column')) {
                             throw $e;
                         }

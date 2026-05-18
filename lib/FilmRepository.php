@@ -1,6 +1,9 @@
 <?php
 /**
- * Façade dvdthèque : catalogue (œuvres + bibliothèque) ou ancienne table films.
+ * Façade dvdthèque : point d’entrée pour « Mes films », envies, quiz, etc.
+ *
+ * Délègue à CatalogFilmRepository (schéma actuel : oeuvres + bibliotheque)
+ * ou FilmRepositoryLegacy si une très ancienne base n’a pas encore été migrée.
  */
 
 declare(strict_types=1);
@@ -18,6 +21,7 @@ final class FilmRepository
     public function __construct()
     {
         $this->db = Database::getInstance();
+        // Choix automatique selon les tables présentes dans moncine.db.
         $this->engine = CatalogSchema::usesCatalogTables($this->db)
             ? new CatalogFilmRepository()
             : new FilmRepositoryLegacy();

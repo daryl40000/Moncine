@@ -18,7 +18,7 @@ define('MONCINE_ROOT', dirname(__DIR__));
 // Dossier web (www) — utile pour les liens et includes de templates
 define('MONCINE_WWW', MONCINE_ROOT . '/www');
 
-// Données : priorité à la variable d'environnement, sinon ../data depuis www
+// Données : sur YunoHost, MONCINE_DATA_PATH pointe vers /home/yunohost.app/moncine/ (voir extra_php-fpm.conf).
 $dataPath = getenv('MONCINE_DATA_PATH');
 if ($dataPath === false || $dataPath === '') {
     $dataPath = MONCINE_ROOT . '/data';

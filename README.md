@@ -9,6 +9,18 @@
 
 Voir aussi : [ROADMAP.md](ROADMAP.md), [LEGACY.md](LEGACY.md).
 
+## Comprendre le code (par où commencer)
+
+| Fichier | Rôle |
+|---------|------|
+| `lib/bootstrap.php` | Chargé par chaque page : config, base, connexion obligatoire |
+| `lib/Auth.php` | Qui est connecté, login, pages publiques |
+| `lib/UserContext.php` | ID utilisateur pour « Mes films » / envies |
+| `lib/Database.php` | SQLite + migrations automatiques |
+| `lib/FilmRepository.php` | Accès aux films de l’utilisateur courant |
+| `www/*.php` | Une page = un fichier (contrôleur léger) |
+| `templates/*.php` | HTML affiché (via `View::render`) |
+
 ## Structure
 
 ```text

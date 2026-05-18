@@ -31,6 +31,7 @@
             </button>
             <nav class="site-nav" id="site-nav" aria-label="Navigation principale">
                 <?php
+                // Menu : nom cliquable → Mon compte ; liens admin seulement pour les administrateurs.
                 $authUser = Moncine\Auth::currentUser();
                 if ($authUser !== null):
                     ?>
@@ -48,6 +49,7 @@
                     <a href="/catalogue.php" class="site-nav__admin">Catalogue</a>
                     <a href="/utilisateurs.php" class="site-nav__admin">Comptes</a>
                 <?php endif; ?>
+                <?php /* POST + jeton CSRF : évite une déconnexion forcée par un simple lien */ ?>
                 <form method="post" action="/deconnexion.php" class="inline-form site-nav__logout-form">
                     <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
                     <button type="submit" class="site-nav__logout btn-link">Déconnexion</button>

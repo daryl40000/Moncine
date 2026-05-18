@@ -1,6 +1,9 @@
 <?php
 /**
  * Protection CSRF pour tous les formulaires POST de l’application.
+ *
+ * Chaque formulaire inclut templates/_csrf_field.php ; les pages POST appellent
+ * Csrf::rejectUnlessValid() pour refuser les requêtes forgées depuis un autre site.
  */
 
 declare(strict_types=1);

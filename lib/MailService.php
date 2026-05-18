@@ -1,6 +1,9 @@
 <?php
 /**
  * Envoi d’e-mails simples (réinitialisation mot de passe).
+ *
+ * Utilise la fonction PHP mail() — sur YunoHost, le serveur doit pouvoir envoyer des mails.
+ * Expéditeur optionnel : variable d’environnement MONCINE_MAIL_FROM (voir extra_php-fpm.conf).
  */
 
 declare(strict_types=1);

@@ -1,5 +1,8 @@
 #!/bin/bash
 # Installation Moncine — paquet YunoHost
+#
+# Étapes : copier le code → dossier data persistant → nginx + PHP → migrations SQLite.
+# L’administrateur crée ensuite son compte via /premier-compte.php dans le navigateur.
 
 set -euo pipefail
 

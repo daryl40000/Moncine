@@ -1,6 +1,9 @@
 <?php
 /**
  * Connexion SQLite unique (singleton) et création des tables si besoin.
+ *
+ * « Singleton » = une seule connexion PDO réutilisée par toute l’application.
+ * Au premier appel, on crée le fichier moncine.db (si besoin) et on applique les migrations.
  */
 
 declare(strict_types=1);
@@ -49,17 +52,23 @@ final class Database
         return $pdo;
     }
 
+    /**
+     * Met le schéma à jour automatiquement (install locale ou upgrade paquet YunoHost).
+     */
     private static function migrate(): void
     {
         $migrator = new SchemaMigrator(self::$pdo);
 
+        // Première installation : toutes les tables depuis sql/schema.sql.
         if (!$migrator->tableExists('oeuvres')) {
             $migrator->applyBaseSchema();
         }
 
+        // Fichiers numérotés dans sql/migrations/ (001, 002, …) non encore appliqués.
         $migrator->runPendingMigrations();
         $migrator->setMetadata(SchemaMigrator::META_PACKAGE_EDITION, SchemaMigrator::EDITION_YUNOHOST);
 
+        // Correctif ponctuel si une ancienne base avait une mauvaise clé sur historique.
         HistoriqueSchema::repairForeignKeyIfNeeded(self::$pdo);
     }
 }
