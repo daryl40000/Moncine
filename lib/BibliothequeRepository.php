@@ -46,22 +46,24 @@ final class BibliothequeRepository
     }
 
     /**
-     * @param array<string, mixed> $libraryData support_physique, saga, saga_ordre, statut
+     * @param array<string, mixed> $libraryData support_physique, format_*, saga, saga_ordre, statut
      */
     public function insert(int $userId, int $oeuvreId, array $libraryData): int
     {
         $statut = LibraryStatut::normalize((string) ($libraryData['statut'] ?? LibraryStatut::COLLECTION));
         $stmt = $this->db->prepare(
             'INSERT INTO bibliotheque (
-                user_id, oeuvre_id, statut, support_physique, saga, saga_ordre,
-                saison_numero, saison_label, ean
-             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                user_id, oeuvre_id, statut, support_physique, format_image, format_son,
+                saga, saga_ordre, saison_numero, saison_label, ean
+             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         );
         $stmt->execute([
             $userId,
             $oeuvreId,
             $statut,
             SupportPhysique::normalize((string) ($libraryData['support_physique'] ?? '')),
+            trim((string) ($libraryData['format_image'] ?? '')),
+            trim((string) ($libraryData['format_son'] ?? '')),
             trim((string) ($libraryData['saga'] ?? '')),
             trim((string) ($libraryData['saga'] ?? '')) === ''
                 ? 0
@@ -84,7 +86,17 @@ final class BibliothequeRepository
         }
         $sets = [];
         $params = ['id' => $id];
-        foreach (['support_physique', 'saga', 'saga_ordre', 'statut', 'saison_numero', 'saison_label', 'ean'] as $field) {
+        foreach ([
+            'support_physique',
+            'format_image',
+            'format_son',
+            'saga',
+            'saga_ordre',
+            'statut',
+            'saison_numero',
+            'saison_label',
+            'ean',
+        ] as $field) {
             if (array_key_exists($field, $libraryData)) {
                 $sets[] = $field . ' = :' . $field;
                 $params[$field] = $libraryData[$field];

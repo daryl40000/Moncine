@@ -10,6 +10,7 @@ require_once dirname(__DIR__) . '/lib/bootstrap.php';
 use Moncine\FilmRepository;
 use Moncine\HistoriqueRepository;
 use Moncine\TmdbConfig;
+use Moncine\UserContext;
 use Moncine\View;
 
 $id = (int) ($_GET['id'] ?? 0);
@@ -73,4 +74,6 @@ View::render('film', [
     'currentTmdbTvKind' => (string) ($film['tmdb_tv_kind'] ?? ''),
     'filmId' => $id,
     'sagaSuggestions' => $repo->distinctSagas(),
+    'canManageCatalog' => UserContext::canManageCatalog(),
+    'showTmdbEnrich' => UserContext::canManageCatalog(),
 ]);

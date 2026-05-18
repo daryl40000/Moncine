@@ -11,6 +11,7 @@ use Moncine\ChoixNote;
 use Moncine\Csrf;
 use Moncine\FilmRepository;
 use Moncine\TmdbConfig;
+use Moncine\UserContext;
 use Moncine\QuizSession;
 use Moncine\Recommender;
 use Moncine\View;
@@ -147,4 +148,5 @@ View::render('resultat', [
     'currentTmdbMediaType' => $pick !== null ? (string) ($pick['film']['tmdb_media_type'] ?? '') : '',
     'currentTmdbTvKind' => $pick !== null ? (string) ($pick['film']['tmdb_tv_kind'] ?? '') : '',
     'filmId' => $pick !== null ? (int) $pick['film']['id'] : 0,
+    'showTmdbEnrich' => UserContext::canManageCatalog(),
 ]);

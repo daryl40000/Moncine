@@ -104,7 +104,9 @@
                 <p class="film-synopsis"><?= Moncine\View::escape($film['synopsis']) ?></p>
             <?php endif; ?>
 
-            <?php require MONCINE_ROOT . '/templates/_enrich_film_panel.php'; ?>
+            <?php if (!empty($showTmdbEnrich)): ?>
+                <?php require MONCINE_ROOT . '/templates/_enrich_film_panel.php'; ?>
+            <?php endif; ?>
 
             <?php
             $return = 'resultat';

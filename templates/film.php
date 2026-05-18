@@ -237,10 +237,13 @@
                 <?php
                 $editOpen = $editOpen ?? false;
                 $saveError = $saveError ?? '';
+                $canManageCatalog = $canManageCatalog ?? false;
                 require MONCINE_ROOT . '/templates/_film_edit_form.php';
                 ?>
 
-                <?php require MONCINE_ROOT . '/templates/_enrich_film_panel.php'; ?>
+                <?php if (!empty($showTmdbEnrich)): ?>
+                    <?php require MONCINE_ROOT . '/templates/_enrich_film_panel.php'; ?>
+                <?php endif; ?>
 
                 <?php if ($isWishlist): ?>
                     <section class="film-promote-panel import-form">

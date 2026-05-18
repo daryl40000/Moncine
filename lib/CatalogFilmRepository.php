@@ -38,6 +38,8 @@ final class CatalogFilmRepository
 
     private const LIBRARY_EXPORT_FIELDS = [
         'support_physique',
+        'format_image',
+        'format_son',
         'saga',
         'saga_ordre',
         'saison_numero',
@@ -1063,22 +1065,17 @@ final class CatalogFilmRepository
      * @param array<string, mixed> $data
      * @return true|string
      */
+    /**
+     * Met à jour uniquement l’exemplaire personnel (bibliothèque), pas le catalogue partagé.
+     *
+     * @param array<string, mixed> $data
+     * @return true|string
+     */
     public function updateManual(int $filmId, array $data): bool|string
     {
         $film = $this->findById($filmId);
         if ($film === null) {
             return 'Film introuvable.';
-        }
-
-        $titre = trim($data['titre']);
-        $realisateur = trim($data['realisateur']);
-        if ($titre === '') {
-            return 'Le titre est obligatoire.';
-        }
-
-        $duplicate = $this->findByTitreAndRealisateur($titre, $realisateur);
-        if ($duplicate !== null && (int) $duplicate['id'] !== $filmId) {
-            return 'Un autre film a déjà ce titre et ce réalisateur.';
         }
 
         $saga = trim((string) ($data['saga'] ?? ''));
@@ -1087,46 +1084,22 @@ final class CatalogFilmRepository
             $sagaOrdre = 0;
         }
 
-        $tmdbId = (int) ($data['tmdb_id'] ?? 0);
-        $tmdbTypes = FilmManualEdit::resolveTmdbTypesForSave($data, $film);
-        $tmdbMediaType = $tmdbTypes['media_type'];
-        $tmdbTvKind = $tmdbTypes['tv_kind'];
-
-        $oeuvrePayload = [
-            'titre' => $titre,
-            'titre_original' => trim((string) ($data['titre_original'] ?? '')),
-            'realisateur' => $realisateur,
-            'duree_min' => (int) ($data['duree_min'] ?? 0),
-            'annee' => (int) ($data['annee'] ?? 0),
-            'styles' => $data['styles'] ?? '',
-            'format_image' => trim((string) ($data['format_image'] ?? '')),
-            'format_son' => trim((string) ($data['format_son'] ?? '')),
-            'poster_url' => $this->resolvePosterForOeuvre(
-                (int) $film['oeuvre_id'],
-                (string) ($data['poster_url'] ?? '')
-            ),
-            'synopsis' => $data['synopsis'] ?? '',
-            'tmdb_id' => $tmdbId,
-            'tmdb_media_type' => $tmdbMediaType,
-            'tmdb_tv_kind' => $tmdbTvKind,
-            'realisateur_tmdb_id' => (int) ($data['realisateur_tmdb_id'] ?? 0),
-            'acteur_1' => trim((string) ($data['acteur_1'] ?? '')),
-            'acteur_2' => trim((string) ($data['acteur_2'] ?? '')),
-            'acteur_3' => trim((string) ($data['acteur_3'] ?? '')),
-            'acteur_1_tmdb_id' => (int) ($data['acteur_1_tmdb_id'] ?? 0),
-            'acteur_2_tmdb_id' => (int) ($data['acteur_2_tmdb_id'] ?? 0),
-            'acteur_3_tmdb_id' => (int) ($data['acteur_3_tmdb_id'] ?? 0),
-            'nationalite' => TmdbCountries::formatNationaliteList((string) ($data['nationalite'] ?? '')),
-            'moncine_kind' => MoncineContentKind::normalize((string) ($data['moncine_kind'] ?? '')),
-        ];
-        $this->oeuvres->update((int) $film['oeuvre_id'], $oeuvrePayload, array_keys($oeuvrePayload));
+        $moncineKind = MoncineContentKind::normalize((string) ($film['moncine_kind'] ?? ''));
+        $saisonNumero = max(0, (int) ($data['saison_numero'] ?? 0));
+        $saisonLabel = trim((string) ($data['saison_label'] ?? ''));
+        if ($moncineKind !== MoncineContentKind::SERIE) {
+            $saisonNumero = 0;
+            $saisonLabel = '';
+        }
 
         $this->bibliotheque->update($filmId, [
             'support_physique' => SupportPhysique::normalize($data['support_physique'] ?? ''),
+            'format_image' => trim((string) ($data['format_image'] ?? '')),
+            'format_son' => trim((string) ($data['format_son'] ?? '')),
             'saga' => $saga,
             'saga_ordre' => $sagaOrdre,
-            'saison_numero' => max(0, (int) ($data['saison_numero'] ?? 0)),
-            'saison_label' => trim((string) ($data['saison_label'] ?? '')),
+            'saison_numero' => $saisonNumero,
+            'saison_label' => $saisonLabel,
             'ean' => trim((string) ($data['ean'] ?? '')),
         ]);
 
@@ -1189,8 +1162,6 @@ final class CatalogFilmRepository
             'duree_min' => (int) ($data['duree_min'] ?? 0),
             'annee' => (int) ($data['annee'] ?? 0),
             'styles' => $data['styles'] ?? '',
-            'format_image' => trim((string) ($data['format_image'] ?? '')),
-            'format_son' => trim((string) ($data['format_son'] ?? '')),
             'poster_url' => $this->resolvePosterForOeuvre($oeuvreId, (string) ($data['poster_url'] ?? '')),
             'synopsis' => $data['synopsis'] ?? '',
             'tmdb_id' => $tmdbId,
@@ -1299,6 +1270,8 @@ final class CatalogFilmRepository
 
         $libraryPayload = [
             'support_physique' => SupportPhysique::normalize((string) ($data['support_physique'] ?? '')),
+            'format_image' => trim((string) ($data['format_image'] ?? '')),
+            'format_son' => trim((string) ($data['format_son'] ?? '')),
             'saga' => trim((string) ($data['saga'] ?? '')),
             'saga_ordre' => max(0, (int) ($data['saga_ordre'] ?? 0)),
             'saison_numero' => max(0, (int) ($data['saison_numero'] ?? 0)),
@@ -1473,6 +1446,8 @@ final class CatalogFilmRepository
 
         $library = [
             'support_physique' => $payload['support_physique'] ?? '',
+            'format_image' => $payload['format_image'] ?? '',
+            'format_son' => $payload['format_son'] ?? '',
             'saga' => $payload['saga'] ?? '',
             'saga_ordre' => $payload['saga_ordre'] ?? 0,
             'saison_numero' => $payload['saison_numero'] ?? 0,

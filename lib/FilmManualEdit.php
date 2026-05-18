@@ -90,22 +90,19 @@ final class FilmManualEdit
             $sagaOrdre = max(1, (int) $sagaOrdreRaw);
         }
 
+        $exemplaire = self::exemplaireDataFromParsed($post, $moncineKind, $saga, $sagaOrdre);
+
         return [
             'ok' => true,
-            'data' => [
+            'data' => array_merge($exemplaire, [
                 'oeuvre_id' => max(0, (int) ($post['oeuvre_id'] ?? 0)),
                 'titre' => $titre,
                 'titre_original' => trim((string) ($post['titre_original'] ?? '')),
                 'realisateur' => $realisateur,
-                'saga' => $saga,
-                'saga_ordre' => $sagaOrdre,
                 'duree_min' => $dureeMin,
                 'annee' => $annee,
                 'nationalite' => TmdbCountries::formatNationaliteList((string) ($post['nationalite'] ?? '')),
                 'styles' => trim((string) ($post['styles'] ?? '')),
-                'format_image' => trim((string) ($post['format_image'] ?? '')),
-                'format_son' => trim((string) ($post['format_son'] ?? '')),
-                'support_physique' => SupportPhysique::normalize((string) ($post['support_physique'] ?? '')),
                 'poster_url' => $posterUrl,
                 'synopsis' => trim((string) ($post['synopsis'] ?? '')),
                 'tmdb_id' => $tmdbId,
@@ -113,13 +110,82 @@ final class FilmManualEdit
                 'tmdb_tv_kind' => $tmdbTvKind,
                 'tmdb_types_locked' => $typesLocked,
                 'moncine_kind' => $moncineKind,
-                'saison_numero' => $saisonNumero,
-                'saison_label' => $saisonLabel,
-                'ean' => preg_replace('/\D+/', '', (string) ($post['ean'] ?? '')) ?? '',
                 'acteur_1' => trim((string) ($post['acteur_1'] ?? '')),
                 'acteur_2' => trim((string) ($post['acteur_2'] ?? '')),
                 'acteur_3' => trim((string) ($post['acteur_3'] ?? '')),
-            ],
+            ]),
+        ];
+    }
+
+    /**
+     * Champs de l’exemplaire personnel uniquement (fiche film / bibliothèque).
+     *
+     * @param array<string, string> $post
+     * @return array{ok: true, data: array<string, mixed>}|array{ok: false, error: string}
+     */
+    public static function parseExemplaireFromPost(array $post): array
+    {
+        $saga = trim((string) ($post['saga'] ?? ''));
+        $sagaOrdreRaw = trim((string) ($post['saga_ordre'] ?? ''));
+        $sagaOrdre = 0;
+        if ($saga !== '' && $sagaOrdreRaw !== '') {
+            if (!preg_match('/^\d+$/', $sagaOrdreRaw)) {
+                return ['ok' => false, 'error' => 'Le numéro dans la saga doit être un entier (ex. 1, 2, 3).'];
+            }
+            $sagaOrdre = max(1, (int) $sagaOrdreRaw);
+        }
+
+        $moncineKind = MoncineContentKind::FILM;
+        if (array_key_exists('content_kind', $post)) {
+            $parsedKind = MoncineContentKind::parseFormValue((string) ($post['content_kind'] ?? ''));
+            $moncineKind = $parsedKind['moncine_kind'];
+        }
+
+        return [
+            'ok' => true,
+            'data' => self::exemplaireDataFromParsed($post, $moncineKind, $saga, $sagaOrdre),
+        ];
+    }
+
+    /**
+     * @param array<string, string> $post
+     * @return array<string, mixed>
+     */
+    private static function exemplaireDataFromParsed(
+        array $post,
+        string $moncineKind,
+        string $saga = '',
+        int $sagaOrdre = 0
+    ): array {
+        if ($saga === '' && array_key_exists('saga', $post)) {
+            $saga = trim((string) $post['saga']);
+        }
+        if ($sagaOrdre === 0 && $saga !== '') {
+            $sagaOrdreRaw = trim((string) ($post['saga_ordre'] ?? ''));
+            if ($sagaOrdreRaw !== '' && preg_match('/^\d+$/', $sagaOrdreRaw)) {
+                $sagaOrdre = max(1, (int) $sagaOrdreRaw);
+            }
+        }
+        if ($saga === '') {
+            $sagaOrdre = 0;
+        }
+
+        $saisonNumero = max(0, (int) ($post['saison_numero'] ?? 0));
+        $saisonLabel = trim((string) ($post['saison_label'] ?? ''));
+        if ($moncineKind !== MoncineContentKind::SERIE) {
+            $saisonNumero = 0;
+            $saisonLabel = '';
+        }
+
+        return [
+            'saga' => $saga,
+            'saga_ordre' => $sagaOrdre,
+            'format_image' => trim((string) ($post['format_image'] ?? '')),
+            'format_son' => trim((string) ($post['format_son'] ?? '')),
+            'support_physique' => SupportPhysique::normalize((string) ($post['support_physique'] ?? '')),
+            'saison_numero' => $saisonNumero,
+            'saison_label' => $saisonLabel,
+            'ean' => preg_replace('/\D+/', '', (string) ($post['ean'] ?? '')) ?? '',
         ];
     }
 

@@ -31,7 +31,7 @@ define('MONCINE_DB_FILE', MONCINE_DATA . '/moncine.db');
 define('MONCINE_APP_NAME', 'Moncine');
 
 // Version affichée / paquet (semver)
-define('MONCINE_PACKAGE_VERSION', '2.0.0-dev');
+define('MONCINE_PACKAGE_VERSION', '2.1.0-dev');
 define('MONCINE_PACKAGE_EDITION', 'yunohost');
 
 // Encodage CSV attendu à l'import (UTF-8 recommandé)

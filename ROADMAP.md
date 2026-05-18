@@ -578,6 +578,7 @@ Les **upgrades YunoHost** ultérieurs (2.0 → 3.0, etc.) restent des migrations
 - 2026-05-16 — Phase **1 bis** ajoutée (paquet 2.0.1) : changer son mot de passe, oublié par e-mail, reset admin
 - 2026-05-16 — Phase **1 bis** livrée en dev : `mon-compte`, oublié, reset par jeton, admin « Réinit. MDP », migration `004`
 - 2026-05-16 — Paquet YunoHost v2 finalisé à la racine du dépôt (install / upgrade / backup testables)
+- 2026-05-16 — Phase **2** livrée en dev (paquet 2.1.0) : `format_image` / `format_son` sur `bibliotheque`, formulaire « mon exemplaire », TMDB enrich réservé admin
 - (à compléter à chaque release)
 ```
 
@@ -592,7 +593,8 @@ Les **upgrades YunoHost** ultérieurs (2.0 → 3.0, etc.) restent des migrations
 | Utilisateur courant | `lib/UserContext.php` |
 | Connexion / session | `lib/Auth.php`, `lib/LoginThrottle.php` |
 | Comptes (admin) | `www/utilisateurs.php`, `lib/UtilisateurRepository.php` |
-| Mots de passe (à venir, phase 1 bis) | `www/mon-compte.php`, `www/mot-de-passe-oublie.php` (prévu) |
+| Mots de passe (phase 1 bis) | `www/mon-compte.php`, `www/mot-de-passe-oublie.php` |
+| Format exemplaire (phase 2) | `sql/migrations/005_*.sql`, `lib/CatalogSchema.php` |
 | Migration catalogue | `sql/migrations/013_catalogue_bibliotheque.sql` |
 | Schéma neuf | `sql/schema.sql` |
 | Déploiement manuel actuel | `README.md` |

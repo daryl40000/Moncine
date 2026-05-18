@@ -9,14 +9,24 @@ namespace Moncine;
 
 final class CatalogSchema
 {
+    /** Champs stockés dans la table bibliotheque (exemplaire personnel). */
+    public const LIBRARY_FIELDS = [
+        'support_physique',
+        'format_image',
+        'format_son',
+        'saga',
+        'saga_ordre',
+        'saison_numero',
+        'saison_label',
+        'ean',
+    ];
+
     /** Champs stockés dans la table oeuvres (catalogue partagé). */
     public const OEUVRE_FIELDS = [
         'titre',
         'titre_original',
         'realisateur',
         'duree_min',
-        'format_image',
-        'format_son',
         'styles',
         'annee',
         'nationalite',
@@ -46,8 +56,8 @@ final class CatalogSchema
             $oeuvre[] = 'o.' . $field;
         }
 
-        return 'b.id, b.user_id, b.oeuvre_id, b.statut, b.support_physique, b.saga, b.saga_ordre, '
-            . 'b.saison_numero, b.saison_label, b.ean, b.created_at, '
+        return 'b.id, b.user_id, b.oeuvre_id, b.statut, b.support_physique, b.format_image, b.format_son, '
+            . 'b.saga, b.saga_ordre, b.saison_numero, b.saison_label, b.ean, b.created_at, '
             . implode(', ', $oeuvre);
     }
 

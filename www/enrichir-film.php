@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/lib/bootstrap.php';
 
+use Moncine\CatalogAdmin;
 use Moncine\Csrf;
 use Moncine\FilmEnricher;
 
@@ -14,6 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: /films.php');
     exit;
 }
+
+CatalogAdmin::denyUnlessAccess();
 
 $filmId = (int) ($_POST['film_id'] ?? 0);
 $action = (string) ($_POST['action'] ?? 'enrich');

@@ -24,7 +24,7 @@ if ($filmId <= 0) {
 
 Csrf::rejectUnlessValid($_POST, '/film.php?id=' . $filmId . '&edit=1');
 
-$parsed = FilmManualEdit::parseFromPost($_POST);
+$parsed = FilmManualEdit::parseExemplaireFromPost($_POST);
 if (!$parsed['ok']) {
     $params = http_build_query([
         'save_error' => $parsed['error'],

@@ -205,9 +205,11 @@ $sortHeader = static function (string $label, string $column) use ($sortBy, $sor
                     <button type="button" class="collection-toolbar__tab"
                             role="tab" aria-selected="false" aria-controls="collection-panel-support"
                             data-bulk-tab="support" id="collection-tab-support">Support</button>
+                    <?php if (!empty($canManageCatalog)): ?>
                     <button type="button" class="collection-toolbar__tab"
                             role="tab" aria-selected="false" aria-controls="collection-panel-tmdb"
                             data-bulk-tab="tmdb" id="collection-tab-tmdb">TMDB</button>
+                    <?php endif; ?>
                     <button type="button" class="collection-toolbar__tab collection-toolbar__tab--danger"
                             role="tab" aria-selected="false" aria-controls="collection-panel-delete"
                             data-bulk-tab="delete" id="collection-tab-delete">Supprimer</button>
@@ -271,6 +273,7 @@ $sortHeader = static function (string $label, string $column) use ($sortBy, $sor
                         </div>
                     </div>
 
+                    <?php if (!empty($canManageCatalog)): ?>
                     <div class="collection-toolbar__panel import-form"
                          id="collection-panel-tmdb" role="tabpanel" aria-labelledby="collection-tab-tmdb" hidden>
                         <p class="collection-toolbar__panel-intro">
@@ -288,6 +291,7 @@ $sortHeader = static function (string $label, string $column) use ($sortBy, $sor
                             </button>
                         <?php endif; ?>
                     </div>
+                    <?php endif; ?>
 
                     <div class="collection-toolbar__panel collection-toolbar__panel--danger import-form"
                          id="collection-panel-delete" role="tabpanel" aria-labelledby="collection-tab-delete" hidden>

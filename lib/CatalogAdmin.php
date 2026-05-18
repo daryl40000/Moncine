@@ -138,8 +138,6 @@ final class CatalogAdmin
             'titre_original' => trim((string) ($data['titre_original'] ?? '')),
             'realisateur' => $realisateur,
             'duree_min' => max(0, (int) ($data['duree_min'] ?? 0)),
-            'format_image' => trim((string) ($data['format_image'] ?? '')),
-            'format_son' => trim((string) ($data['format_son'] ?? '')),
             'styles' => trim((string) ($data['styles'] ?? '')),
             'annee' => max(0, (int) ($data['annee'] ?? 0)),
             'nationalite' => TmdbCountries::formatNationaliteList((string) ($data['nationalite'] ?? '')),

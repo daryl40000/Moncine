@@ -7,7 +7,9 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/lib/bootstrap.php';
 
+use Moncine\CatalogAdmin;
 use Moncine\CollectionViewMode;
+use Moncine\UserContext;
 use Moncine\Csrf;
 use Moncine\FilmEnricher;
 use Moncine\FilmRepository;
@@ -86,6 +88,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'enrich_tmdb') {
+        if (!CatalogAdmin::canAccess()) {
+            moncine_films_bulk_redirect($redirectUrl, [
+                'bulk_error' => 'L’enrichissement TMDB est réservé à l’administrateur du catalogue.',
+            ]);
+        }
+
         $result = (new FilmEnricher())->enrichSelectedByTmdbId($filmIds);
 
         if ($result['errors'] !== [] && $result['updated'] === 0 && $result['skipped_no_tmdb'] === 0) {
@@ -133,4 +141,5 @@ View::render('films', [
     'totalCount' => $totalCount,
     'existingSagas' => $existingSagas,
     'hasTmdbKey' => FilmEnricher::canEnrich(),
+    'canManageCatalog' => UserContext::canManageCatalog(),
 ]);
