@@ -8,8 +8,8 @@ source /usr/share/yunohost/helpers
 
 ynh_script_progression "Mise à jour de ${app}…"
 
-ynh_app_setting_set_default --key=php_upload_max_filesize --value=10M
-ynh_app_setting_set_default --key=php_post_max_size --value=10M
+ynh_app_setting_set --key=php_upload_max_filesize --value=85M
+ynh_app_setting_set --key=php_post_max_size --value=85M
 
 ynh_script_progression "Mise à jour des fichiers de l'application…"
 moncine_copy_sources "${install_dir}"

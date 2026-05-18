@@ -49,6 +49,7 @@ Le dossier des données est en général `/home/yunohost.app/moncine/` (`MONCINE
 
 | Problème | Solution |
 |----------|----------|
+| **413 Request Entity Too Large** (import ZIP affiches) | Limite nginx/PHP trop basse. Mettre à jour le paquet (`yunohost app upgrade moncine -u …`) : nginx `85M`, PHP `upload_max_filesize` / `post_max_size` à `85M`. Puis `sudo systemctl reload nginx` et `php8.4-fpm`. |
 | **500 — readonly database** | Corrigé dans le paquet : migrations en `sudo -u moncine`. Réinstallez après mise à jour du dépôt. |
 | **Template introuvable** | Dossier `templates/` manquant → `git pull` puis `yunohost app upgrade moncine -u /tmp/Moncine` |
 | **500 autre** | `sudo tail -30 /var/log/nginx/VOTRE-DOMAINE-error.log` |
