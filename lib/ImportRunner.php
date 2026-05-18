@@ -21,11 +21,11 @@ final class ImportRunner
      * @param list<string|null> $header
      * @return array{imported: int, vues: int, errors: list<string>}
      */
-    public function importFilmsSheet(array $dataRows, array $header): array
+    public function importFilmsSheet(array $dataRows, array $header, bool $replaceCatalog = false): array
     {
         return match (ImportFormat::detectFromHeader($header)) {
             ImportFormat::KIND_LIBRARY => $this->importLibrarySheet($dataRows, $header),
-            ImportFormat::KIND_CATALOG => $this->importCatalogSheet($dataRows, $header),
+            ImportFormat::KIND_CATALOG => $this->importCatalogSheet($dataRows, $header, $replaceCatalog),
             default => $this->importLegacyFilmsSheet($dataRows, $header),
         };
     }
@@ -96,7 +96,7 @@ final class ImportRunner
      * @param list<string|null> $header
      * @return array{imported: int, vues: int, errors: list<string>}
      */
-    public function importCatalogSheet(array $dataRows, array $header): array
+    public function importCatalogSheet(array $dataRows, array $header, bool $replaceCatalog = false): array
     {
         if (!CatalogAdmin::canAccess()) {
             return [
@@ -115,12 +115,27 @@ final class ImportRunner
             ];
         }
 
+        if (!isset($map['oeuvre_id'])) {
+            return [
+                'imported' => 0,
+                'vues' => 0,
+                'errors' => [
+                    'Colonne « ID catalogue » introuvable. Utilisez l’export « CSV catalogue » (admin), '
+                    . 'pas l’export bibliothèque ni l’ancien export complet.',
+                ],
+            ];
+        }
+
         $admin = new CatalogAdmin();
+        if ($replaceCatalog) {
+            $admin->clearCatalogForImport();
+        }
+
         $imported = 0;
         $errors = [];
         $line = 1;
-
         $hadExplicitIds = false;
+        $missingIdLines = 0;
 
         foreach ($dataRows as $row) {
             $line++;
@@ -132,9 +147,15 @@ final class ImportRunner
                 if (trim((string) ($parsed['titre'] ?? '')) === '') {
                     continue;
                 }
-                if ((int) ($parsed['oeuvre_id'] ?? 0) > 0) {
-                    $hadExplicitIds = true;
+
+                $oeuvreId = (int) ($parsed['oeuvre_id'] ?? 0);
+                if ($oeuvreId <= 0) {
+                    $missingIdLines++;
+                    $errors[] = 'Catalogue ligne ' . $line . ' : ID catalogue manquant ou invalide.';
+                    continue;
                 }
+
+                $hadExplicitIds = true;
                 $importColumns = (array) ($parsed['_import_columns'] ?? array_keys($map));
                 unset($parsed['_import_columns']);
                 $admin->importOeuvreFromExport($parsed, $importColumns);
@@ -146,6 +167,11 @@ final class ImportRunner
 
         if ($hadExplicitIds) {
             $this->oeuvres->syncAutoincrementSequence();
+        }
+
+        if ($missingIdLines > 0 && $imported === 0) {
+            $errors[] = 'Aucune ligne importée : vérifiez que la colonne « ID catalogue » contient bien les numéros '
+                . 'de l’ancienne instance (pas un export réalisé après la première importation).';
         }
 
         return ['imported' => $imported, 'vues' => 0, 'errors' => $errors];

@@ -17,7 +17,7 @@ final class ImportOds
     /**
      * @return array{imported: int, vues: int, errors: list<string>}
      */
-    public function importFromPath(string $path): array
+    public function importFromPath(string $path, bool $replaceCatalog = false): array
     {
         if (!class_exists(\ZipArchive::class)) {
             return [
@@ -49,7 +49,7 @@ final class ImportOds
         $catalogTable = $this->findTable($tables, ['catalogue', 'catalog']);
         if ($catalogTable !== null) {
             [$header, $rows] = $catalogTable;
-            $catalogResult = $this->runner->importCatalogSheet($rows, $header);
+            $catalogResult = $this->runner->importCatalogSheet($rows, $header, $replaceCatalog);
             $result = ImportRunner::mergeResults($result, $catalogResult);
         }
 

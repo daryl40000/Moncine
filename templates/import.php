@@ -41,6 +41,17 @@
             <input type="checkbox" name="replace_all" value="1">
             Remplacer toute ma bibliothèque avant import (films + envies + historique)
         </label>
+        <?php if (!empty($canManageCatalog)): ?>
+        <label class="checkbox">
+            <input type="checkbox" name="replace_catalog" value="1">
+            <strong>Réinitialiser le catalogue avant import</strong> (migration : conserve les ID du fichier)
+        </label>
+        <p class="hint">
+            À cocher pour une <strong>migration</strong> avec export « CSV catalogue » de l’ancienne instance.
+            Supprime toutes les œuvres et les liens bibliothèque, puis recrée les ID indiqués dans le fichier.
+            Sans cette case, Moncine met à jour les films existants <em>sans changer leurs numéros</em>.
+        </p>
+        <?php endif; ?>
         <p class="hint">
             Le type de fichier est détecté automatiquement : export <em>bibliothèque</em> (léger),
             export <em>catalogue</em> (admin), ou ancien export complet.

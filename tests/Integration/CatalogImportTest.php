@@ -18,6 +18,7 @@ final class CatalogImportTest extends MoncineTestCase
 
         $header = CatalogExportSchema::headers();
         $row = $this->catalogRowFromHeader($header, [
+            'ID catalogue' => '8001',
             'Titre' => 'Nouveau film',
             'Réalisateur' => 'Martin',
             'Année' => '2015',
@@ -65,6 +66,7 @@ final class CatalogImportTest extends MoncineTestCase
 
         $header = CatalogExportSchema::headers();
         $row = $this->catalogRowFromHeader($header, [
+            'ID catalogue' => '8002',
             'Titre' => 'Tentative',
             'Réalisateur' => 'Hacker',
             'Synopsis' => 'Ne doit pas passer',
@@ -83,6 +85,7 @@ final class CatalogImportTest extends MoncineTestCase
 
         $header = CatalogExportSchema::headers();
         $row = $this->catalogRowFromHeader($header, [
+            'ID catalogue' => '8003',
             'Titre' => 'Via importFilmsSheet',
             'Réalisateur' => 'Auto',
             'Synopsis' => 'OK',

@@ -211,10 +211,16 @@ final class CatalogAdmin
         if ($oeuvreId > 0) {
             $duplicate = $this->oeuvres->findByTitreAndRealisateur($titre, $realisateur);
             if ($duplicate !== null && (int) ($duplicate['id'] ?? 0) !== $oeuvreId) {
-                throw new \RuntimeException(
-                    '« ' . $titre . ' » existe déjà avec l’ID catalogue '
-                    . (int) $duplicate['id'] . ', pas ' . $oeuvreId . '.'
-                );
+                $wrongId = (int) $duplicate['id'];
+                if ($this->oeuvres->countBibliothequeLinks($wrongId) > 0) {
+                    throw new \RuntimeException(
+                        '« ' . $titre . ' » est déjà en base avec l’ID '
+                        . $wrongId . ' (fichier : ' . $oeuvreId . '). '
+                        . 'Cochez « Réinitialiser le catalogue avant import » ou supprimez les bibliothèques liées.'
+                    );
+                }
+                $this->oeuvres->deleteById($wrongId);
+                $duplicate = null;
             }
 
             $existing = $this->oeuvres->findById($oeuvreId);
@@ -265,6 +271,15 @@ final class CatalogAdmin
         }
 
         return $payload;
+    }
+
+    /**
+     * Supprime toutes les œuvres du catalogue (et les entrées bibliothèque — CASCADE).
+     * À utiliser avant un import migration avec conservation des ID catalogue.
+     */
+    public function clearCatalogForImport(): void
+    {
+        $this->oeuvres->deleteAll();
     }
 
     public function deleteOeuvre(int $oeuvreId): bool|string

@@ -17,8 +17,11 @@ final class ImportCsv
     /**
      * @return array{imported: int, vues: int, errors: list<string>}
      */
-    public function importFromPath(string $path, string $delimiter = MONCINE_CSV_DELIMITER): array
-    {
+    public function importFromPath(
+        string $path,
+        string $delimiter = MONCINE_CSV_DELIMITER,
+        bool $replaceCatalog = false
+    ): array {
         $handle = fopen($path, 'rb');
         if ($handle === false) {
             return ['imported' => 0, 'vues' => 0, 'errors' => ['Impossible d\'ouvrir le fichier.']];
@@ -38,7 +41,7 @@ final class ImportCsv
         }
         fclose($handle);
 
-        return $this->runner->importFilmsSheet($dataRows, $header);
+        return $this->runner->importFilmsSheet($dataRows, $header, $replaceCatalog);
     }
 
     /** Convertit « 1h56 », « 2h30 », « 90 » en minutes. */

@@ -78,6 +78,25 @@ final class OeuvreRepository
         return $stmt->rowCount() > 0;
     }
 
+    public function countBibliothequeLinks(int $oeuvreId): int
+    {
+        if ($oeuvreId <= 0) {
+            return 0;
+        }
+
+        $stmt = $this->db->prepare('SELECT COUNT(*) FROM bibliotheque WHERE oeuvre_id = ?');
+        $stmt->execute([$oeuvreId]);
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    /** Vide le catalogue (supprime aussi les entrées bibliothèque liées — CASCADE). */
+    public function deleteAll(): void
+    {
+        $this->db->exec('DELETE FROM oeuvres');
+        $this->syncAutoincrementSequence();
+    }
+
     public function findByTmdbId(int $tmdbId): ?array
     {
         if ($tmdbId <= 0) {

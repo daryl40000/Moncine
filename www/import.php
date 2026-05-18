@@ -153,6 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $replaceAll = isset($_POST['replace_all']);
+        $replaceCatalog = CatalogAdmin::canAccess() && isset($_POST['replace_catalog']);
 
         $uploadError = (int) ($_FILES['csv_file']['error'] ?? UPLOAD_ERR_NO_FILE);
         if (!isset($_FILES['csv_file']) || $uploadError !== UPLOAD_ERR_OK) {
@@ -174,9 +175,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $ext = strtolower(pathinfo((string) ($_FILES['csv_file']['name'] ?? ''), PATHINFO_EXTENSION));
             if ($ext === 'ods') {
-                $result = (new ImportOds())->importFromPath($tmp);
+                $result = (new ImportOds())->importFromPath($tmp, $replaceCatalog);
             } else {
-                $result = (new ImportCsv())->importFromPath($tmp);
+                $result = (new ImportCsv())->importFromPath($tmp, MONCINE_CSV_DELIMITER, $replaceCatalog);
             }
 
             $message = sprintf(
