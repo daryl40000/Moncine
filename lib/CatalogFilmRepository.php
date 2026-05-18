@@ -342,19 +342,7 @@ final class CatalogFilmRepository
         $libraryId = max(0, (int) ($data['bibliotheque_id'] ?? 0));
         $statut = LibraryStatut::normalize((string) ($data['statut'] ?? LibraryStatut::COLLECTION));
 
-        if ($libraryId > 0) {
-            $existing = $this->findById($libraryId);
-            if ($existing !== null) {
-                if ((int) ($existing['user_id'] ?? 0) !== $this->userId()) {
-                    throw new \RuntimeException('Entrée bibliothèque #' . $libraryId . ' introuvable.');
-                }
-                $this->applyLibraryImportUpdate($libraryId, $data, $importedColumns, $statut);
-
-                return;
-            }
-            // ID bibliothèque d’un autre export (migration) : on retombe sur l’ID catalogue.
-        }
-
+        // Migration : l’export contient des ID bibliothèque de l’ancienne instance — on privilégie l’ID catalogue.
         if ($oeuvreId > 0) {
             $oeuvre = $this->oeuvres->findById($oeuvreId);
             if ($oeuvre === null) {
@@ -371,6 +359,18 @@ final class CatalogFilmRepository
 
             $payload = $this->libraryPayloadFromImport($data, $statut);
             $this->bibliotheque->insert($this->userId(), $oeuvreId, $payload);
+
+            return;
+        }
+
+        if ($libraryId > 0) {
+            $existing = $this->findById($libraryId);
+            if ($existing === null) {
+                throw new \RuntimeException(
+                    'Entrée bibliothèque #' . $libraryId . ' introuvable (importez d’abord le catalogue ou indiquez l’ID catalogue).'
+                );
+            }
+            $this->applyLibraryImportUpdate($libraryId, $data, $importedColumns, $statut);
 
             return;
         }

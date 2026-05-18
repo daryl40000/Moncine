@@ -70,6 +70,9 @@ final class ImportRunner
                 $noteRaw = (string) ($parsed['_note'] ?? '');
                 $importColumns = (array) ($parsed['_import_columns'] ?? array_keys($map));
                 unset($parsed['_vu'], $parsed['_note'], $parsed['_import_columns']);
+                if ((int) ($parsed['oeuvre_id'] ?? 0) > 0) {
+                    unset($parsed['bibliotheque_id']);
+                }
 
                 $this->films->upsertLibraryFromExport($parsed, $importColumns);
                 $imported++;

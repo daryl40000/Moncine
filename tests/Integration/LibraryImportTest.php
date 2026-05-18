@@ -73,7 +73,7 @@ final class LibraryImportTest extends MoncineTestCase
         $this->assertStringContainsString('99999', $result['errors'][0]);
     }
 
-    public function testImportLibraryFallsBackToOeuvreIdWhenBibliothequeIdUnknown(): void
+    public function testImportLibraryPrefersOeuvreIdOverExportedBibliothequeId(): void
     {
         $this->loginAsAdmin();
         $oeuvreId = $this->seedCatalogOeuvre('300', 'Zack Snyder');
