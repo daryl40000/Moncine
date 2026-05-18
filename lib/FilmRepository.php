@@ -124,7 +124,31 @@ final class FilmRepository
         $this->engine->upsertFromExport($data, $importedColumns);
     }
 
-  /** @return list<string> */
+    /**
+     * @param array<string, mixed> $data
+     * @param list<string> $importedColumns
+     */
+    public function upsertLibraryFromExport(array $data, array $importedColumns = []): void
+    {
+        if (!$this->engine instanceof CatalogFilmRepository) {
+            $this->engine->upsertFromExport($data, $importedColumns);
+
+            return;
+        }
+
+        $this->engine->upsertLibraryFromExport($data, $importedColumns);
+    }
+
+    public function countLibraryEntries(): int
+    {
+        if ($this->engine instanceof CatalogFilmRepository) {
+            return $this->engine->countLibraryEntries();
+        }
+
+        return $this->engine->count();
+    }
+
+    /** @return list<string> */
     public function distinctSagas(): array
     {
         return $this->engine->distinctSagas();

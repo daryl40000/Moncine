@@ -178,6 +178,87 @@ final class CatalogAdmin
         return (new FilmRepository())->updateOeuvreManual($oeuvreId, $data);
     }
 
+    /**
+     * Import / mise à jour d’une œuvre catalogue depuis un export admin.
+     *
+     * @param array<string, mixed> $data
+     * @param list<string> $importedColumns
+     */
+    public function importOeuvreFromExport(array $data, array $importedColumns = []): void
+    {
+        $titre = trim((string) ($data['titre'] ?? ''));
+        if ($titre === '') {
+            throw new \RuntimeException('Le titre est obligatoire pour le catalogue.');
+        }
+
+        $realisateur = trim((string) ($data['realisateur'] ?? ''));
+        $oeuvreId = max(0, (int) ($data['oeuvre_id'] ?? 0));
+        $importSet = $importedColumns !== [] ? array_flip($importedColumns) : null;
+
+        $payload = [];
+        foreach (CatalogExportSchema::oeuvreDatabaseFields() as $field) {
+            if ($importSet !== null && !isset($importSet[$field])) {
+                continue;
+            }
+            if (array_key_exists($field, $data)) {
+                $payload[$field] = $data[$field];
+            }
+        }
+
+        $payload['titre'] = $titre;
+        $payload['realisateur'] = $realisateur;
+
+        if ($oeuvreId > 0) {
+            $existing = $this->oeuvres->findById($oeuvreId);
+            if ($existing === null) {
+                throw new \RuntimeException('ID catalogue ' . $oeuvreId . ' introuvable.');
+            }
+            $duplicate = $this->oeuvres->findByTitreAndRealisateur($titre, $realisateur);
+            if ($duplicate !== null && (int) ($duplicate['id'] ?? 0) !== $oeuvreId) {
+                throw new \RuntimeException('Une autre œuvre a déjà ce titre et ce réalisateur.');
+            }
+            $fields = array_keys($payload);
+            $this->oeuvres->update($oeuvreId, $payload, $fields);
+            $this->cachePosterIfRemote($oeuvreId, (string) ($payload['poster_url'] ?? $existing['poster_url'] ?? ''));
+
+            return;
+        }
+
+        $duplicate = $this->oeuvres->findByTitreAndRealisateur($titre, $realisateur);
+        if ($duplicate !== null) {
+            $fields = array_keys($payload);
+            $this->oeuvres->update((int) $duplicate['id'], $payload, $fields);
+            $this->cachePosterIfRemote((int) $duplicate['id'], (string) ($payload['poster_url'] ?? ''));
+
+            return;
+        }
+
+        $newId = $this->oeuvres->insert($this->completeOeuvrePayload($payload));
+        $this->cachePosterIfRemote($newId, (string) ($payload['poster_url'] ?? ''));
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    private function completeOeuvrePayload(array $payload): array
+    {
+        foreach (CatalogSchema::OEUVRE_FIELDS as $field) {
+            if (array_key_exists($field, $payload)) {
+                continue;
+            }
+            $payload[$field] = match ($field) {
+                'duree_min', 'annee', 'tmdb_id', 'realisateur_tmdb_id',
+                'acteur_1_tmdb_id', 'acteur_2_tmdb_id', 'acteur_3_tmdb_id' => 0,
+                'omdb_enriched_at' => null,
+                'moncine_kind' => MoncineContentKind::FILM,
+                default => '',
+            };
+        }
+
+        return $payload;
+    }
+
     public function deleteOeuvre(int $oeuvreId): bool|string
     {
         if ($oeuvreId <= 0) {

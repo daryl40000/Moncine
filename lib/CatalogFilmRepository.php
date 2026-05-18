@@ -130,6 +130,40 @@ final class CatalogFilmRepository
         return $stmt->fetchAll();
     }
 
+    /**
+     * Collection + envies pour export bibliothèque (léger).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function findAllLibraryForExport(): array
+    {
+        [$userWhere, $params] = CatalogSchema::userFilter($this->userId(), null);
+
+        $stmt = $this->db->prepare(
+            'SELECT ' . CatalogSchema::selectFilmRow() . ',
+                (SELECT h.date_vue FROM historique h
+                 WHERE h.film_id = b.id
+                 ORDER BY h.date_vue DESC, h.id DESC LIMIT 1) AS derniere_vue,
+                (SELECT h.note FROM historique h
+                 WHERE h.film_id = b.id
+                 ORDER BY h.date_vue DESC, h.id DESC LIMIT 1) AS derniere_note
+             FROM ' . CatalogSchema::JOIN . '
+             WHERE ' . $userWhere . '
+             ORDER BY b.statut COLLATE FRENCH_NOCASE, o.titre COLLATE FRENCH_NOCASE'
+        );
+        $stmt->execute($params);
+
+        return $stmt->fetchAll();
+    }
+
+    public function countLibraryEntries(): int
+    {
+        $stmt = $this->db->prepare('SELECT COUNT(*) FROM bibliotheque WHERE user_id = ?');
+        $stmt->execute([$this->userId()]);
+
+        return (int) $stmt->fetchColumn();
+    }
+
     /** Même liste collection, ordre aléatoire. */
     public function findAllRandomOrder(): array
     {
@@ -296,6 +330,129 @@ final class CatalogFilmRepository
      * @param array<string, mixed> $data
      * @param list<string> $importedColumns
      */
+    /**
+     * Import bibliothèque légère : lie une œuvre du catalogue à l’utilisateur (collection ou envies).
+     *
+     * @param array<string, mixed> $data
+     * @param list<string> $importedColumns
+     */
+    public function upsertLibraryFromExport(array $data, array $importedColumns = []): void
+    {
+        $oeuvreId = max(0, (int) ($data['oeuvre_id'] ?? 0));
+        $libraryId = max(0, (int) ($data['bibliotheque_id'] ?? 0));
+        $statut = LibraryStatut::normalize((string) ($data['statut'] ?? LibraryStatut::COLLECTION));
+
+        if ($libraryId > 0) {
+            $existing = $this->findById($libraryId);
+            if ($existing === null || (int) ($existing['user_id'] ?? 0) !== $this->userId()) {
+                throw new \RuntimeException('Entrée bibliothèque #' . $libraryId . ' introuvable.');
+            }
+            $this->applyLibraryImportUpdate($libraryId, $data, $importedColumns, $statut);
+
+            return;
+        }
+
+        if ($oeuvreId > 0) {
+            $oeuvre = $this->oeuvres->findById($oeuvreId);
+            if ($oeuvre === null) {
+                throw new \RuntimeException(
+                    'ID catalogue ' . $oeuvreId . ' introuvable. Importez d’abord le catalogue (admin).'
+                );
+            }
+            $library = $this->bibliotheque->findByOeuvreId($oeuvreId, $this->userId());
+            if ($library !== null) {
+                $this->applyLibraryImportUpdate((int) $library['id'], $data, $importedColumns, $statut);
+
+                return;
+            }
+
+            $payload = $this->libraryPayloadFromImport($data, $statut);
+            $this->bibliotheque->insert($this->userId(), $oeuvreId, $payload);
+
+            return;
+        }
+
+        $titre = trim((string) ($data['titre'] ?? ''));
+        if ($titre === '') {
+            throw new \RuntimeException('ID catalogue ou titre obligatoire.');
+        }
+
+        $realisateur = trim((string) ($data['realisateur'] ?? ''));
+        $oeuvre = $this->oeuvres->findByTitreAndRealisateur($titre, $realisateur);
+        if ($oeuvre === null) {
+            throw new \RuntimeException(
+                'Aucune œuvre « ' . $titre . ' » au catalogue. Utilisez l’ID catalogue ou importez le catalogue.'
+            );
+        }
+
+        $library = $this->bibliotheque->findByOeuvreId((int) $oeuvre['id'], $this->userId());
+        if ($library !== null) {
+            $this->applyLibraryImportUpdate((int) $library['id'], $data, $importedColumns, $statut);
+
+            return;
+        }
+
+        $this->bibliotheque->insert(
+            $this->userId(),
+            (int) $oeuvre['id'],
+            $this->libraryPayloadFromImport($data, $statut)
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param list<string> $importedColumns
+     */
+    private function applyLibraryImportUpdate(
+        int $libraryId,
+        array $data,
+        array $importedColumns,
+        string $statut
+    ): void {
+        $importSet = $importedColumns !== [] ? array_flip($importedColumns) : null;
+        $update = [];
+
+        foreach (LibraryExportSchema::libraryDatabaseFields() as $field) {
+            if ($importSet !== null && !isset($importSet[$field])) {
+                continue;
+            }
+            if (array_key_exists($field, $data)) {
+                $update[$field] = $data[$field];
+            }
+        }
+
+        if ($importSet === null || isset($importSet['statut'])) {
+            $update['statut'] = $statut;
+        }
+
+        if ($update !== []) {
+            $this->bibliotheque->update($libraryId, $update);
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
+    private function libraryPayloadFromImport(array $data, string $statut): array
+    {
+        $saga = trim((string) ($data['saga'] ?? ''));
+
+        return [
+            'support_physique' => SupportPhysique::normalize((string) ($data['support_physique'] ?? '')),
+            'format_image' => trim((string) ($data['format_image'] ?? '')),
+            'format_son' => trim((string) ($data['format_son'] ?? '')),
+            'saga' => $saga,
+            'saga_ordre' => $saga === ''
+                ? 0
+                : max(0, (int) ($data['saga_ordre'] ?? 0)),
+            'saison_numero' => max(0, (int) ($data['saison_numero'] ?? 0)),
+            'saison_label' => trim((string) ($data['saison_label'] ?? '')),
+            'ean' => preg_replace('/\D+/', '', (string) ($data['ean'] ?? '')) ?? '',
+            'statut' => $statut,
+        ];
+    }
+
     public function upsertFromExport(array $data, array $importedColumns = []): void
     {
         $existing = $this->findByTitreAndRealisateur(

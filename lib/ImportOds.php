@@ -46,13 +46,20 @@ final class ImportOds
 
         $result = ['imported' => 0, 'vues' => 0, 'errors' => []];
 
-        $filmsTable = $this->findTable($tables, ['films', 'film']);
+        $catalogTable = $this->findTable($tables, ['catalogue', 'catalog']);
+        if ($catalogTable !== null) {
+            [$header, $rows] = $catalogTable;
+            $catalogResult = $this->runner->importCatalogSheet($rows, $header);
+            $result = ImportRunner::mergeResults($result, $catalogResult);
+        }
+
+        $filmsTable = $this->findTable($tables, ['bibliotheque', 'films', 'film']);
         if ($filmsTable !== null) {
             [$header, $rows] = $filmsTable;
             $filmResult = $this->runner->importFilmsSheet($rows, $header);
             $result = ImportRunner::mergeResults($result, $filmResult);
-        } else {
-            $result['errors'][] = 'Feuille « Films » introuvable — seule la feuille Historique ne suffit pas.';
+        } elseif ($catalogTable === null) {
+            $result['errors'][] = 'Feuille « Bibliotheque » ou « Catalogue » introuvable.';
         }
 
         $histTable = $this->findTable($tables, ['historique', 'history']);

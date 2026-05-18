@@ -7,7 +7,9 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/lib/bootstrap.php';
 
+use Moncine\CatalogAdmin;
 use Moncine\Csrf;
+use Moncine\ExportCatalog;
 use Moncine\FilmEnricher;
 use Moncine\FilmRepository;
 use Moncine\ImportCsv;
@@ -23,7 +25,8 @@ $enrichMessage = '';
 if (isset($_GET['export_error'])) {
     $exportErr = (string) $_GET['export_error'];
     $errors[] = match ($exportErr) {
-        'empty' => 'Aucun film à exporter. Importez d’abord vos films.',
+        'empty' => 'Aucune entrée dans votre bibliothèque à exporter.',
+        'empty_catalog' => 'Le catalogue est vide — rien à exporter.',
         'format' => 'Format d’export non reconnu.',
         'failed' => 'Export impossible. Réessayez ou consultez les logs du serveur.',
         default => 'Export impossible.',
@@ -94,8 +97,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
         } else {
             $result = (new ImportCsv())->importFromPath($tmp);
         }
+
         $message = sprintf(
-            '%d film(s) importé(s) ou mis à jour. %d vision(s) enregistrée(s) dans l’historique.',
+            '%d entrée(s) importée(s) ou mise(s) à jour. %d vision(s) enregistrée(s) dans l’historique.',
             $result['imported'],
             $result['vues']
         );
@@ -103,7 +107,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
     }
 }
 
-$filmCount = (new FilmRepository())->count();
+$repo = new FilmRepository();
+$filmCount = $repo->count();
+$libraryCount = $repo->usesCatalogModel() ? $repo->countLibraryEntries() : $filmCount;
+$catalogCount = CatalogAdmin::canAccess() ? (new ExportCatalog())->catalogEntryCount() : 0;
 $enrichPending = (new FilmEnricher())->countPending();
 $hasTmdbKey = TmdbConfig::hasApiKey();
 
@@ -114,6 +121,9 @@ View::render('import', [
     'tmdbMessage' => $tmdbMessage,
     'enrichMessage' => $enrichMessage,
     'filmCount' => $filmCount,
+    'libraryCount' => $libraryCount,
+    'catalogCount' => $catalogCount,
+    'canManageCatalog' => CatalogAdmin::canAccess(),
     'enrichPending' => $enrichPending,
     'hasTmdbKey' => $hasTmdbKey,
     'enrichBatchSize' => MONCINE_ENRICH_BATCH_SIZE,

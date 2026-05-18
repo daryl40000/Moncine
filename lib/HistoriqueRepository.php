@@ -301,7 +301,7 @@ final class HistoriqueRepository
     {
         if (CatalogSchema::usesCatalogTables($this->db)) {
             $stmt = $this->db->prepare(
-                'SELECT h.id, h.film_id, o.titre, o.realisateur, h.date_vue, h.note
+                'SELECT h.id, h.film_id, b.oeuvre_id, o.titre, o.realisateur, h.date_vue, h.note
                  FROM historique h
                  INNER JOIN bibliotheque b ON b.id = h.film_id
                  INNER JOIN oeuvres o ON o.id = b.oeuvre_id

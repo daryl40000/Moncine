@@ -1,12 +1,9 @@
 <section>
-    <h1>Importer ma dvdthèque</h1>
+    <h1>Importer / exporter</h1>
     <p class="lead">
-        Réimportez un export Moncine (<strong>CSV</strong> point-virgule ou <strong>ODS</strong>) :
-        toutes les colonnes de la fiche (titre original, support DVD/Blu-ray, <strong>saga</strong>,
-        <strong>nationalité</strong>, <strong>statut</strong> (mes films ou mes envies), type TMDB, acteurs, synopsis…)
-        et l’historique des visions (feuille <strong>Historique</strong> dans l’ODS, ou colonnes
-        <strong>Vu</strong> / <strong>Note</strong> en CSV).
-        Un ancien fichier sans certaines colonnes ne les efface pas à la réimportation.
+        Deux formats distincts : votre <strong>bibliothèque</strong> (films possédés, envies, support, notes…)
+        et le <strong>catalogue partagé</strong> (métadonnées des œuvres, réservé à l’administrateur).
+        La bibliothèque référence chaque film par son <strong>ID catalogue</strong>.
     </p>
 
     <?php if (!empty($message)): ?>
@@ -29,64 +26,105 @@
 
     <form method="post" enctype="multipart/form-data" class="import-form">
         <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
-        <label for="csv_file">Fichier CSV ou ODS (export Moncine)</label>
+        <label for="csv_file">Fichier CSV ou ODS</label>
         <input type="file" name="csv_file" id="csv_file" accept=".csv,.ods,text/csv" required>
 
         <label class="checkbox">
             <input type="checkbox" name="replace_all" value="1">
-            Remplacer tous mes films (supprime les films existants avant import)
+            Remplacer toute ma bibliothèque avant import (films + envies + historique)
         </label>
-        <p class="hint">Taille maximale du fichier : <?= (int) (MONCINE_CSV_MAX_BYTES / 1024 / 1024) ?> Mo.</p>
+        <p class="hint">
+            Le type de fichier est détecté automatiquement : export <em>bibliothèque</em> (léger),
+            export <em>catalogue</em> (admin), ou ancien export complet.
+            Taille max. <?= (int) (MONCINE_CSV_MAX_BYTES / 1024 / 1024) ?> Mo.
+        </p>
 
         <button type="submit" class="btn btn-primary">Importer</button>
     </form>
-
-    <p class="hint">
-        <a href="/samples/films-exemple.csv">Télécharger un fichier d'exemple</a>
-    </p>
 </section>
 
 <section class="export-panel">
-    <h2>Exporter mes films</h2>
+    <h2>Exporter ma bibliothèque</h2>
     <p class="lead">
-        Téléchargez l’ensemble de votre base : tous les films et leurs informations
-        (année, saga, nationalité, support, acteurs, synopsis TMDB…). Le fichier CSV peut être réouvert dans Excel ;
-        le fichier ODS contient en plus une feuille <strong>Historique</strong> avec toutes les dates de vision.
+        Collection <strong>et</strong> liste d’envies : support, format, saga, ID catalogue, dernière vision…
+        Sans synopsis ni affiche (déjà dans le catalogue partagé).
     </p>
 
-    <?php if ((int) $filmCount === 0): ?>
-        <p class="hint">Aucun film en base — importez d’abord un fichier CSV.</p>
+    <?php if ((int) ($libraryCount ?? 0) === 0): ?>
+        <p class="hint">Aucune entrée en bibliothèque.</p>
     <?php else: ?>
-        <p class="stats"><?= (int) $filmCount ?> film<?= $filmCount > 1 ? 's' : '' ?> seront exporté<?= $filmCount > 1 ? 's' : '' ?>.</p>
+        <p class="stats"><?= (int) $libraryCount ?> entrée(s) (films + envies).</p>
         <div class="export-actions">
             <form method="post" action="/export.php" class="inline-form">
                 <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
+                <input type="hidden" name="scope" value="library">
                 <input type="hidden" name="format" value="csv">
-                <button type="submit" class="btn btn-secondary">Télécharger en CSV</button>
+                <input type="hidden" name="return" value="/import.php">
+                <button type="submit" class="btn btn-secondary">CSV bibliothèque</button>
             </form>
             <form method="post" action="/export.php" class="inline-form">
                 <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
+                <input type="hidden" name="scope" value="library">
                 <input type="hidden" name="format" value="ods">
-                <button type="submit" class="btn btn-secondary">Télécharger en ODS</button>
+                <input type="hidden" name="return" value="/import.php">
+                <button type="submit" class="btn btn-secondary">ODS bibliothèque</button>
             </form>
         </div>
-        <p class="hint">
-            CSV : point-virgule (<code>;</code>), une feuille avec toutes les colonnes de l’export.
-            ODS : feuilles <strong>Films</strong> et <strong>Historique</strong> réimportées entièrement.
-        </p>
         <details class="import-columns-help">
-            <summary>Liste des colonnes exportées / importées</summary>
-            <p class="hint"><?= Moncine\View::escape(Moncine\CollectionExportSchema::filmColumnLabelsText()) ?></p>
+            <summary>Colonnes export bibliothèque</summary>
+            <p class="hint"><?= Moncine\View::escape(Moncine\LibraryExportSchema::columnLabelsText()) ?></p>
         </details>
     <?php endif; ?>
 </section>
 
+<?php if (!empty($canManageCatalog)): ?>
+<section class="export-panel">
+    <h2>Exporter le catalogue (administrateur)</h2>
+    <p class="lead">
+        Toutes les œuvres partagées (titre, synopsis, TMDB, affiche…). Importez ce fichier sur une autre instance
+        <strong>avant</strong> les exports bibliothèque des utilisateurs.
+    </p>
+
+    <?php if ((int) ($catalogCount ?? 0) === 0): ?>
+        <p class="hint">Catalogue vide.</p>
+    <?php else: ?>
+        <p class="stats"><?= (int) $catalogCount ?> œuvre(s) au catalogue.</p>
+        <div class="export-actions">
+            <form method="post" action="/export.php" class="inline-form">
+                <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
+                <input type="hidden" name="scope" value="catalog">
+                <input type="hidden" name="format" value="csv">
+                <input type="hidden" name="return" value="/import.php">
+                <button type="submit" class="btn btn-secondary">CSV catalogue</button>
+            </form>
+            <form method="post" action="/export.php" class="inline-form">
+                <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
+                <input type="hidden" name="scope" value="catalog">
+                <input type="hidden" name="format" value="ods">
+                <input type="hidden" name="return" value="/import.php">
+                <button type="submit" class="btn btn-secondary">ODS catalogue</button>
+            </form>
+            <form method="post" action="/export.php" class="inline-form">
+                <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
+                <input type="hidden" name="scope" value="catalog">
+                <input type="hidden" name="format" value="zip">
+                <input type="hidden" name="return" value="/import.php">
+                <button type="submit" class="btn btn-secondary">ZIP affiches locales</button>
+            </form>
+        </div>
+        <details class="import-columns-help">
+            <summary>Colonnes export catalogue</summary>
+            <p class="hint"><?= Moncine\View::escape(Moncine\CatalogExportSchema::columnLabelsText()) ?></p>
+        </details>
+    <?php endif; ?>
+</section>
+<?php endif; ?>
+
 <section class="enrich-panel">
     <h2>Enrichir mes films (TMDB)</h2>
     <p class="lead">
-        <strong>TMDB</strong> complète vos fiches : films, séries, <strong>documentaires</strong>
-        et <strong>émissions TV</strong> — synopsis <strong>en français</strong>, affiche, année,
-        durée, créateur/réalisateur et acteurs principaux.
+        <strong>TMDB</strong> complète les fiches du <strong>catalogue</strong> : synopsis, affiche, acteurs…
+        (réservé à l’administrateur sur les fiches individuelles).
     </p>
 
     <?php if (!empty($tmdbMessage)): ?>
@@ -94,11 +132,8 @@
     <?php endif; ?>
 
     <p class="hint">
-        Créez un compte sur
-        <a href="https://www.themoviedb.org/signup" target="_blank" rel="noopener">themoviedb.org</a>,
-        puis demandez une clé « API » (type Developer) sur
-        <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">Paramètres → API</a>.
-        Copiez la clé <strong>API Key (v3 auth)</strong>.
+        Clé API sur
+        <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">themoviedb.org</a>.
     </p>
 
     <?php if (!$hasTmdbKey): ?>
@@ -112,46 +147,35 @@
         </form>
     <?php else: ?>
         <p class="hint">✓ Clé TMDB configurée.</p>
+        <?php if (!empty($canManageCatalog)): ?>
         <form method="post" action="/enrichir.php" class="inline-form">
             <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
             <input type="hidden" name="action" value="test_tmdb">
             <button type="submit" class="btn btn-secondary btn-sm">Tester la connexion TMDB</button>
         </form>
-        <form method="post" action="/enrichir.php" class="inline-form enrich-key-update">
-            <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
-            <input type="hidden" name="action" value="save_tmdb_key">
-            <label for="tmdb_api_key_new">Changer la clé TMDB</label>
-            <input type="password" name="tmdb_api_key" id="tmdb_api_key_new" autocomplete="off" placeholder="Nouvelle clé">
-            <button type="submit" class="btn btn-ghost btn-sm">Mettre à jour</button>
-        </form>
-
-        <p class="stats">
-            <?= (int) $filmCount ?> film(s) en base —
-            <strong><?= (int) $enrichPending ?></strong> encore à enrichir.
-        </p>
         <form method="post" action="/enrichir.php" class="import-form enrich-actions">
             <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
             <input type="hidden" name="action" value="enrichir">
-            <p class="hint">
-                Environ <?= (int) $enrichBatchSize ?> films par clic (synopsis en français).
-                <?php if ($enrichPending > 0): ?> Répétez jusqu’à « terminé ».<?php endif; ?>
-            </p>
-            <button type="submit" class="btn btn-accent">Enrichir la base</button>
+            <p class="hint">Enrichit les œuvres du catalogue (environ <?= (int) $enrichBatchSize ?> par clic).</p>
+            <button type="submit" class="btn btn-accent">Enrichir le catalogue</button>
             <label class="checkbox">
                 <input type="checkbox" name="force_all" value="1">
-                Tout retraiter (même les films déjà cherchés)
+                Tout retraiter
             </label>
         </form>
+        <?php endif; ?>
     <?php endif; ?>
 </section>
 
 <section class="export-panel">
     <h2>Affiches locales</h2>
     <p class="lead">
-        Copiez les affiches sur votre serveur (<code>www/posters/</code>) pour ne plus dépendre d’Internet
-        pour les afficher. Les enrichissements TMDB le font désormais automatiquement.
+        Les affiches sont stockées par <strong>ID catalogue</strong> dans <code>www/posters/</code>.
     </p>
     <p>
         <a href="/ranger-affiches.php" class="btn btn-secondary">Gérer les affiches locales</a>
+        <?php if (!empty($canManageCatalog)): ?>
+            <span class="hint"> — ou export ZIP ci-dessus (catalogue admin).</span>
+        <?php endif; ?>
     </p>
 </section>

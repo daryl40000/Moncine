@@ -155,6 +155,20 @@ final class OeuvreRepository
         return $out;
     }
 
+    /**
+     * Toutes les œuvres du catalogue (export admin).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function findAllForExport(): array
+    {
+        $stmt = $this->db->query(
+            'SELECT * FROM oeuvres ORDER BY titre COLLATE FRENCH_NOCASE, realisateur COLLATE FRENCH_NOCASE'
+        );
+
+        return $stmt->fetchAll() ?: [];
+    }
+
     private function escapeLike(string $value): string
     {
         return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
