@@ -217,6 +217,7 @@ final class ImportFilmRows
 
     public static function normalizeHeader(string $label): string
     {
+        $label = self::stripHeaderWrapping($label);
         $label = mb_strtolower(trim($label), 'UTF-8');
         $label = str_replace(
             ['é', 'è', 'ê', 'ë', 'à', 'â', 'ù', 'û', 'ô', 'î', 'ï', 'ç'],
@@ -225,5 +226,22 @@ final class ImportFilmRows
         );
 
         return preg_replace('/\s+/', ' ', $label) ?? $label;
+    }
+
+    /** Enlève BOM UTF-8 et guillemets Excel autour d’un libellé de colonne. */
+    public static function stripHeaderWrapping(string $label): string
+    {
+        $label = (string) preg_replace('/^\x{FEFF}/u', '', $label);
+        $label = (string) preg_replace('/^\xEF\xBB\xBF/', '', $label);
+        $label = trim($label);
+        while (
+            strlen($label) >= 2
+            && (($label[0] === '"' && $label[strlen($label) - 1] === '"')
+                || ($label[0] === "'" && $label[strlen($label) - 1] === "'"))
+        ) {
+            $label = trim(substr($label, 1, -1));
+        }
+
+        return trim($label);
     }
 }

@@ -33,7 +33,12 @@ final class ImportCsv
             return ['imported' => 0, 'vues' => 0, 'errors' => ['Fichier vide ou invalide.']];
         }
 
-        $header[0] = preg_replace('/^\xEF\xBB\xBF/', '', (string) $header[0]) ?? $header[0];
+        $header = array_map(
+            static fn ($cell): ?string => $cell === null
+                ? null
+                : ImportFilmRows::stripHeaderWrapping((string) $cell),
+            $header
+        );
 
         $dataRows = [];
         while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {

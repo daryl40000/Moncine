@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Moncine\Tests\Unit;
 
 use Moncine\ImportCsv;
+use Moncine\ImportFilmRows;
+use Moncine\ImportFormat;
+use Moncine\CatalogExportSchema;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -40,5 +43,19 @@ final class ImportCsvParsingTest extends TestCase
         $this->assertSame(8, ImportCsv::parseNote('8'));
         $this->assertNull(ImportCsv::parseNote(''));
         $this->assertSame(10, ImportCsv::parseNote('11'));
+    }
+
+    /** BOM + guillemets sur la 1re colonne (export Excel / LibreOffice). */
+    public function testNormalizeHeaderStripsBomAndQuotes(): void
+    {
+        $this->assertSame('id catalogue', ImportFilmRows::normalizeHeader("\xEF\xBB\xBF\"ID catalogue\""));
+
+        $header = ["\xEF\xBB\xBF\"ID catalogue\"", 'Titre', 'Synopsis'];
+        $map = ImportFilmRows::mapHeaders($header, CatalogExportSchema::COLUMN_ALIASES);
+        $this->assertArrayHasKey('oeuvre_id', $map);
+
+        $analysis = ImportFormat::analyzeHeader($header);
+        $this->assertTrue($analysis['has_id_column']);
+        $this->assertSame(ImportFormat::KIND_CATALOG, $analysis['format']);
     }
 }
