@@ -209,14 +209,22 @@ final class CatalogAdmin
         $payload['realisateur'] = $realisateur;
 
         if ($oeuvreId > 0) {
-            $existing = $this->oeuvres->findById($oeuvreId);
-            if ($existing === null) {
-                throw new \RuntimeException('ID catalogue ' . $oeuvreId . ' introuvable.');
-            }
             $duplicate = $this->oeuvres->findByTitreAndRealisateur($titre, $realisateur);
             if ($duplicate !== null && (int) ($duplicate['id'] ?? 0) !== $oeuvreId) {
-                throw new \RuntimeException('Une autre œuvre a déjà ce titre et ce réalisateur.');
+                throw new \RuntimeException(
+                    '« ' . $titre . ' » existe déjà avec l’ID catalogue '
+                    . (int) $duplicate['id'] . ', pas ' . $oeuvreId . '.'
+                );
             }
+
+            $existing = $this->oeuvres->findById($oeuvreId);
+            if ($existing === null) {
+                $this->oeuvres->insertWithId($oeuvreId, $this->completeOeuvrePayload($payload));
+                $this->cachePosterIfRemote($oeuvreId, (string) ($payload['poster_url'] ?? ''));
+
+                return;
+            }
+
             $fields = array_keys($payload);
             $this->oeuvres->update($oeuvreId, $payload, $fields);
             $this->cachePosterIfRemote($oeuvreId, (string) ($payload['poster_url'] ?? $existing['poster_url'] ?? ''));

@@ -107,6 +107,41 @@ final class OeuvreRepository
     }
 
     /**
+     * Crée une œuvre avec un ID catalogue imposé (import / migration depuis une autre instance).
+     *
+     * @param array<string, mixed> $payload
+     */
+    public function insertWithId(int $id, array $payload): void
+    {
+        if ($id <= 0) {
+            throw new \InvalidArgumentException('ID catalogue invalide.');
+        }
+
+        if ($this->findById($id) !== null) {
+            throw new \RuntimeException('ID catalogue ' . $id . ' déjà utilisé.');
+        }
+
+        $fields = array_merge(['id'], CatalogSchema::OEUVRE_FIELDS);
+        $columns = implode(', ', $fields);
+        $placeholders = implode(', ', array_map(static fn (string $f): string => ':' . $f, $fields));
+        $params = $this->filterPayload($payload, CatalogSchema::OEUVRE_FIELDS);
+        $params['id'] = $id;
+
+        $stmt = $this->db->prepare("INSERT INTO oeuvres ($columns) VALUES ($placeholders)");
+        $stmt->execute($params);
+        $this->touchUpdated($id);
+    }
+
+    /** Réaligne le compteur AUTOINCREMENT SQLite après des insertions avec ID explicite. */
+    public function syncAutoincrementSequence(): void
+    {
+        $max = (int) $this->db->query('SELECT COALESCE(MAX(id), 0) FROM oeuvres')->fetchColumn();
+        $this->db->exec(
+            "INSERT OR REPLACE INTO sqlite_sequence (name, seq) VALUES ('oeuvres', " . max(0, $max) . ')'
+        );
+    }
+
+    /**
      * @param array<string, mixed> $payload
      * @param list<string> $onlyFields
      */

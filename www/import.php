@@ -15,12 +15,14 @@ use Moncine\FilmRepository;
 use Moncine\ImportCsv;
 use Moncine\ImportOds;
 use Moncine\ImportPostersZip;
+use Moncine\PosterIdRemap;
 use Moncine\TmdbConfig;
 use Moncine\UploadLimits;
 use Moncine\View;
 
 $message = '';
 $posterZipMessage = '';
+$posterRemapMessage = '';
 $errors = [];
 $tmdbMessage = '';
 $enrichMessage = '';
@@ -78,6 +80,33 @@ if (isset($_GET['enrich_done'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (UploadLimits::postBodyWasDiscarded()) {
         $errors[] = UploadLimits::postTooLargeMessage();
+    } elseif (($_POST['action'] ?? '') === 'remap_posters') {
+        if (!Csrf::validateFromPost($_POST)) {
+            header('Location: /import.php?csrf_error=1');
+            exit;
+        }
+
+        if (!CatalogAdmin::canAccess()) {
+            $errors[] = 'Le recalage des affiches est réservé à l’administrateur.';
+        } else {
+            $uploadError = (int) ($_FILES['remap_catalog_csv']['error'] ?? UPLOAD_ERR_NO_FILE);
+            if (!isset($_FILES['remap_catalog_csv']) || $uploadError !== UPLOAD_ERR_OK) {
+                $errors[] = match ($uploadError) {
+                    UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Fichier CSV trop volumineux.',
+                    UPLOAD_ERR_NO_FILE => 'Sélectionnez l’export catalogue de l’ancienne instance (avec ID catalogue).',
+                    default => 'Erreur lors de l’envoi du CSV.',
+                };
+            } else {
+                $result = (new PosterIdRemap())->remapFromCatalogExportPath(
+                    (string) $_FILES['remap_catalog_csv']['tmp_name']
+                );
+                $posterRemapMessage = sprintf('%d affiche(s) recalée(s).', $result['remapped']);
+                if ($result['skipped'] > 0) {
+                    $posterRemapMessage .= ' ' . $result['skipped'] . ' ignorée(s).';
+                }
+                $errors = array_merge($errors, $result['errors']);
+            }
+        }
     } elseif (($_POST['action'] ?? '') === 'import_posters_zip') {
         if (!Csrf::validateFromPost($_POST)) {
             header('Location: /import.php?csrf_error=1');
@@ -171,6 +200,7 @@ View::render('import', [
     'pageTitle' => 'Importer',
     'message' => $message,
     'posterZipMessage' => $posterZipMessage,
+    'posterRemapMessage' => $posterRemapMessage,
     'errors' => $errors,
     'tmdbMessage' => $tmdbMessage,
     'enrichMessage' => $enrichMessage,

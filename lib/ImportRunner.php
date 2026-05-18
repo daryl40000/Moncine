@@ -11,7 +11,8 @@ final class ImportRunner
 {
     public function __construct(
         private readonly FilmRepository $films = new FilmRepository(),
-        private readonly HistoriqueRepository $historique = new HistoriqueRepository()
+        private readonly HistoriqueRepository $historique = new HistoriqueRepository(),
+        private readonly OeuvreRepository $oeuvres = new OeuvreRepository()
     ) {
     }
 
@@ -119,6 +120,8 @@ final class ImportRunner
         $errors = [];
         $line = 1;
 
+        $hadExplicitIds = false;
+
         foreach ($dataRows as $row) {
             $line++;
             if (ImportFilmRows::isEmptyRow($row)) {
@@ -129,6 +132,9 @@ final class ImportRunner
                 if (trim((string) ($parsed['titre'] ?? '')) === '') {
                     continue;
                 }
+                if ((int) ($parsed['oeuvre_id'] ?? 0) > 0) {
+                    $hadExplicitIds = true;
+                }
                 $importColumns = (array) ($parsed['_import_columns'] ?? array_keys($map));
                 unset($parsed['_import_columns']);
                 $admin->importOeuvreFromExport($parsed, $importColumns);
@@ -136,6 +142,10 @@ final class ImportRunner
             } catch (\Throwable $e) {
                 $errors[] = 'Catalogue ligne ' . $line . ' : ' . $e->getMessage();
             }
+        }
+
+        if ($hadExplicitIds) {
+            $this->oeuvres->syncAutoincrementSequence();
         }
 
         return ['imported' => $imported, 'vues' => 0, 'errors' => $errors];

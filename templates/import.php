@@ -14,6 +14,10 @@
         <div class="alert alert-success"><?= Moncine\View::escape($posterZipMessage) ?></div>
     <?php endif; ?>
 
+    <?php if (!empty($posterRemapMessage)): ?>
+        <div class="alert alert-success"><?= Moncine\View::escape($posterRemapMessage) ?></div>
+    <?php endif; ?>
+
     <?php if (!empty($enrichMessage)): ?>
         <div class="alert alert-success"><?= Moncine\View::escape($enrichMessage) ?></div>
     <?php endif; ?>
@@ -87,6 +91,8 @@
     <p class="lead">
         Toutes les œuvres partagées (titre, synopsis, TMDB, affiche…). Importez ce fichier sur une autre instance
         <strong>avant</strong> les exports bibliothèque des utilisateurs.
+        La colonne <strong>ID catalogue</strong> doit être conservée (mêmes numéros que les fichiers
+        <code>posters/123.jpg</code>).
     </p>
 
     <?php if ((int) ($catalogCount ?? 0) === 0): ?>
@@ -199,6 +205,21 @@
             <label for="posters_zip">Archive ZIP des affiches</label>
             <input type="file" name="posters_zip" id="posters_zip" accept=".zip,application/zip" required>
             <button type="submit" class="btn btn-primary">Importer le ZIP</button>
+        </form>
+
+        <h3>Recaler les affiches (après import)</h3>
+        <p class="hint">
+            Si les affiches ont été importées avec de <strong>mauvais numéros</strong> (catalogue importé sans
+            conserver les ID), envoyez l’<strong>export catalogue de l’ancienne instance</strong> (avec colonne
+            ID catalogue). Moncine associe chaque ancien numéro au film actuel via titre + réalisateur, puis
+            renomme les fichiers dans <code>posters/</code>.
+        </p>
+        <form method="post" enctype="multipart/form-data" class="import-form">
+            <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
+            <input type="hidden" name="action" value="remap_posters">
+            <label for="remap_catalog_csv">Export catalogue (ancienne instance, avec ID)</label>
+            <input type="file" name="remap_catalog_csv" id="remap_catalog_csv" accept=".csv,text/csv" required>
+            <button type="submit" class="btn btn-secondary">Recaler les affiches</button>
         </form>
     <?php else: ?>
         <p class="hint">L’import ZIP est réservé à l’administrateur (après import du catalogue).</p>
