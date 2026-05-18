@@ -7,6 +7,12 @@
 /www/posters/*
 !/www/posters/.gitkeep
 
+# Graine d’installation (données personnelles — ne pas versionner)
+/install_seed/*.csv
+/install_seed/*.zip
+/install_seed/*.ods
+/data/install_seed/
+
 # Fichiers système
 .DS_Store
 Thumbs.db

@@ -27,6 +27,10 @@ define('MONCINE_DATA', $dataPath);
 
 define('MONCINE_DB_FILE', MONCINE_DATA . '/moncine.db');
 
+// Graine d’installation (CSV catalogue + ZIP affiches) — voir install_seed/README.md
+define('MONCINE_INSTALL_SEED_PACKAGE_DIR', MONCINE_ROOT . '/install_seed');
+define('MONCINE_INSTALL_SEED_DATA_DIR', MONCINE_DATA . '/install_seed');
+
 // Nom de l'application (affiché dans les pages)
 define('MONCINE_APP_NAME', 'Moncine');
 

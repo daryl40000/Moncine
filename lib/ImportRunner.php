@@ -21,13 +21,22 @@ final class ImportRunner
      * @param list<string|null> $header
      * @return array{imported: int, vues: int, errors: list<string>}
      */
-    public function importFilmsSheet(array $dataRows, array $header, bool $replaceCatalog = false): array
-    {
+    public function importFilmsSheet(
+        array $dataRows,
+        array $header,
+        bool $replaceCatalog = false,
+        bool $systemInstallSeed = false
+    ): array {
         $analysis = ImportFormat::analyzeHeader($header);
 
         $result = match ($analysis['format']) {
             ImportFormat::KIND_LIBRARY => $this->importLibrarySheet($dataRows, $header),
-            ImportFormat::KIND_CATALOG => $this->importCatalogSheet($dataRows, $header, $replaceCatalog),
+            ImportFormat::KIND_CATALOG => $this->importCatalogSheet(
+                $dataRows,
+                $header,
+                $replaceCatalog,
+                $systemInstallSeed
+            ),
             default => [
                 'imported' => 0,
                 'vues' => 0,
@@ -113,9 +122,13 @@ final class ImportRunner
      * @param list<string|null> $header
      * @return array{imported: int, vues: int, errors: list<string>}
      */
-    public function importCatalogSheet(array $dataRows, array $header, bool $replaceCatalog = false): array
-    {
-        if (!CatalogAdmin::canAccess()) {
+    public function importCatalogSheet(
+        array $dataRows,
+        array $header,
+        bool $replaceCatalog = false,
+        bool $systemInstallSeed = false
+    ): array {
+        if (!$systemInstallSeed && !CatalogAdmin::canAccess()) {
             return [
                 'imported' => 0,
                 'vues' => 0,

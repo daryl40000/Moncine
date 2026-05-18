@@ -20,7 +20,8 @@ final class ImportCsv
     public function importFromPath(
         string $path,
         string $delimiter = MONCINE_CSV_DELIMITER,
-        bool $replaceCatalog = false
+        bool $replaceCatalog = false,
+        bool $systemInstallSeed = false
     ): array {
         $handle = fopen($path, 'rb');
         if ($handle === false) {
@@ -46,7 +47,7 @@ final class ImportCsv
         }
         fclose($handle);
 
-        return $this->runner->importFilmsSheet($dataRows, $header, $replaceCatalog);
+        return $this->runner->importFilmsSheet($dataRows, $header, $replaceCatalog, $systemInstallSeed);
     }
 
     /** Convertit « 1h56 », « 2h30 », « 90 » en minutes. */

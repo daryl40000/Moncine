@@ -40,6 +40,40 @@ moncine_run_migrate() {
     moncine_fix_data_permissions
 }
 
+# Catalogue + affiches depuis install_seed/ (installation neuve, catalogue vide uniquement).
+moncine_apply_install_seed() {
+    local seed_php="${install_dir}/lib/cli/install-seed.php"
+    if [[ ! -f "${seed_php}" ]]; then
+        ynh_print_info "install-seed.php absent — graine d’installation ignorée."
+        return 0
+    fi
+
+    moncine_prepare_install_seed_dir
+
+    ynh_print_info "Graine d’installation (catalogue / affiches) si fichiers présents…"
+    sudo -u "${app}" env \
+        MONCINE_DATA_PATH="${data_dir}" \
+        php "${seed_php}" \
+        || ynh_exit 1 --message="Échec de la graine d’installation Moncine (install_seed/)"
+}
+
+# Dossier persistant + copie optionnelle depuis le paquet (CSV/ZIP non versionnés).
+moncine_prepare_install_seed_dir() {
+    mkdir -p "${data_dir}/install_seed"
+    if [[ -d "${MONCINE_PACKAGE_ROOT}/install_seed" ]]; then
+        local f
+        for f in "${MONCINE_PACKAGE_ROOT}/install_seed/"*; do
+            [[ -f "${f}" ]] || continue
+            local base
+            base="$(basename "${f}")"
+            if [[ ! -f "${data_dir}/install_seed/${base}" ]]; then
+                cp -a "${f}" "${data_dir}/install_seed/"
+            fi
+        done
+    fi
+    moncine_fix_data_permissions
+}
+
 # Copie le code PHP depuis ce dépôt vers /var/www/moncine (install depuis chemin local).
 moncine_copy_sources() {
     local dest="${1:?}"
@@ -59,7 +93,7 @@ moncine_copy_sources() {
     rsync -a --delete "${MONCINE_PACKAGE_ROOT}/templates/" "${dest}/templates/"
 
     local item
-    for item in lib sql doc; do
+    for item in lib sql doc install_seed; do
         if [[ -d "${MONCINE_PACKAGE_ROOT}/${item}" ]]; then
             rsync -a --delete "${MONCINE_PACKAGE_ROOT}/${item}/" "${dest}/${item}/"
         fi

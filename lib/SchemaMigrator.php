@@ -18,6 +18,7 @@ final class SchemaMigrator
 {
     public const META_SCHEMA_VERSION = 'schema_version';
     public const META_PACKAGE_EDITION = 'package_edition';
+    public const META_INSTALL_SEED_APPLIED = 'install_seed_applied';
     public const EDITION_YUNOHOST = 'yunohost';
 
     public function __construct(private readonly PDO $pdo)
@@ -113,6 +114,16 @@ final class SchemaMigrator
         $stmt->execute([$table]);
 
         return (bool) $stmt->fetchColumn();
+    }
+
+    public function getMetadata(string $key): string
+    {
+        $this->ensureMigrationTables();
+        $stmt = $this->pdo->prepare('SELECT value FROM app_metadata WHERE key = ?');
+        $stmt->execute([$key]);
+        $value = $stmt->fetchColumn();
+
+        return is_string($value) ? $value : '';
     }
 
     public function setMetadata(string $key, string $value): void

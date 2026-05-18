@@ -36,8 +36,14 @@ Moncine/
 │   └── migrations_legacy/  anciennes 002–015 (non exécutées)
 ├── yunohost/         scripts install / upgrade / backup
 ├── data/             base SQLite (non versionnée)
+├── install_seed/     CSV catalogue + ZIP affiches (install neuve uniquement)
 └── doc/
 ```
+
+### Installation neuve avec catalogue prérempli
+
+Déposez votre export **CSV catalogue** et votre **ZIP affiches** dans `install_seed/` avant `yunohost app install` (voir [install_seed/README.md](install_seed/README.md)).  
+L’import automatique ne s’exécute **pas** si la base contient déjà des œuvres.
 
 ## Tester en local
 
