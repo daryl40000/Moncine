@@ -1,5 +1,8 @@
 # Moncine — édition paquet YunoHost
 
+**Auteur :** Stéphane MATER  
+**Licence :** [GNU General Public License v3.0 ou ultérieure](LICENSE) (GPL-3.0-or-later)
+
 **Développement actif** de la future application YunoHost.
 
 | Dossier | Rôle |

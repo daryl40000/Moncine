@@ -2,7 +2,12 @@
     "name": "moncine/app",
     "description": "Moncine — gestion de collection cinéma (paquet YunoHost)",
     "type": "project",
-    "license": "proprietary",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Stéphane MATER"
+        }
+    ],
     "require": {
         "php": ">=8.2"
     },

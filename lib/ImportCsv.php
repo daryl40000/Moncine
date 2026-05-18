@@ -1,6 +1,6 @@
 <?php
 /**
- * Import CSV — aligné sur ExportCollection (toutes les colonnes + feuille unique).
+ * Import CSV — export catalogue ou bibliothèque (détection automatique).
  */
 
 declare(strict_types=1);

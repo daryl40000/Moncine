@@ -1,6 +1,6 @@
 <?php
 /**
- * Détecte le type d’import (bibliothèque légère, catalogue admin, ancien export complet).
+ * Détecte le type d’import (bibliothèque légère ou catalogue admin).
  */
 
 declare(strict_types=1);
@@ -11,7 +11,7 @@ final class ImportFormat
 {
     public const KIND_LIBRARY = 'library';
     public const KIND_CATALOG = 'catalog';
-    public const KIND_LEGACY = 'legacy';
+    public const KIND_UNKNOWN = 'unknown';
 
     /**
      * @param list<string|null> $header
@@ -20,7 +20,6 @@ final class ImportFormat
     {
         $libraryMap = ImportFilmRows::mapHeaders($header, LibraryExportSchema::COLUMN_ALIASES);
         $catalogMap = ImportFilmRows::mapHeaders($header, CatalogExportSchema::COLUMN_ALIASES);
-        $legacyMap = ImportFilmRows::mapHeaders($header, CollectionExportSchema::FILM_COLUMN_ALIASES);
 
         $hasOeuvreId = isset($libraryMap['oeuvre_id']) || isset($catalogMap['oeuvre_id']);
         $hasCatalogMeta = isset($catalogMap['synopsis'])
@@ -29,7 +28,8 @@ final class ImportFormat
             || isset($catalogMap['styles']);
         $hasLibraryOnly = isset($libraryMap['statut'])
             || isset($libraryMap['support_physique'])
-            || isset($libraryMap['format_image']);
+            || isset($libraryMap['format_image'])
+            || isset($libraryMap['bibliotheque_id']);
 
         if ($hasOeuvreId && $hasCatalogMeta) {
             return self::KIND_CATALOG;
@@ -39,11 +39,15 @@ final class ImportFormat
             return self::KIND_LIBRARY;
         }
 
-        if (isset($legacyMap['titre'])) {
-            return self::KIND_LEGACY;
+        if (isset($libraryMap['titre']) && $hasLibraryOnly && !$hasCatalogMeta) {
+            return self::KIND_LIBRARY;
         }
 
-        return self::KIND_LEGACY;
+        if (isset($catalogMap['titre']) && $hasCatalogMeta && !$hasLibraryOnly) {
+            return self::KIND_CATALOG;
+        }
+
+        return self::KIND_UNKNOWN;
     }
 
     public static function label(string $kind): string
@@ -51,13 +55,11 @@ final class ImportFormat
         return match ($kind) {
             self::KIND_LIBRARY => 'bibliothèque (léger)',
             self::KIND_CATALOG => 'catalogue partagé',
-            default => 'export complet (ancien format)',
+            default => 'format non reconnu',
         };
     }
 
     /**
-     * Infos affichées après import pour comprendre pourquoi les ID changent ou non.
-     *
      * @param list<string|null> $header
      * @return array{format: string, has_id_column: bool, label: string}
      */
@@ -66,10 +68,7 @@ final class ImportFormat
         $format = self::detectFromHeader($header);
         $libraryMap = ImportFilmRows::mapHeaders($header, LibraryExportSchema::COLUMN_ALIASES);
         $catalogMap = ImportFilmRows::mapHeaders($header, CatalogExportSchema::COLUMN_ALIASES);
-        $legacyMap = ImportFilmRows::mapHeaders($header, CollectionExportSchema::FILM_COLUMN_ALIASES);
-        $hasId = isset($libraryMap['oeuvre_id'])
-            || isset($catalogMap['oeuvre_id'])
-            || isset($legacyMap['oeuvre_id']);
+        $hasId = isset($libraryMap['oeuvre_id']) || isset($catalogMap['oeuvre_id']);
 
         return [
             'format' => $format,

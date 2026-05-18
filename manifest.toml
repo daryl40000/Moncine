@@ -10,10 +10,11 @@ description.en = "Personal movie library: collection, wishlist, evening picker"
 
 version = "2.1.0~ynh1"
 
-maintainers = ["stephane"]
+maintainers = ["Stéphane MATER"]
 
 [upstream]
-license = "MIT"
+license = "GPL-3.0-or-later"
+website = "https://github.com/stephane/Moncine"
 code = "https://github.com/stephane/Moncine"
 
 [integration]

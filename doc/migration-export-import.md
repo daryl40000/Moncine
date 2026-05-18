@@ -24,7 +24,12 @@ Pas de copie directe de `moncine.db` : le schéma évoluera (comptes, foyers, ch
 - [ ] Import sur paquet neuf
 - [ ] Test sur URL de préproduction
 
+## Formats supportés
+
+- **Catalogue** : export admin CSV/ODS (`ID catalogue`, métadonnées œuvre)
+- **Bibliothèque** : export personnel CSV/ODS (`ID catalogue`, support, statut, etc.)
+- L’import « export complet » de l’ancienne webapp n’est **plus** pris en charge : utilisez les deux exports séparés ci-dessus.
+
 ## À développer (roadmap)
 
-- Import unifié « migration legacy » reconnaissant l’export de l’ancienne app
 - Rapport post-import (films importés, lignes ignorées, doublons)

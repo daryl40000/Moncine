@@ -28,7 +28,17 @@ final class ImportRunner
         $result = match ($analysis['format']) {
             ImportFormat::KIND_LIBRARY => $this->importLibrarySheet($dataRows, $header),
             ImportFormat::KIND_CATALOG => $this->importCatalogSheet($dataRows, $header, $replaceCatalog),
-            default => $this->importLegacyFilmsSheet($dataRows, $header, $replaceCatalog),
+            default => [
+                'imported' => 0,
+                'vues' => 0,
+                'errors' => [
+                    'Format de fichier non reconnu. Utilisez l’export « CSV catalogue » (admin) '
+                    . 'ou « CSV bibliothèque » depuis Moncine.',
+                ],
+                'format' => ImportFormat::KIND_UNKNOWN,
+                'format_label' => ImportFormat::label(ImportFormat::KIND_UNKNOWN),
+                'has_id_column' => false,
+            ],
         };
 
         return $this->withImportMeta($result, $analysis, $replaceCatalog);
@@ -187,102 +197,6 @@ final class ImportRunner
     }
 
     /**
-     * Ancien export complet (toutes colonnes sur une feuille).
-     *
-     * @param list<list<string|null>> $dataRows
-     * @param list<string|null> $header
-     * @return array{imported: int, vues: int, errors: list<string>}
-     */
-    private function importLegacyFilmsSheet(array $dataRows, array $header, bool $replaceCatalog = false): array
-    {
-        $map = ImportFilmRows::mapHeaders($header);
-        if (!isset($map['titre'])) {
-            return [
-                'imported' => 0,
-                'vues' => 0,
-                'errors' => ['Colonne « Titre » introuvable dans l’en-tête.'],
-                'format' => ImportFormat::KIND_LEGACY,
-            ];
-        }
-
-        $catalogCleared = false;
-        if ($replaceCatalog && CatalogAdmin::canAccess()) {
-            (new CatalogAdmin())->clearCatalogForImport();
-            $catalogCleared = true;
-        }
-
-        $imported = 0;
-        $vues = 0;
-        $errors = [];
-        $line = 1;
-        $idsFromFile = 0;
-
-        if (!isset($map['oeuvre_id']) && $replaceCatalog) {
-            $errors[] = 'Export « ancien format » sans colonne ID : les numéros seront recréés (1, 2, 3…). '
-                . 'Ajoutez une colonne « ID catalogue » / « ID » depuis l’ancienne base, ou utilisez l’export « CSV catalogue » admin.';
-        }
-
-        foreach ($dataRows as $row) {
-            $line++;
-            if (ImportFilmRows::isEmptyRow($row)) {
-                continue;
-            }
-            try {
-                $parsed = ImportFilmRows::rowToFilm($row, $map);
-                $titre = (string) $parsed['titre'];
-                if ($titre === '') {
-                    continue;
-                }
-
-                $vuRaw = (string) ($parsed['_vu'] ?? '');
-                $noteRaw = (string) ($parsed['_note'] ?? '');
-                if ((int) ($parsed['oeuvre_id'] ?? 0) > 0) {
-                    $idsFromFile++;
-                }
-
-                $importColumns = (array) ($parsed['_import_columns'] ?? array_keys($map));
-                unset($parsed['_vu'], $parsed['_note'], $parsed['_import_columns']);
-
-                $this->films->upsertFromExport($parsed, $importColumns);
-                $imported++;
-
-                $film = $this->films->findByTitreAndRealisateur(
-                    $titre,
-                    (string) ($parsed['realisateur'] ?? '')
-                );
-                if ($film === null) {
-                    continue;
-                }
-
-                $filmId = (int) $film['id'];
-                $dateVue = ImportCsv::parseVueDate($vuRaw);
-                if ($dateVue !== null) {
-                    $note = ImportCsv::parseNote($noteRaw);
-                    if ($this->historique->recordViewing($filmId, $dateVue, $note)) {
-                        $vues++;
-                    }
-                }
-            } catch (\Throwable $e) {
-                $errors[] = 'Ligne ' . $line . ' ('
-                    . ImportFilmRows::previewTitre($row, $map) . ') : ' . $e->getMessage();
-            }
-        }
-
-        if ($idsFromFile > 0) {
-            $this->oeuvres->syncAutoincrementSequence();
-        }
-
-        $sheet = [
-            'imported' => $imported,
-            'vues' => $vues,
-            'errors' => $errors,
-            'has_id_column' => isset($map['oeuvre_id']),
-        ];
-
-        return $this->withSheetMeta($sheet, ImportFormat::KIND_LEGACY, $replaceCatalog, $catalogCleared);
-    }
-
-    /**
      * @param array<string, mixed> $parsed
      * @return array<string, mixed>|null
      */
@@ -430,11 +344,7 @@ final class ImportRunner
         $result['format_label'] = $analysis['label'];
         $result['has_id_column'] = $analysis['has_id_column'];
         $result['catalog_cleared'] = (bool) ($result['catalog_cleared'] ?? false)
-            || ($replaceCatalog && in_array(
-                $analysis['format'],
-                [ImportFormat::KIND_CATALOG, ImportFormat::KIND_LEGACY],
-                true
-            ));
+            || ($replaceCatalog && $analysis['format'] === ImportFormat::KIND_CATALOG);
         if (!array_key_exists('has_id_column', $result)) {
             $result['has_id_column'] = $analysis['has_id_column'];
         }
@@ -455,7 +365,7 @@ final class ImportRunner
         $result['format'] = $format;
         $result['format_label'] = ImportFormat::label($format);
         $result['catalog_cleared'] = $catalogCleared
-            || ($replaceCatalog && in_array($format, [ImportFormat::KIND_CATALOG, ImportFormat::KIND_LEGACY], true));
+            || ($replaceCatalog && $format === ImportFormat::KIND_CATALOG);
         if (!array_key_exists('has_id_column', $result)) {
             $result['has_id_column'] = false;
         }

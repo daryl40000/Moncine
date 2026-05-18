@@ -57,8 +57,8 @@
         </p>
         <?php endif; ?>
         <p class="hint">
-            Le type de fichier est détecté automatiquement : export <em>bibliothèque</em> (léger),
-            export <em>catalogue</em> (admin), ou ancien export complet.
+            Le type de fichier est détecté automatiquement : export <em>bibliothèque</em> (léger)
+            ou export <em>catalogue</em> (admin).
             Taille max. <?= (int) (MONCINE_CSV_MAX_BYTES / 1024 / 1024) ?> Mo.
         </p>
 

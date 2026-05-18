@@ -31,13 +31,6 @@ final class ImportFormatTest extends TestCase
                 ImportFormat::KIND_CATALOG,
                 CatalogExportSchema::headers(),
             ],
-            'export complet legacy (sans colonne ID)' => [
-                ImportFormat::KIND_LEGACY,
-                array_values(array_filter(
-                    CollectionExportSchema::filmHeaders(),
-                    static fn (string $label): bool => $label !== 'ID catalogue'
-                )),
-            ],
             'export complet avec ID => catalogue' => [
                 ImportFormat::KIND_CATALOG,
                 CollectionExportSchema::filmHeaders(),
@@ -50,6 +43,13 @@ final class ImportFormatTest extends TestCase
                 ImportFormat::KIND_CATALOG,
                 ['ID catalogue', 'Titre', 'Réalisateur', 'Synopsis'],
             ],
+            'ancien export complet sans ID => inconnu' => [
+                ImportFormat::KIND_UNKNOWN,
+                array_values(array_filter(
+                    CollectionExportSchema::filmHeaders(),
+                    static fn (string $label): bool => $label !== 'ID catalogue'
+                )),
+            ],
         ];
     }
 
@@ -57,5 +57,6 @@ final class ImportFormatTest extends TestCase
     {
         $this->assertStringContainsString('bibliothèque', ImportFormat::label(ImportFormat::KIND_LIBRARY));
         $this->assertStringContainsString('catalogue', ImportFormat::label(ImportFormat::KIND_CATALOG));
+        $this->assertStringContainsString('non reconnu', ImportFormat::label(ImportFormat::KIND_UNKNOWN));
     }
 }
