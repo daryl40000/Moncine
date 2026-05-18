@@ -6,12 +6,14 @@
 /** @var bool $usesCatalog */
 /** @var string $saveError */
 /** @var bool $hasTmdbKey */
+/** @var bool $canManageCatalog */
 
 $showChoice = $showChoice ?? true;
 $usesCatalog = $usesCatalog ?? true;
 $saveError = $saveError ?? '';
 $sagaSuggestions = $sagaSuggestions ?? [];
 $hasTmdbKey = $hasTmdbKey ?? false;
+$canManageCatalog = $canManageCatalog ?? false;
 ?>
 <section class="add-film-page">
     <?php if ($showChoice): ?>
@@ -40,8 +42,13 @@ $hasTmdbKey = $hasTmdbKey ?? false;
         <h1>Ajouter un film</h1>
         <p class="lead">
             Nouvelle entrée dans <strong><?= Moncine\View::escape($statutLabel) ?></strong>.
-            Indiquez le titre et la catégorie (film, série, documentaire, spectacle). Après l’enregistrement,
-            ouvrez la fiche pour <strong>enrichir via TMDB</strong> (affiche, synopsis, acteurs…).
+            Indiquez le titre et la catégorie (film, série, documentaire, spectacle).
+            <?php if ($canManageCatalog): ?>
+                Vous pouvez enregistrer avec enrichissement TMDB (affiche, synopsis, acteurs…)
+                ou compléter la fiche plus tard depuis le catalogue.
+            <?php else: ?>
+                Les métadonnées du catalogue (affiche, synopsis…) sont gérées par l’administrateur.
+            <?php endif; ?>
         </p>
 
         <?php if ($prefillOeuvreId > 0 && is_array($prefillFilm)): ?>
@@ -55,7 +62,7 @@ $hasTmdbKey = $hasTmdbKey ?? false;
             <p class="alert alert-warning"><?= Moncine\View::escape($saveError) ?></p>
         <?php endif; ?>
 
-        <?php if (!$hasTmdbKey): ?>
+        <?php if ($canManageCatalog && !$hasTmdbKey): ?>
             <p class="alert alert-info">
                 <a href="/import.php">Configurez une clé API TMDB</a> pour enrichir automatiquement vos fiches.
             </p>

@@ -10,6 +10,7 @@ require_once dirname(__DIR__) . '/lib/bootstrap.php';
 use Moncine\FilmRepository;
 use Moncine\LibraryStatut;
 use Moncine\OeuvreRepository;
+use Moncine\UserContext;
 use Moncine\View;
 
 $repo = new FilmRepository();
@@ -42,6 +43,7 @@ View::render('ajouter-film', [
     'usesCatalog' => $repo->usesCatalogModel(),
     'saveError' => trim((string) ($_GET['save_error'] ?? '')),
     'hasTmdbKey' => \Moncine\FilmEnricher::canEnrich(),
+    'canManageCatalog' => UserContext::canManageCatalog(),
     'prefillOeuvreId' => $prefillFilm !== null ? $prefillOeuvreId : 0,
     'prefillFilm' => $prefillFilm,
 ]);

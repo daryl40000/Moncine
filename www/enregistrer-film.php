@@ -12,6 +12,7 @@ use Moncine\FilmEnricher;
 use Moncine\FilmManualEdit;
 use Moncine\FilmRepository;
 use Moncine\LibraryStatut;
+use Moncine\UserContext;
 use Moncine\View;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -21,7 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $statut = LibraryStatut::normalize((string) ($_POST['statut'] ?? LibraryStatut::COLLECTION));
 $backUrl = View::addFilmUrl($statut);
-$withEnrich = ((string) ($_POST['save_mode'] ?? 'save')) === 'enrich';
+$withEnrich = ((string) ($_POST['save_mode'] ?? 'save')) === 'enrich'
+    && UserContext::canManageCatalog();
 
 Csrf::rejectUnlessValid($_POST, $backUrl);
 

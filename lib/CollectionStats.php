@@ -81,6 +81,17 @@ final class CollectionStats
 
     private function countDistinctFilmsSeen(): int
     {
+        if ($this->usesPerUserHistory()) {
+            $stmt = $this->db->prepare(
+                'SELECT COUNT(DISTINCT h.film_id) FROM historique h
+                 INNER JOIN bibliotheque b ON b.id = h.film_id
+                 WHERE b.user_id = ?'
+            );
+            $stmt->execute([$this->currentUserId()]);
+
+            return (int) $stmt->fetchColumn();
+        }
+
         return (int) $this->db->query(
             'SELECT COUNT(DISTINCT film_id) FROM historique'
         )->fetchColumn();
@@ -88,6 +99,17 @@ final class CollectionStats
 
     private function countDistinctFilmsSeenInYear(int $year): int
     {
+        if ($this->usesPerUserHistory()) {
+            $stmt = $this->db->prepare(
+                "SELECT COUNT(DISTINCT h.film_id) FROM historique h
+                 INNER JOIN bibliotheque b ON b.id = h.film_id
+                 WHERE b.user_id = ? AND strftime('%Y', h.date_vue) = ?"
+            );
+            $stmt->execute([$this->currentUserId(), (string) $year]);
+
+            return (int) $stmt->fetchColumn();
+        }
+
         $stmt = $this->db->prepare(
             "SELECT COUNT(DISTINCT film_id) FROM historique
              WHERE strftime('%Y', date_vue) = ?"
@@ -99,11 +121,33 @@ final class CollectionStats
 
     private function countViewings(): int
     {
+        if ($this->usesPerUserHistory()) {
+            $stmt = $this->db->prepare(
+                'SELECT COUNT(*) FROM historique h
+                 INNER JOIN bibliotheque b ON b.id = h.film_id
+                 WHERE b.user_id = ?'
+            );
+            $stmt->execute([$this->currentUserId()]);
+
+            return (int) $stmt->fetchColumn();
+        }
+
         return (int) $this->db->query('SELECT COUNT(*) FROM historique')->fetchColumn();
     }
 
     private function countViewingsInYear(int $year): int
     {
+        if ($this->usesPerUserHistory()) {
+            $stmt = $this->db->prepare(
+                "SELECT COUNT(*) FROM historique h
+                 INNER JOIN bibliotheque b ON b.id = h.film_id
+                 WHERE b.user_id = ? AND strftime('%Y', h.date_vue) = ?"
+            );
+            $stmt->execute([$this->currentUserId(), (string) $year]);
+
+            return (int) $stmt->fetchColumn();
+        }
+
         $stmt = $this->db->prepare(
             "SELECT COUNT(*) FROM historique WHERE strftime('%Y', date_vue) = ?"
         );
@@ -126,13 +170,19 @@ final class CollectionStats
     {
         $distribution = array_fill(1, 10, 0);
         $max = 0;
+        $noteWhere = 'h.note IS NOT NULL AND h.note >= 1 AND h.note <= 10';
+        $historyJoin = $this->historyJoinSql();
+        $userWhere = $this->historyUserWhereSql();
+        $params = $this->historyUserParams();
 
-        $stmt = $this->db->query(
-            'SELECT note, COUNT(*) AS cnt FROM historique
-             WHERE note IS NOT NULL AND note >= 1 AND note <= 10
-             GROUP BY note
-             ORDER BY note'
+        $stmt = $this->db->prepare(
+            "SELECT h.note, COUNT(*) AS cnt FROM historique h
+             {$historyJoin}
+             WHERE {$userWhere} AND {$noteWhere}
+             GROUP BY h.note
+             ORDER BY h.note"
         );
+        $stmt->execute($params);
         foreach ($stmt->fetchAll() as $row) {
             $n = (int) $row['note'];
             $c = (int) $row['cnt'];
@@ -142,19 +192,25 @@ final class CollectionStats
             }
         }
 
-        $avgAll = $this->db->query(
-            'SELECT AVG(note) FROM historique
-             WHERE note IS NOT NULL AND note >= 1 AND note <= 10'
-        )->fetchColumn();
+        $stmt = $this->db->prepare(
+            "SELECT AVG(h.note) FROM historique h
+             {$historyJoin}
+             WHERE {$userWhere} AND {$noteWhere}"
+        );
+        $stmt->execute($params);
+        $avgAll = $stmt->fetchColumn();
         $avgAll = $avgAll !== false && $avgAll !== null ? round((float) $avgAll, 2) : null;
 
-        $avgFilm = $this->db->query(
-            'SELECT AVG(film_best) FROM (
-                SELECT MAX(note) AS film_best FROM historique
-                WHERE note IS NOT NULL AND note >= 1 AND note <= 10
-                GROUP BY film_id
-             )'
-        )->fetchColumn();
+        $stmt = $this->db->prepare(
+            "SELECT AVG(film_best) FROM (
+                SELECT MAX(h.note) AS film_best FROM historique h
+                {$historyJoin}
+                WHERE {$userWhere} AND {$noteWhere}
+                GROUP BY h.film_id
+             )"
+        );
+        $stmt->execute($params);
+        $avgFilm = $stmt->fetchColumn();
         $avgFilm = $avgFilm !== false && $avgFilm !== null ? round((float) $avgFilm, 2) : null;
 
         $notesCount = array_sum($distribution);
@@ -177,14 +233,21 @@ final class CollectionStats
      */
     private function viewsByYear(): array
     {
-        $stmt = $this->db->query(
-            "SELECT CAST(strftime('%Y', date_vue) AS INTEGER) AS y,
+        $historyJoin = $this->historyJoinSql();
+        $userWhere = $this->historyUserWhereSql();
+        $params = $this->historyUserParams();
+
+        $stmt = $this->db->prepare(
+            "SELECT CAST(strftime('%Y', h.date_vue) AS INTEGER) AS y,
                     COUNT(*) AS viewings,
-                    COUNT(DISTINCT film_id) AS films
-             FROM historique
+                    COUNT(DISTINCT h.film_id) AS films
+             FROM historique h
+             {$historyJoin}
+             WHERE {$userWhere}
              GROUP BY y
              ORDER BY y ASC"
         );
+        $stmt->execute($params);
         $rows = [];
         foreach ($stmt->fetchAll() as $row) {
             $year = (int) ($row['y'] ?? 0);
@@ -355,5 +418,44 @@ final class CollectionStats
         $stmt->execute();
 
         return $stmt->fetchAll();
+    }
+
+    private function usesPerUserHistory(): bool
+    {
+        return CatalogSchema::usesCatalogTables($this->db);
+    }
+
+    private function currentUserId(): int
+    {
+        return UserContext::currentUserId();
+    }
+
+    /** Jointure historique → bibliothèque (multi-comptes) ou chaîne vide (legacy). */
+    private function historyJoinSql(): string
+    {
+        if ($this->usesPerUserHistory()) {
+            return 'INNER JOIN bibliotheque b ON b.id = h.film_id';
+        }
+
+        return '';
+    }
+
+    private function historyUserWhereSql(): string
+    {
+        if ($this->usesPerUserHistory()) {
+            return 'b.user_id = ?';
+        }
+
+        return '1=1';
+    }
+
+    /** @return list<int> */
+    private function historyUserParams(): array
+    {
+        if ($this->usesPerUserHistory()) {
+            return [$this->currentUserId()];
+        }
+
+        return [];
     }
 }
