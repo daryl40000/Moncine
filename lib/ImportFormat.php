@@ -64,9 +64,12 @@ final class ImportFormat
     public static function analyzeHeader(array $header): array
     {
         $format = self::detectFromHeader($header);
+        $libraryMap = ImportFilmRows::mapHeaders($header, LibraryExportSchema::COLUMN_ALIASES);
         $catalogMap = ImportFilmRows::mapHeaders($header, CatalogExportSchema::COLUMN_ALIASES);
         $legacyMap = ImportFilmRows::mapHeaders($header, CollectionExportSchema::FILM_COLUMN_ALIASES);
-        $hasId = isset($catalogMap['oeuvre_id']) || isset($legacyMap['oeuvre_id']);
+        $hasId = isset($libraryMap['oeuvre_id'])
+            || isset($catalogMap['oeuvre_id'])
+            || isset($legacyMap['oeuvre_id']);
 
         return [
             'format' => $format,

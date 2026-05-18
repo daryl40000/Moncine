@@ -344,12 +344,15 @@ final class CatalogFilmRepository
 
         if ($libraryId > 0) {
             $existing = $this->findById($libraryId);
-            if ($existing === null || (int) ($existing['user_id'] ?? 0) !== $this->userId()) {
-                throw new \RuntimeException('Entrée bibliothèque #' . $libraryId . ' introuvable.');
-            }
-            $this->applyLibraryImportUpdate($libraryId, $data, $importedColumns, $statut);
+            if ($existing !== null) {
+                if ((int) ($existing['user_id'] ?? 0) !== $this->userId()) {
+                    throw new \RuntimeException('Entrée bibliothèque #' . $libraryId . ' introuvable.');
+                }
+                $this->applyLibraryImportUpdate($libraryId, $data, $importedColumns, $statut);
 
-            return;
+                return;
+            }
+            // ID bibliothèque d’un autre export (migration) : on retombe sur l’ID catalogue.
         }
 
         if ($oeuvreId > 0) {

@@ -73,6 +73,28 @@ final class LibraryImportTest extends MoncineTestCase
         $this->assertStringContainsString('99999', $result['errors'][0]);
     }
 
+    public function testImportLibraryFallsBackToOeuvreIdWhenBibliothequeIdUnknown(): void
+    {
+        $this->loginAsAdmin();
+        $oeuvreId = $this->seedCatalogOeuvre('300', 'Zack Snyder');
+
+        $header = LibraryExportSchema::headers();
+        $row = $this->emptyLibraryRow($header);
+        $row[$this->columnIndex($header, 'ID catalogue')] = (string) $oeuvreId;
+        $row[$this->columnIndex($header, 'ID bibliothèque')] = '1';
+        $row[$this->columnIndex($header, 'Statut')] = 'Mes films';
+        $row[$this->columnIndex($header, 'Support')] = 'blu-ray';
+
+        $result = (new ImportRunner())->importLibrarySheet([$row], $header);
+
+        $this->assertSame(1, $result['imported']);
+        $this->assertSame([], $result['errors']);
+
+        $library = (new BibliothequeRepository())->findByOeuvreId($oeuvreId, Auth::currentUserId());
+        $this->assertNotNull($library);
+        $this->assertSame('bluray', $library['support_physique']);
+    }
+
     public function testImportLibraryRecordsViewingFromVuColumn(): void
     {
         $this->loginAsAdmin();
