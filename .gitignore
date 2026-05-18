@@ -1,0 +1,17 @@
+# Base de données locale (ne pas versionner vos films)
+/data/*.db
+/data/*.db-journal
+/data/tmdb_api_key.txt
+
+# Affiches téléchargées (fichiers générés)
+/www/posters/*
+!/www/posters/.gitkeep
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Éditeurs
+.idea/
+.vscode/
+*.swp

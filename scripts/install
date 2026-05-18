@@ -1,0 +1,30 @@
+#!/bin/bash
+# Installation Moncine — paquet YunoHost
+
+set -euo pipefail
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+ynh_script_progression "Installation de ${app}…"
+
+# Limites PHP (import CSV, affiches)
+ynh_app_setting_set --key=php_upload_max_filesize --value=10M
+ynh_app_setting_set --key=php_post_max_size --value=10M
+
+ynh_script_progression "Copie des fichiers de l'application…"
+moncine_copy_sources "${install_dir}"
+chown -R "${app}:www-data" "${install_dir}"
+
+ynh_script_progression "Préparation du dossier de données…"
+moncine_prepare_data_dir
+
+ynh_script_progression "Configuration PHP-FPM et NGINX…"
+ynh_config_add_phpfpm
+ynh_config_add_nginx
+
+ynh_script_progression "Initialisation de la base SQLite…"
+moncine_run_migrate
+
+ynh_script_progression "Installation de ${app} terminée."
+ynh_print_info "Ouvrez https://${domain}${path} puis créez le compte administrateur (/premier-compte.php)."
