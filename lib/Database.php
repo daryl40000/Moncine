@@ -27,6 +27,16 @@ final class Database
         return self::$pdo;
     }
 
+    /**
+     * Réinitialise le singleton PDO (tests PHPUnit uniquement).
+     *
+     * @internal
+     */
+    public static function resetInstance(): void
+    {
+        self::$pdo = null;
+    }
+
     private static function connect(): PDO
     {
         $dataDir = MONCINE_DATA;

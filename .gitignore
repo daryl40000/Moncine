@@ -11,6 +11,11 @@
 .DS_Store
 Thumbs.db
 
+# Dépendances PHP (tests)
+/vendor/
+/.phpunit.cache/
+/composer.phar
+
 # Éditeurs
 .idea/
 .vscode/

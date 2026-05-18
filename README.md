@@ -53,6 +53,18 @@ Ouvrir http://localhost:8080 — à la première visite, créez le **compte admi
 - **Gestion des comptes** : `/utilisateurs.php` (admin uniquement)
 - Chaque utilisateur a sa propre bibliothèque et ses envies
 
+## Tests automatisés (PHPUnit)
+
+Vérifie l’import/export (détection de format, parsing CSV, import bibliothèque et catalogue) sur une base SQLite temporaire.
+
+```bash
+cd /chemin/vers/Moncine
+composer install
+composer test
+```
+
+Prérequis : PHP 8.2+, extension `sqlite3`, [Composer](https://getcomposer.org/).
+
 ## Migrations SQL (paquet uniquement)
 
 - **Install** : `sql/schema.sql` si la base est vide, puis `sql/migrations/*.sql`
