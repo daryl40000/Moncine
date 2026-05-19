@@ -73,6 +73,14 @@ function initMobileNav() {
         link.addEventListener('click', closeNav);
     });
 
+    nav.querySelectorAll('.site-nav__submenu a').forEach((link) => {
+        link.addEventListener('click', () => {
+            nav.querySelectorAll('.site-nav__menu[open]').forEach((menu) => {
+                menu.removeAttribute('open');
+            });
+        });
+    });
+
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
             closeNav();

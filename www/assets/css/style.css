@@ -835,6 +835,97 @@ textarea {
     color: #7dd3fc;
 }
 
+.site-nav__settings {
+    color: var(--text);
+}
+
+.site-nav__menu {
+    position: relative;
+    margin: 0;
+}
+
+.site-nav__menu-summary {
+    list-style: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: inherit;
+    font-family: inherit;
+    padding: 0.65rem 0.5rem;
+    border-radius: 6px;
+    min-height: var(--touch-min, 44px);
+    display: flex;
+    align-items: center;
+    user-select: none;
+}
+
+.site-nav__menu-summary::-webkit-details-marker {
+    display: none;
+}
+
+.site-nav__menu-summary::after {
+    content: " ▾";
+    font-size: 0.75em;
+    opacity: 0.75;
+}
+
+.site-nav__menu[open] .site-nav__menu-summary::after {
+    content: " ▴";
+}
+
+.site-nav__menu-summary:hover,
+.site-nav__menu-summary:focus-visible {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.site-nav__submenu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    margin: 0 0 0.35rem;
+    padding: 0.25rem 0 0.35rem 0.75rem;
+    border-left: 2px solid var(--border);
+}
+
+.site-nav__submenu a {
+    margin: 0;
+    padding: 0.5rem 0.5rem;
+    font-size: 0.95rem;
+}
+
+@media (min-width: 900px) {
+    .site-nav__menu-summary {
+        padding: 0.4rem 0.65rem;
+        min-height: auto;
+        white-space: nowrap;
+    }
+
+    .site-nav__submenu {
+        position: absolute;
+        top: calc(100% + 0.2rem);
+        right: 0;
+        z-index: 200;
+        min-width: 11rem;
+        margin: 0;
+        padding: 0.35rem 0;
+        border: 1px solid var(--border);
+        border-left: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .site-nav__submenu a {
+        padding: 0.45rem 0.85rem;
+        border-radius: 0;
+    }
+
+    .site-nav__submenu a:hover,
+    .site-nav__submenu a:focus-visible {
+        background: rgba(255, 255, 255, 0.06);
+    }
+}
+
 .catalog-admin-panel {
     margin-bottom: 1.5rem;
     border: 1px solid var(--border);

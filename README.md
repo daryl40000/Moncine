@@ -95,7 +95,7 @@ Ouvrir http://localhost:8080 — à la première visite, créez le **compte admi
 
 - **Premier lancement** : `/premier-compte.php` (administrateur + foyer par défaut)
 - **Connexion** : `/connexion.php`
-- **Mon compte** : `/mon-compte.php`
+- **Paramètres** (profil, mot de passe) : `/parametres.php`
 - **Gestion des comptes** : `/utilisateurs.php` (admin uniquement)
 - **Foyers** : `/foyers.php` (admin — collection partagée entre membres)
 
