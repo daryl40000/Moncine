@@ -7,8 +7,6 @@
 
 Application web pour gérer une **dvdthèque personnelle** : films, envies, notes, enrichissement TMDB, import/export CSV, comptes utilisateurs.
 
-Le **code source** (upstream) vit dans ce dépôt. Le **paquet YunoHost** est maintenu à part, dans le dépôt voisin **Moncine-yunohost**, synchronisé à partir de celui-ci.
-
 ---
 
 ## Fonctionnalités actuelles (v0.5)
@@ -130,9 +128,3 @@ composer test
 - **Import** : page `/import.php` (bibliothèque ou catalogue admin)
 
 Les affiches locales sont stockées dans `data/posters/` (ou le dossier défini par `MONCINE_DATA_PATH`).
-
----
-
-## Déploiement YunoHost
-
-Le packaging YunoHost (scripts d’install, nginx, manifest) se trouve dans le dépôt **Moncine-yunohost**, mis à jour à partir de ce dépôt upstream.
