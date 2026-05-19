@@ -129,4 +129,23 @@ final class CatalogSchema
 
         return (bool) $stmt->fetchColumn();
     }
+
+    /**
+     * Moyenne des meilleures notes de chaque membre du foyer pour un film.
+     */
+    public static function foyerAverageNoteSubquery(
+        string $filmIdColumn = 'b.id',
+        string $foyerParam = ':foyer_rating_id'
+    ): string {
+        return '(SELECT ROUND(AVG(member_note.best_note), 2)
+            FROM (
+                SELECT MAX(h.note) AS best_note
+                FROM historique h
+                INNER JOIN utilisateurs u ON u.id = h.user_id
+                WHERE h.film_id = ' . $filmIdColumn . '
+                  AND u.foyer_id = ' . $foyerParam . '
+                  AND h.note IS NOT NULL AND h.note >= 1 AND h.note <= 10
+                GROUP BY h.user_id
+            ) member_note) AS note_foyer_moy';
+    }
 }

@@ -65,11 +65,10 @@ final class CatalogFilmRepository
         $direction = strtolower($sortDir) === 'desc' ? 'DESC' : 'ASC';
         $orderExpr = self::COLLECTION_SORT_COLUMNS[$sortBy];
 
-        $sql = 'SELECT ' . CatalogSchema::selectFilmRow() . ',
-                (SELECT MAX(h.date_vue) FROM historique h WHERE h.film_id = b.id AND h.user_id = :history_user_id) AS derniere_vue,
-                (SELECT MAX(h.note) FROM historique h
-                 WHERE h.film_id = b.id AND h.user_id = :history_user_id AND h.note IS NOT NULL AND h.note >= 1) AS note_max
-             FROM ' . CatalogSchema::JOIN;
+        $includeFoyerAverage = $statut === LibraryStatut::COLLECTION && $this->usesFoyerRatings();
+
+        $sql = 'SELECT ' . CatalogSchema::selectFilmRow() . $this->collectionRatingSelectSql($includeFoyerAverage)
+             . ' FROM ' . CatalogSchema::JOIN;
 
         [$userWhere, $params] = CatalogSchema::libraryFilter($this->foyerId(), $this->userId(), $statut);
         $whereParts = [$userWhere];
@@ -90,7 +89,7 @@ final class CatalogFilmRepository
             $sql .= ', o.titre COLLATE FRENCH_NOCASE ASC';
         }
 
-        $params['history_user_id'] = $this->userId();
+        $this->appendCollectionRatingParams($params, $includeFoyerAverage);
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
 
@@ -615,11 +614,10 @@ final class CatalogFilmRepository
             return [];
         }
 
+        $includeFoyerAverage = $this->usesFoyerRatings();
+
         $stmt = $this->db->prepare(
-            'SELECT ' . CatalogSchema::selectFilmRow() . ',
-                (SELECT MAX(h.date_vue) FROM historique h WHERE h.film_id = b.id AND h.user_id = :history_user_id) AS derniere_vue,
-                (SELECT MAX(h.note) FROM historique h
-                 WHERE h.film_id = b.id AND h.user_id = :history_user_id AND h.note IS NOT NULL AND h.note >= 1) AS note_max
+            'SELECT ' . CatalogSchema::selectFilmRow() . $this->collectionRatingSelectSql($includeFoyerAverage) . '
              FROM ' . CatalogSchema::JOIN . '
              WHERE b.foyer_id = :catalog_foyer_id
                AND b.statut = :catalog_statut
@@ -628,12 +626,13 @@ final class CatalogFilmRepository
                 CASE WHEN b.saga_ordre > 0 THEN b.saga_ordre ELSE 999999 END ASC,
                 o.titre COLLATE FRENCH_NOCASE ASC'
         );
-        $stmt->execute([
+        $params = [
             'catalog_foyer_id' => $this->foyerId(),
             'catalog_statut' => LibraryStatut::COLLECTION,
             'saga' => $saga,
-            'history_user_id' => $this->userId(),
-        ]);
+        ];
+        $this->appendCollectionRatingParams($params, $includeFoyerAverage);
+        $stmt->execute($params);
 
         return $stmt->fetchAll();
     }
@@ -776,23 +775,23 @@ final class CatalogFilmRepository
             return [];
         }
 
+        $includeFoyerAverage = $this->usesFoyerRatings();
+
         $stmt = $this->db->prepare(
-            'SELECT ' . CatalogSchema::selectFilmRow() . ',
-                (SELECT MAX(h.date_vue) FROM historique h WHERE h.film_id = b.id AND h.user_id = :history_user_id) AS derniere_vue,
-                (SELECT MAX(h.note) FROM historique h
-                 WHERE h.film_id = b.id AND h.user_id = :history_user_id AND h.note IS NOT NULL AND h.note >= 1) AS note_max
+            'SELECT ' . CatalogSchema::selectFilmRow() . $this->collectionRatingSelectSql($includeFoyerAverage) . '
              FROM ' . CatalogSchema::JOIN . '
              WHERE b.foyer_id = :catalog_foyer_id
                AND b.statut = :catalog_statut
                AND b.support_physique = :support
              ORDER BY o.titre COLLATE FRENCH_NOCASE'
         );
-        $stmt->execute([
+        $params = [
             'catalog_foyer_id' => $this->foyerId(),
             'catalog_statut' => LibraryStatut::COLLECTION,
             'support' => $supportKey,
-            'history_user_id' => $this->userId(),
-        ]);
+        ];
+        $this->appendCollectionRatingParams($params, $includeFoyerAverage);
+        $stmt->execute($params);
 
         return $stmt->fetchAll();
     }
@@ -1552,6 +1551,34 @@ final class CatalogFilmRepository
     private static function escapeLikePattern(string $value): string
     {
         return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
+    }
+
+    private function usesFoyerRatings(): bool
+    {
+        return CatalogSchema::usesFoyerModel($this->db) && $this->foyerId() > 0;
+    }
+
+    private function collectionRatingSelectSql(bool $includeFoyerAverage): string
+    {
+        $sql = ',
+                (SELECT MAX(h.date_vue) FROM historique h WHERE h.film_id = b.id AND h.user_id = :history_user_id) AS derniere_vue,
+                (SELECT MAX(h.note) FROM historique h
+                 WHERE h.film_id = b.id AND h.user_id = :history_user_id AND h.note IS NOT NULL AND h.note >= 1) AS note_max';
+
+        if ($includeFoyerAverage) {
+            $sql .= ',' . CatalogSchema::foyerAverageNoteSubquery();
+        }
+
+        return $sql;
+    }
+
+    /** @param array<string, int|string|float|null> $params */
+    private function appendCollectionRatingParams(array &$params, bool $includeFoyerAverage): void
+    {
+        $params['history_user_id'] = $this->userId();
+        if ($includeFoyerAverage) {
+            $params['foyer_rating_id'] = $this->foyerId();
+        }
     }
 
     private function userId(): int

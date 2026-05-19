@@ -263,6 +263,41 @@ final class HistoriqueRepository
         return $n >= 1 ? min(10, $n) : null;
     }
 
+    /** Moyenne des meilleures notes des membres du foyer pour ce film. */
+    public function getFoyerAverageNote(int $filmId): ?float
+    {
+        if (!CatalogSchema::usesFoyerModel($this->db)) {
+            return null;
+        }
+
+        $foyerId = UserContext::currentFoyerId();
+        if ($foyerId <= 0 || $filmId <= 0) {
+            return null;
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT ROUND(AVG(member_note.best_note), 2)
+             FROM (
+                 SELECT MAX(h.note) AS best_note
+                 FROM historique h
+                 INNER JOIN utilisateurs u ON u.id = h.user_id
+                 WHERE h.film_id = ?
+                   AND u.foyer_id = ?
+                   AND h.note IS NOT NULL AND h.note >= 1 AND h.note <= 10
+                 GROUP BY h.user_id
+             ) member_note'
+        );
+        $stmt->execute([$filmId, $foyerId]);
+        $value = $stmt->fetchColumn();
+        if ($value === false || $value === null) {
+            return null;
+        }
+
+        $average = (float) $value;
+
+        return $average >= 1 ? min(10.0, $average) : null;
+    }
+
     public static function formatNoteSur10(?int $note): string
     {
         if ($note === null || $note < 1) {
@@ -270,6 +305,15 @@ final class HistoriqueRepository
         }
 
         return min(10, $note) . '/10';
+    }
+
+    public static function formatAverageNote(?float $note): string
+    {
+        if ($note === null || $note < 1) {
+            return '';
+        }
+
+        return number_format(min(10.0, $note), 1, ',', ' ') . '/10';
     }
 
     public static function formatDateVue(?string $date): string

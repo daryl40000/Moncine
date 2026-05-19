@@ -111,8 +111,47 @@ final class FoyerTest extends MoncineTestCase
 
         $films = (new FilmRepository())->findAll();
         $this->assertCount(1, $films);
+        $this->assertNull($films[0]['note_max'] ?? null);
+        $this->assertNull($films[0]['note_foyer_moy'] ?? null);
 
         $wishlist = (new FilmRepository())->findAllWishlist();
         $this->assertSame([], $wishlist);
+    }
+
+    public function testFoyerAverageRatingAcrossMembers(): void
+    {
+        $adminId = $this->loginAsAdmin();
+        $foyerId = (new FoyerRepository())->currentFoyerIdForUser($adminId);
+        $oeuvreId = $this->seedCatalogOeuvre('Film noté');
+        $libraryId = (new BibliothequeRepository())->insert(
+            $adminId,
+            $foyerId,
+            $oeuvreId,
+            ['statut' => LibraryStatut::COLLECTION]
+        );
+
+        (new HistoriqueRepository())->recordViewing($libraryId, '2024-01-10', 8);
+
+        Auth::logout();
+        $this->startSession();
+
+        $memberId = (new UtilisateurRepository())->create(
+            'Noteur',
+            'noteur@test.local',
+            'TestPass123!',
+            UserRole::USER,
+            $foyerId
+        );
+        $this->assertIsInt($memberId);
+        Auth::login('noteur@test.local', 'TestPass123!');
+        (new HistoriqueRepository())->recordViewing($libraryId, '2024-02-01', 6);
+
+        $films = (new FilmRepository())->findAll();
+        $this->assertCount(1, $films);
+        $this->assertSame(6, (int) ($films[0]['note_max'] ?? 0));
+        $this->assertSame(7.0, (float) ($films[0]['note_foyer_moy'] ?? 0));
+
+        $hist = new HistoriqueRepository();
+        $this->assertSame(7.0, $hist->getFoyerAverageNote($libraryId));
     }
 }
