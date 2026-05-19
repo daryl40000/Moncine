@@ -26,7 +26,7 @@ Fonctionnalités métier visées :
 
 ## État actuel
 
-**Version applicative : 0.5.0** — environ **50 %** de la vision cible (phases 1, 1 bis et 2 livrées ; phases 3 à 6 restantes).
+**Version applicative : 0.51.0**
 
 Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 
@@ -362,7 +362,7 @@ Fonctionnalité transversale déjà partiellement en place :
 
 - 2026-05-16 — Phases **1**, **1 bis** et **2** livrées (comptes, mots de passe, champs exemplaire)
 - 2026-05-19 — Roadmap recentrée sur les **fonctionnalités logicielles** ; séparation upstream / packaging externalisée
-- 2026-05-19 — Version **0.5.0** : jalonnement à mi-parcours (~50 % de l’objectif initial)
+- 2026-05-19 — Version **0.51.0** : correction création premier compte, mise en page fiches sans affiche
 
 ---
 

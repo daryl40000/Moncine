@@ -1,6 +1,6 @@
 # Moncine
 
-**Version : 0.5.0** — environ **50 %** de la vision fonctionnelle cible (voir [ROADMAP.md](ROADMAP.md)).
+**Version : 0.51.0**
 
 **Auteur :** Stéphane MATER  
 **Licence :** [GNU General Public License v3.0 ou ultérieure](LICENSE) (GPL-3.0-or-later)
@@ -9,7 +9,7 @@ Application web pour gérer une **dvdthèque personnelle** : films, envies, note
 
 ---
 
-## Fonctionnalités actuelles (v0.5)
+## Fonctionnalités actuelles (v0.51)
 
 | Domaine | Disponible |
 |---------|------------|
@@ -20,7 +20,7 @@ Application web pour gérer une **dvdthèque personnelle** : films, envies, note
 | Exemplaire personnel | Support, format image/son (séparés du catalogue) |
 | Données | Import / export CSV, affiches |
 
-### Prochaines étapes (v0.5 → v1.0)
+### Prochaines étapes (v0.51 → v1.0)
 
 - Admin catalogue (doublons, journal)
 - Foyers & famille (collection partagée, envies personnelles)
