@@ -4,6 +4,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     initMobileNav();
+    initListAnchors();
 
     document.querySelectorAll('.marquer-vu-today').forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -35,6 +36,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+/**
+ * Ancres #film-detail et #catalogue-list : garder la vue sur la liste / la fiche.
+ */
+function initListAnchors() {
+    const scrollToHash = () => {
+        const hash = window.location.hash;
+        if (!hash || hash.length < 2) {
+            return;
+        }
+        const target = document.querySelector(hash);
+        if (!target) {
+            return;
+        }
+        target.scrollIntoView({ block: 'start', behavior: 'auto' });
+    };
+
+    if (!window.location.hash) {
+        return;
+    }
+
+    scrollToHash();
+    requestAnimationFrame(scrollToHash);
+}
 
 /**
  * Menu hamburger : ouvre / ferme la navigation sur mobile et tablette.

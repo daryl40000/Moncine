@@ -831,6 +831,115 @@ textarea {
     background: rgba(0, 210, 255, 0.06);
 }
 
+/* Barre de navigation discrète (fiches film, pagination catalogue) */
+.list-pager {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.85rem;
+    margin: 0.35rem 0 0.85rem;
+    padding: 0.35rem 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+}
+
+.film-list-pager {
+    justify-content: center;
+}
+
+.film-detail__body > .film-list-pager {
+    margin-top: 1.25rem;
+}
+
+.catalog-list-pager {
+    justify-content: space-between;
+}
+
+.list-pager__group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.5rem;
+}
+
+.list-pager__status {
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.list-pager__status-meta {
+    opacity: 0.85;
+}
+
+.list-pager__link {
+    color: var(--accent, #7dd3fc);
+    text-decoration: none;
+    padding: 0.15rem 0;
+}
+
+.list-pager__link:hover,
+.list-pager__link:focus-visible {
+    text-decoration: underline;
+    color: var(--text);
+}
+
+.list-pager__link.is-disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.list-pager__sep {
+    opacity: 0.45;
+    user-select: none;
+}
+
+.list-pager__goto {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.45rem;
+    margin: 0;
+    margin-left: auto;
+}
+
+.list-pager__goto-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.list-pager__goto-input {
+    width: 3.25rem;
+    min-height: 1.85rem;
+    padding: 0.2rem 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+.list-pager__goto-btn {
+    font: inherit;
+    font-size: 0.85rem;
+    color: var(--accent, #7dd3fc);
+    background: none;
+    border: none;
+    padding: 0.15rem 0.35rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.list-pager__goto-btn:hover,
+.list-pager__goto-btn:focus-visible {
+    color: var(--text);
+}
+
+#film-detail,
+#catalogue-list {
+    scroll-margin-top: 5.5rem;
+}
+
 .site-nav__admin {
     color: #7dd3fc;
 }
@@ -989,11 +1098,15 @@ textarea {
     margin: 0 0 0.5rem;
 }
 
-.catalog-admin-pagination {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 1rem;
+@media (max-width: 899px) {
+    .catalog-list-pager {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .list-pager__goto {
+        margin-left: 0;
+    }
 }
 
 .visually-hidden {

@@ -26,7 +26,7 @@ Fonctionnalités métier visées :
 
 ## État actuel
 
-**Version applicative : 0.7.1**
+**Version applicative : 0.7.2**
 
 Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 
@@ -346,6 +346,7 @@ Fonctionnalité transversale déjà partiellement en place :
 
 ### Historique
 
+- 2026-05-19 — Version **0.7.2** : menu Gestion / Paramètres, navigation entre fiches et pagination catalogue améliorée
 - 2026-05-19 — Version **0.7.1** : dépôt d’affiche manuel sur une fiche catalogue (admin)
 - 2026-05-16 — Phases **1**, **1 bis** et **2** livrées (comptes, mots de passe, champs exemplaire)
 - 2026-05-19 — Roadmap recentrée sur les **fonctionnalités logicielles** ; séparation upstream / packaging externalisée
