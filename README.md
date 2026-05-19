@@ -1,6 +1,6 @@
 # Moncine
 
-**Version : 0.51.0**
+**Version : 0.6.0**
 
 **Auteur :** Stéphane MATER  
 **Licence :** [GNU General Public License v3.0 ou ultérieure](LICENSE) (GPL-3.0-or-later)
@@ -9,7 +9,7 @@ Application web pour gérer une **dvdthèque personnelle** : films, envies, note
 
 ---
 
-## Fonctionnalités actuelles (v0.51)
+## Fonctionnalités actuelles (v0.6)
 
 | Domaine | Disponible |
 |---------|------------|
@@ -18,11 +18,11 @@ Application web pour gérer une **dvdthèque personnelle** : films, envies, note
 | Comptes | Connexion, rôles admin/utilisateur, gestion des comptes |
 | Mots de passe | Mon compte, changement, oublié par e-mail, reset admin |
 | Exemplaire personnel | Support, format image/son (séparés du catalogue) |
+| Maintenance catalogue | Doublons, fusion de fiches, journal admin, nettoyage affiches |
 | Données | Import / export CSV, affiches |
 
-### Prochaines étapes (v0.51 → v1.0)
+### Prochaines étapes (v0.6 → v1.0)
 
-- Admin catalogue (doublons, journal)
 - Foyers & famille (collection partagée, envies personnelles)
 - Soumissions au catalogue
 - Mes BD

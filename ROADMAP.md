@@ -26,7 +26,7 @@ Fonctionnalités métier visées :
 
 ## État actuel
 
-**Version applicative : 0.51.0**
+**Version applicative : 0.6.0**
 
 Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 
@@ -40,13 +40,13 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | **Mots de passe (phase 1 bis)** | Mon compte, changement de mot de passe, oublié par e-mail, reset admin |
 | **Exemplaire personnel (phase 2)** | `format_image` / `format_son` sur `bibliotheque` ; formulaire « mon exemplaire » ; enrichissement catalogue réservé admin |
 | **Migrations SQL** | `SchemaMigrator`, CLI `php lib/cli/migrate.php`, migrations `001` → `006` |
-| **Tests** | PHPUnit sur import/export CSV |
+| **Tests** | PHPUnit sur import/export CSV et maintenance catalogue |
 
 ### Prochaines étapes
 
 | Phase | Statut |
 |-------|--------|
-| Phase 3 — Admin catalogue | À faire |
+| Phase 3 — Admin catalogue | ✅ Livré (v0.6) |
 | Phase 4 — Foyers & famille | À faire |
 | Phase 5 — Soumissions catalogue | À faire |
 | Phase 6 — Mes BD | À faire |
@@ -193,27 +193,22 @@ sessions             -- si sessions en base
 
 ---
 
-## Phase 3 — Admin catalogue
+## Phase 3 — Admin catalogue ✅
 
 **Objectif :** outils de maintenance du catalogue pour les administrateurs.
 
-**Dépend de :** phase 1.
+**Statut : livré** (v0.6.0, migration `007_admin_audit_log.sql`).
 
-### Migrations SQL prévues
+| # | Tâche | Statut |
+|---|--------|--------|
+| 3.1 | Page admin : vue d’ensemble (doublons, fiches incomplètes) | ✅ |
+| 3.2 | Fusion de doublons (`oeuvres` → une seule fiche) | ✅ |
+| 3.3 | Journal des actions admin sur le catalogue | ✅ |
+| 3.4 | Outils de nettoyage (affiches orphelines, doublons TMDB) | ✅ |
 
-```text
-007_admin_audit_log.sql (optionnel)
-  - journal des modifications catalogue (qui, quoi, quand)
-```
+Page : `/maintenance-catalogue.php` (menu admin **Maintenance**).
 
-| # | Tâche |
-|---|--------|
-| 3.1 | Page admin : vue d’ensemble du catalogue (doublons, fiches incomplètes) |
-| 3.2 | Fusion de doublons (`oeuvres` → une seule fiche) |
-| 3.3 | Journal des actions admin sur le catalogue |
-| 3.4 | Outils de nettoyage (affiches orphelines, TMDB invalides) |
-
-**Critère terminé :** un admin peut détecter et fusionner un doublon sans perte de bibliothèque utilisateur.
+**Critère :** un admin peut détecter et fusionner un doublon sans perte de bibliothèque utilisateur.
 
 ---
 
@@ -362,6 +357,7 @@ Fonctionnalité transversale déjà partiellement en place :
 
 - 2026-05-16 — Phases **1**, **1 bis** et **2** livrées (comptes, mots de passe, champs exemplaire)
 - 2026-05-19 — Roadmap recentrée sur les **fonctionnalités logicielles** ; séparation upstream / packaging externalisée
+- 2026-05-19 — Version **0.6.0** : phase **3** (maintenance catalogue : doublons, fusion, journal, nettoyage affiches)
 - 2026-05-19 — Version **0.51.0** : correction création premier compte, mise en page fiches sans affiche
 
 ---
@@ -378,6 +374,7 @@ Fonctionnalité transversale déjà partiellement en place :
 | Mots de passe | `www/mon-compte.php`, `www/mot-de-passe-oublie.php` |
 | Format exemplaire | `sql/migrations/005_*.sql`, `lib/CatalogSchema.php` |
 | Import / export | `www/import.php`, `www/export.php` |
+| Maintenance catalogue | `www/maintenance-catalogue.php`, `lib/CatalogMaintenance.php` |
 | Schéma | `sql/schema.sql` |
 | CLI migrations | `lib/cli/migrate.php` |
 

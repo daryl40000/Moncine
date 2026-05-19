@@ -296,6 +296,16 @@ final class CatalogAdmin
             return 'Impossible de supprimer cette œuvre.';
         }
 
+        $adminId = Auth::currentUserId();
+        if ($adminId > 0) {
+            (new CatalogAuditLog())->log(
+                $adminId,
+                CatalogAuditLog::ACTION_DELETE,
+                $oeuvreId,
+                'Suppression du catalogue'
+            );
+        }
+
         return true;
     }
 
