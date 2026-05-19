@@ -1,6 +1,7 @@
 {
     "name": "moncine/app",
-    "description": "Moncine — gestion de collection cinéma (paquet YunoHost)",
+    "description": "Moncine — gestion de collection cinéma (dvdthèque personnelle)",
+    "version": "0.5.0",
     "type": "project",
     "license": "GPL-3.0-or-later",
     "authors": [

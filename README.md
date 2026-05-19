@@ -1,16 +1,37 @@
-# Moncine — édition paquet YunoHost
+# Moncine
+
+**Version : 0.5.0** — environ **50 %** de la vision fonctionnelle cible (voir [ROADMAP.md](ROADMAP.md)).
 
 **Auteur :** Stéphane MATER  
 **Licence :** [GNU General Public License v3.0 ou ultérieure](LICENSE) (GPL-3.0-or-later)
 
-**Développement actif** de la future application YunoHost.
+Application web pour gérer une **dvdthèque personnelle** : films, envies, notes, enrichissement TMDB, import/export CSV, comptes utilisateurs.
 
-| Dossier | Rôle |
-|---------|------|
-| **`Moncine/`** (ici) | Paquet YunoHost, nouvelles fonctionnalités |
-| **`Moncine (origine)/`** | Production figée My Webapp — export uniquement |
+Le **code source** (upstream) vit dans ce dépôt. Le **paquet YunoHost** est maintenu à part, dans le dépôt voisin **Moncine-yunohost**, synchronisé à partir de celui-ci.
 
-Voir aussi : [ROADMAP.md](ROADMAP.md), [LEGACY.md](LEGACY.md).
+---
+
+## Fonctionnalités actuelles (v0.5)
+
+| Domaine | Disponible |
+|---------|------------|
+| Collection & envies | Mes films, Mes envies, sagas, statistiques, quiz |
+| Catalogue partagé | Fiches œuvres, enrichissement TMDB / OMDB, affiches |
+| Comptes | Connexion, rôles admin/utilisateur, gestion des comptes |
+| Mots de passe | Mon compte, changement, oublié par e-mail, reset admin |
+| Exemplaire personnel | Support, format image/son (séparés du catalogue) |
+| Données | Import / export CSV, affiches |
+
+### Prochaines étapes (v0.5 → v1.0)
+
+- Admin catalogue (doublons, journal)
+- Foyers & famille (collection partagée, envies personnelles)
+- Soumissions au catalogue
+- Mes BD
+
+Détail : [ROADMAP.md](ROADMAP.md).
+
+---
 
 ## Comprendre le code (par où commencer)
 
@@ -24,83 +45,94 @@ Voir aussi : [ROADMAP.md](ROADMAP.md), [LEGACY.md](LEGACY.md).
 | `www/*.php` | Une page = un fichier (contrôleur léger) |
 | `templates/*.php` | HTML affiché (via `View::render`) |
 
-## Structure
+---
+
+## Structure du projet
 
 ```text
 Moncine/
 ├── www/              pages web
 ├── lib/              code PHP (+ cli/migrate.php)
+├── templates/        vues HTML
 ├── sql/
-│   ├── schema.sql    install fraîche
-│   ├── migrations/   migrations paquet (001, 002…)
-│   └── migrations_legacy/  anciennes 002–015 (non exécutées)
-├── yunohost/         scripts install / upgrade / backup
-├── data/             base SQLite (non versionnée)
-├── install_seed/     CSV catalogue + ZIP affiches (install neuve uniquement)
+│   ├── schema.sql    schéma complet (install fraîche)
+│   ├── migrations/   évolutions SQL (001, 002…)
+│   └── migrations_legacy/  historique dev (non exécuté)
+├── data/             base SQLite, clés API, affiches (non versionné)
+├── tests/            tests PHPUnit
 └── doc/
 ```
 
-### Installation neuve avec catalogue prérempli
+---
 
-Déposez votre export **CSV catalogue** et votre **ZIP affiches** dans `install_seed/` avant `yunohost app install` (voir [install_seed/README.md](install_seed/README.md)).  
-L’import automatique ne s’exécute **pas** si la base contient déjà des œuvres.
+## Prérequis
 
-## Tester en local
+- PHP **8.2+** avec extension **sqlite3**
+- [Composer](https://getcomposer.org/) (pour les tests)
+
+---
+
+## Installation et test en local
 
 ```bash
 cd /chemin/vers/Moncine
-php lib/cli/migrate.php --fresh   # première fois (sans moncine.db)
+composer install
+php lib/cli/migrate.php --fresh   # première fois (crée data/moncine.db)
 php -S localhost:8080 -t www
 ```
 
-Ouvrir http://localhost:8080 — à la première visite, créez le **compte administrateur** (`/premier-compte.php`).
+Ouvrir http://localhost:8080 — à la première visite, créez le **compte administrateur** sur `/premier-compte.php`.
 
-## Comptes utilisateurs (paquet 2.0)
+### Variables d’environnement utiles
+
+| Variable | Rôle |
+|----------|------|
+| `MONCINE_DATA_PATH` | Dossier des données (base SQLite, clés API, affiches). Par défaut : `./data/` |
+| `MONCINE_BASE_URL` | URL publique de l’app (liens dans les e-mails de réinitialisation de mot de passe) |
+
+---
+
+## Comptes utilisateurs
 
 - **Premier lancement** : `/premier-compte.php` (administrateur)
 - **Connexion** : `/connexion.php`
+- **Mon compte** : `/mon-compte.php`
 - **Gestion des comptes** : `/utilisateurs.php` (admin uniquement)
-- Chaque utilisateur a sa propre bibliothèque et ses envies
+
+Chaque utilisateur a sa propre bibliothèque et ses envies.
+
+Documentation mots de passe : [doc/comptes-mot-de-passe.md](doc/comptes-mot-de-passe.md).
+
+---
+
+## Migrations SQL
+
+- **Install fraîche** : `sql/schema.sql` si la base est vide, puis `sql/migrations/*.sql`
+- **Mise à jour** : `php lib/cli/migrate.php`
+
+Les fichiers dans `sql/migrations_legacy/` ne sont **pas** appliqués (historique uniquement).
+
+---
 
 ## Tests automatisés (PHPUnit)
 
 Vérifie l’import/export (détection de format, parsing CSV, import bibliothèque et catalogue) sur une base SQLite temporaire.
 
 ```bash
-cd /chemin/vers/Moncine
-composer install
 composer test
 ```
 
-Prérequis : PHP 8.2+, extension `sqlite3`, [Composer](https://getcomposer.org/).
+---
 
-## Migrations SQL (paquet uniquement)
+## Import / export
 
-- **Install** : `sql/schema.sql` si la base est vide, puis `sql/migrations/*.sql`
-- **Upgrade** : `php lib/cli/migrate.php` ou `yunohost/scripts/upgrade`
-- Les fichiers dans `sql/migrations_legacy/` ne sont **pas** appliqués
+- **Export** : page `/export.php` (CSV collection, envies, historique)
+- **Import** : page `/import.php` (bibliothèque ou catalogue admin)
 
-## YunoHost
+Les affiches locales sont stockées dans `data/posters/` (ou le dossier défini par `MONCINE_DATA_PATH`).
 
-Paquet installable (format v2) à la racine du dépôt : `manifest.toml`, `scripts/`, `conf/`.
+---
 
-**Installation sur un serveur YunoHost :** voir [doc/packaging-yunohost.md](doc/packaging-yunohost.md).
+## Déploiement YunoHost
 
-```bash
-sudo yunohost app install /chemin/vers/Moncine --force \
-  -a "domain=moncine.votredomaine.tld&path=/&init_main_permission=visitors"
-```
-
-Variables utiles sur le serveur :
-
-- `MONCINE_DATA_PATH` — base SQLite et clés API (`/home/yunohost.app/moncine/`)
-- `MONCINE_BASE_URL` — URL publique (e-mails de réinitialisation)
-
-## Migration depuis l’ancienne prod
-
-Export CSV (+ affiches) depuis `Moncine (origine)`, puis import ici une fois l’outil prêt : [doc/migration-export-import.md](doc/migration-export-import.md).
-
-## Prérequis
-
-- PHP 8.1+ avec extension **sqlite3**
-# Moncine
+Le packaging YunoHost (scripts d’install, nginx, manifest) se trouve dans le dépôt **Moncine-yunohost**, mis à jour à partir de ce dépôt upstream.
