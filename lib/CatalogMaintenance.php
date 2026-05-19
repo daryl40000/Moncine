@@ -371,7 +371,8 @@ final class CatalogMaintenance
                 continue;
             }
 
-            $existing = (new BibliothequeRepository())->findByOeuvreId($keepId, $userId);
+            $foyerId = (new FoyerRepository())->currentFoyerIdForUser($userId);
+            $existing = (new BibliothequeRepository())->findByOeuvreId($keepId, $userId, $foyerId);
             if ($existing === null) {
                 $this->db->prepare('UPDATE bibliotheque SET oeuvre_id = ? WHERE id = ?')
                     ->execute([$keepId, $entryId]);

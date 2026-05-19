@@ -26,7 +26,7 @@ Fonctionnalités métier visées :
 
 ## État actuel
 
-**Version applicative : 0.6.0**
+**Version applicative : 0.7.0**
 
 Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 
@@ -47,7 +47,7 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | Phase | Statut |
 |-------|--------|
 | Phase 3 — Admin catalogue | ✅ Livré (v0.6) |
-| Phase 4 — Foyers & famille | À faire |
+| Phase 4 — Foyers & famille | ✅ Livré (v0.7) |
 | Phase 5 — Soumissions catalogue | À faire |
 | Phase 6 — Mes BD | À faire |
 
@@ -212,43 +212,34 @@ Page : `/maintenance-catalogue.php` (menu admin **Maintenance**).
 
 ---
 
-## Phase 4 — Foyers & famille
+## Phase 4 — Foyers & famille ✅
 
 **Objectif :** collection partagée au niveau du foyer ; wishlist et historique personnels.
 
+**Statut : livré** (v0.7.0, migrations `008`–`011`, script `FoyerMigration`).
+
 **Dépend de :** phase 2. **Migration la plus délicate** — prévoir sauvegarde avant upgrade.
 
-### Migrations SQL prévues
+### Migrations SQL
 
 ```text
-008_foyers.sql
-  - table foyers (nom, created_at)
-  - foyer_id sur utilisateurs
-
-009_bibliotheque_foyer_collection.sql
-  - foyer_id sur entrées collection
-  - UNIQUE (foyer_id, oeuvre_id) pour statut collection
-
-010_historique_user_id.sql
-  - user_id sur historique (visions personnelles)
-
-011_wishlist_per_user.sql
-  - Contrainte wishlist : UNIQUE (user_id, oeuvre_id)
+008_foyers.sql — table foyers, foyer_id sur utilisateurs
+009_bibliotheque_foyer_collection.sql — foyer_id sur collection
+010_historique_user_id.sql — user_id sur historique
+011_wishlist_per_user.sql — contraintes collection (foyer) / envies (user)
 ```
 
-### Script PHP post-SQL
+Script PHP post-SQL : `lib/FoyerMigration.php`.
 
-- Regrouper les entrées `bibliotheque` collection du même ménage sous un `foyer_id`
-- Dédupliquer si besoin
-- Créer un foyer par défaut pour les installations existantes
+| # | Tâche | Statut |
+|---|--------|--------|
+| 4.1 | CRUD foyers (admin) | ✅ |
+| 4.2 | Affectation utilisateur → foyer | ✅ |
+| 4.3 | Collection visible par tous les membres du foyer | ✅ |
+| 4.4 | Wishlist et historique filtrés par `user_id` | ✅ |
+| 4.5 | Interface « famille » (sous-comptes, affectation foyer) | ✅ |
 
-| # | Tâche |
-|---|--------|
-| 4.1 | CRUD foyers (admin) |
-| 4.2 | Affectation utilisateur → foyer |
-| 4.3 | Collection visible par tous les membres du foyer |
-| 4.4 | Wishlist et historique filtrés par `user_id` |
-| 4.5 | Interface « famille » (invitation, sous-comptes) |
+Pages : `/foyers.php`, `/utilisateurs.php`, `/mon-compte.php`.
 
 **Critère terminé :** deux membres d’un même foyer voient la même collection ; leurs envies et notes restent séparées.
 
@@ -357,6 +348,7 @@ Fonctionnalité transversale déjà partiellement en place :
 
 - 2026-05-16 — Phases **1**, **1 bis** et **2** livrées (comptes, mots de passe, champs exemplaire)
 - 2026-05-19 — Roadmap recentrée sur les **fonctionnalités logicielles** ; séparation upstream / packaging externalisée
+- 2026-05-19 — Version **0.7.0** : phase **4** (foyers, collection partagée, envies et historique personnels)
 - 2026-05-19 — Version **0.6.0** : phase **3** (maintenance catalogue : doublons, fusion, journal, nettoyage affiches)
 - 2026-05-19 — Version **0.51.0** : correction création premier compte, mise en page fiches sans affiche
 
@@ -368,7 +360,7 @@ Fonctionnalité transversale déjà partiellement en place :
 |-------|----------|
 | Connexion DB + migrations | `lib/Database.php`, `lib/SchemaMigrator.php` |
 | Chemins données | `lib/config.php` (`MONCINE_DATA_PATH`) |
-| Utilisateur courant | `lib/UserContext.php` |
+| Utilisateur courant | `lib/UserContext.php`, `lib/FoyerRepository.php` |
 | Connexion / session | `lib/Auth.php`, `lib/LoginThrottle.php` |
 | Comptes (admin) | `www/utilisateurs.php`, `lib/UtilisateurRepository.php` |
 | Mots de passe | `www/mon-compte.php`, `www/mot-de-passe-oublie.php` |

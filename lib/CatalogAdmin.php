@@ -99,7 +99,11 @@ final class CatalogAdmin
             return null;
         }
 
-        $library = (new BibliothequeRepository())->findByOeuvreId($oeuvreId, UserContext::currentUserId());
+        $library = (new BibliothequeRepository())->findByOeuvreId(
+            $oeuvreId,
+            UserContext::currentUserId(),
+            UserContext::currentFoyerId()
+        );
         $stmt = $this->db->prepare('SELECT COUNT(*) FROM bibliotheque WHERE oeuvre_id = ?');
         $stmt->execute([$oeuvreId]);
 

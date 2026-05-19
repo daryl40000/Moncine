@@ -6,6 +6,7 @@ namespace Moncine\Tests\Integration;
 
 use Moncine\BibliothequeRepository;
 use Moncine\CatalogMaintenance;
+use Moncine\FoyerRepository;
 use Moncine\HistoriqueRepository;
 use Moncine\OeuvreRepository;
 use Moncine\PosterStorage;
@@ -19,8 +20,9 @@ final class CatalogMaintenanceTest extends MoncineTestCase
         $keepId = $this->seedCatalogOeuvre('Film Alpha', 'Réalisateur A');
         $removeId = $this->seedCatalogOeuvre('Film Alpha ', 'Réalisateur A');
 
+        $foyerId = (new FoyerRepository())->currentFoyerIdForUser($adminId);
         $bib = new BibliothequeRepository();
-        $removeEntryId = $bib->insert($adminId, $removeId, [
+        $removeEntryId = $bib->insert($adminId, $foyerId, $removeId, [
             'statut' => 'collection',
             'support_physique' => 'bluray',
             'format_image' => '1080p',
@@ -32,7 +34,7 @@ final class CatalogMaintenanceTest extends MoncineTestCase
         $this->assertTrue($result === true);
 
         $this->assertNull((new OeuvreRepository())->findById($removeId));
-        $entry = $bib->findByOeuvreId($keepId, $adminId);
+        $entry = $bib->findByOeuvreId($keepId, $adminId, $foyerId);
         $this->assertNotNull($entry);
         $this->assertSame('bluray', $entry['support_physique']);
         $this->assertSame('1080p', $entry['format_image']);

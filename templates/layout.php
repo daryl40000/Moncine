@@ -48,6 +48,7 @@
                 <?php if (Moncine\CatalogAdmin::canAccess()): ?>
                     <a href="/catalogue.php" class="site-nav__admin">Catalogue</a>
                     <a href="/maintenance-catalogue.php" class="site-nav__admin">Maintenance</a>
+                    <a href="/foyers.php" class="site-nav__admin">Foyers</a>
                     <a href="/utilisateurs.php" class="site-nav__admin">Comptes</a>
                 <?php endif; ?>
                 <?php /* POST + jeton CSRF : évite une déconnexion forcée par un simple lien */ ?>

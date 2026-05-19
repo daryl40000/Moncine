@@ -1,6 +1,6 @@
 # Moncine
 
-**Version : 0.6.0**
+**Version : 0.7.0**
 
 **Auteur :** Stéphane MATER  
 **Licence :** [GNU General Public License v3.0 ou ultérieure](LICENSE) (GPL-3.0-or-later)
@@ -9,11 +9,12 @@ Application web pour gérer une **dvdthèque personnelle** : films, envies, note
 
 ---
 
-## Fonctionnalités actuelles (v0.6)
+## Fonctionnalités actuelles (v0.7)
 
 | Domaine | Disponible |
 |---------|------------|
 | Collection & envies | Mes films, Mes envies, sagas, statistiques, quiz |
+| Foyers & famille | Collection partagée par foyer ; envies et historique personnels |
 | Catalogue partagé | Fiches œuvres, enrichissement TMDB / OMDB, affiches |
 | Comptes | Connexion, rôles admin/utilisateur, gestion des comptes |
 | Mots de passe | Mon compte, changement, oublié par e-mail, reset admin |
@@ -21,9 +22,8 @@ Application web pour gérer une **dvdthèque personnelle** : films, envies, note
 | Maintenance catalogue | Doublons, fusion de fiches, journal admin, nettoyage affiches |
 | Données | Import / export CSV, affiches |
 
-### Prochaines étapes (v0.6 → v1.0)
+### Prochaines étapes (v0.7 → v1.0)
 
-- Foyers & famille (collection partagée, envies personnelles)
 - Soumissions au catalogue
 - Mes BD
 
@@ -37,7 +37,8 @@ Détail : [ROADMAP.md](ROADMAP.md).
 |---------|------|
 | `lib/bootstrap.php` | Chargé par chaque page : config, base, connexion obligatoire |
 | `lib/Auth.php` | Qui est connecté, login, pages publiques |
-| `lib/UserContext.php` | ID utilisateur pour « Mes films » / envies |
+| `lib/UserContext.php` | ID utilisateur et foyer pour « Mes films » / envies |
+| `lib/FoyerRepository.php` | Foyers (collection partagée) |
 | `lib/Database.php` | SQLite + migrations automatiques |
 | `lib/FilmRepository.php` | Accès aux films de l’utilisateur courant |
 | `www/*.php` | Une page = un fichier (contrôleur léger) |
@@ -90,14 +91,15 @@ Ouvrir http://localhost:8080 — à la première visite, créez le **compte admi
 
 ---
 
-## Comptes utilisateurs
+## Comptes utilisateurs et foyers
 
-- **Premier lancement** : `/premier-compte.php` (administrateur)
+- **Premier lancement** : `/premier-compte.php` (administrateur + foyer par défaut)
 - **Connexion** : `/connexion.php`
 - **Mon compte** : `/mon-compte.php`
 - **Gestion des comptes** : `/utilisateurs.php` (admin uniquement)
+- **Foyers** : `/foyers.php` (admin — collection partagée entre membres)
 
-Chaque utilisateur a sa propre bibliothèque et ses envies.
+Les membres d’un même foyer voient la **même collection** ; chacun garde **ses envies** et **son historique**.
 
 Documentation mots de passe : [doc/comptes-mot-de-passe.md](doc/comptes-mot-de-passe.md).
 
@@ -109,6 +111,8 @@ Documentation mots de passe : [doc/comptes-mot-de-passe.md](doc/comptes-mot-de-p
 - **Mise à jour** : `php lib/cli/migrate.php`
 
 Les fichiers dans `sql/migrations_legacy/` ne sont **pas** appliqués (historique uniquement).
+
+**Important (v0.7)** : sauvegardez `data/moncine.db` avant une mise à jour — la migration foyers regroupe les collections existantes.
 
 ---
 

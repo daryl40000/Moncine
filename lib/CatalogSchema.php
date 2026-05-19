@@ -1,6 +1,6 @@
 <?php
 /**
- * Schéma catalogue Moncine : œuvres (catalogue) + bibliothèque (relation utilisateur).
+ * Schéma catalogue Moncine : œuvres (catalogue) + bibliothèque (relation utilisateur / foyer).
  */
 
 declare(strict_types=1);
@@ -56,30 +56,75 @@ final class CatalogSchema
             $oeuvre[] = 'o.' . $field;
         }
 
-        return 'b.id, b.user_id, b.oeuvre_id, b.statut, b.support_physique, b.format_image, b.format_son, '
+        return 'b.id, b.user_id, b.foyer_id, b.oeuvre_id, b.statut, b.support_physique, b.format_image, b.format_son, '
             . 'b.saga, b.saga_ordre, b.saison_numero, b.saison_label, b.ean, b.created_at, '
             . implode(', ', $oeuvre);
     }
 
     /**
+     * Filtre bibliothèque : collection partagée du foyer, envies personnelles.
+     *
+     * @return array{0: string, 1: array<string, int|string>}
+     */
+    public static function libraryFilter(int $foyerId, int $userId, ?string $statut): array
+    {
+        if ($statut === LibraryStatut::WISHLIST) {
+            return [
+                'b.user_id = :catalog_user_id AND b.statut = :catalog_statut',
+                [
+                    'catalog_user_id' => $userId,
+                    'catalog_statut' => LibraryStatut::WISHLIST,
+                ],
+            ];
+        }
+
+        if ($statut === LibraryStatut::COLLECTION) {
+            return [
+                'b.foyer_id = :catalog_foyer_id AND b.statut = :catalog_statut',
+                [
+                    'catalog_foyer_id' => $foyerId,
+                    'catalog_statut' => LibraryStatut::COLLECTION,
+                ],
+            ];
+        }
+
+        return [
+            '((b.foyer_id = :catalog_foyer_id AND b.statut = :catalog_collection)
+              OR (b.user_id = :catalog_user_id AND b.statut = :catalog_wishlist))',
+            [
+                'catalog_foyer_id' => $foyerId,
+                'catalog_user_id' => $userId,
+                'catalog_collection' => LibraryStatut::COLLECTION,
+                'catalog_wishlist' => LibraryStatut::WISHLIST,
+            ],
+        ];
+    }
+
+    /**
+     * @deprecated Utiliser libraryFilter().
      * @return array{0: string, 1: array<string, int|string>}
      */
     public static function userFilter(int $userId, ?string $statut): array
     {
-        $where = ['b.user_id = :catalog_user_id'];
-        $params = ['catalog_user_id' => $userId];
-        if ($statut !== null) {
-            $where[] = 'b.statut = :catalog_statut';
-            $params['catalog_statut'] = $statut;
-        }
-
-        return [implode(' AND ', $where), $params];
+        return self::libraryFilter(UserContext::currentFoyerId(), $userId, $statut);
     }
 
     public static function usesCatalogTables(\PDO $db): bool
     {
         $stmt = $db->query(
             "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'bibliotheque' LIMIT 1"
+        );
+
+        return (bool) $stmt->fetchColumn();
+    }
+
+    public static function usesFoyerModel(\PDO $db): bool
+    {
+        if (!self::usesCatalogTables($db)) {
+            return false;
+        }
+        $stmt = $db->query(
+            "SELECT 1 FROM pragma_table_info('bibliotheque') WHERE name = 'foyer_id' LIMIT 1"
         );
 
         return (bool) $stmt->fetchColumn();
