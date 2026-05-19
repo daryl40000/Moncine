@@ -1,6 +1,6 @@
 # Roadmap Moncine
 
-Document de planification des **évolutions fonctionnelles** de l’application Moncine (dvdthèque personnelle : films, puis bandes dessinées).
+Document de planification des **évolutions fonctionnelles** de l’application Moncine (dvdthèque personnelle : films, bandes dessinées, puis magazines).
 
 Les phases sont **ordonnées par dépendances** : chaque étape s’appuie sur la précédente. Les changements de base de données passent par des **migrations SQL numérotées**, testées depuis la version précédente.
 
@@ -10,7 +10,7 @@ Les phases sont **ordonnées par dépendances** : chaque étape s’appuie sur l
 
 | Acteur | Capacités |
 |--------|-----------|
-| **Administrateur** | Gère le catalogue d’œuvres partagé (films, puis BD), valide les propositions, enrichit les fiches via TMDB |
+| **Administrateur** | Gère le catalogue d’œuvres partagé (films, BD, magazines), valide les propositions, enrichit les fiches via TMDB |
 | **Utilisateur** | Gère sa bibliothèque : collection du foyer, **sa** wishlist, **ses** notes et visions |
 | **Sous-utilisateur « famille »** | Même collection physique que le foyer ; wishlist et historique **personnels** |
 | **Tous** | Ne modifient pas les métadonnées catalogue — seulement les infos de **leur** exemplaire (`support`, format image/son, etc.) |
@@ -19,8 +19,12 @@ Fonctionnalités métier visées :
 
 1. Comptes **admin** / **utilisateur** (connexion, gestion admin, changement et réinitialisation de mot de passe)
 2. Foyers et sous-comptes **famille**
-3. Page **Mes BD** (collection + wishlist)
-4. **Soumissions** au catalogue (préremplissage → validation admin)
+3. **Export PDF** de la bibliothèque (depuis Mes films) et des **envies** (depuis Mes envies)
+4. **Accès visiteur** en lecture seule via URL partagée (bibliothèque du foyer et wishlist personnelle)
+5. Page **Mes BD** (collection + wishlist)
+6. **Soumissions** au catalogue (préremplissage → validation admin)
+7. **Collections de magazines** (titres, numéros, organisation par collection)
+8. **Magazines en PDF** stockés localement + **lecteur PDF** intégré
 
 ---
 
@@ -49,7 +53,10 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | Phase 3 — Admin catalogue | ✅ Livré (v0.6) |
 | Phase 4 — Foyers & famille | ✅ Livré (v0.7) |
 | Phase 5 — Soumissions catalogue | À faire |
-| Phase 6 — Mes BD | À faire |
+| Phase 6 — Export PDF & partage visiteur | À faire |
+| Phase 7 — Mes BD | À faire |
+| Phase 8 — Collections de magazines | À faire |
+| Phase 9 — Magazines PDF & lecteur | À faire |
 
 ---
 
@@ -63,7 +70,10 @@ flowchart TD
     P3[Phase 3 - Admin catalogue]
     P4[Phase 4 - Foyers]
     P5[Phase 5 - Soumissions]
-    P6[Phase 6 - Mes BD]
+    P6[Phase 6 - Export PDF et partage]
+    P7[Phase 7 - Mes BD]
+    P8[Phase 8 - Collections magazines]
+    P9[Phase 9 - PDF magazines lecteur]
 
     P1 --> P1b
     P1 --> P2
@@ -73,7 +83,11 @@ flowchart TD
     P3 --> P5
     P2 --> P6
     P4 --> P6
-    P5 --> P6
+    P5 --> P7
+    P2 --> P7
+    P4 --> P7
+    P7 --> P8
+    P8 --> P9
 ```
 
 ---
@@ -108,12 +122,16 @@ app_metadata (
 ### Schéma cible (après toutes les phases)
 
 ```text
-oeuvres              -- catalogue partagé (films, BD, …)
+oeuvres              -- catalogue partagé (films, BD, magazines, …)
 bibliotheque         -- lien foyer/user + statut + champs perso exemplaire
 historique           -- visions + notes (+ user_id)
 utilisateurs         -- comptes (role, foyer_id)
 foyers               -- ménage / famille
 catalogue_soumissions
+share_links          -- jetons URL partagée lecture seule (phase 6)
+magazine_collections -- titres / séries de magazines (phase 8)
+magazine_numeros     -- numéros rattachés à une collection (phase 8)
+magazine_fichiers    -- PDF ou chemins locaux (phase 9)
 schema_migrations
 app_metadata
 sessions             -- si sessions en base
@@ -254,9 +272,11 @@ Pages : `/foyers.php`, `/utilisateurs.php`, `/mon-compte.php`.
 ### Migrations SQL prévues
 
 ```text
-012_catalogue_soumissions.sql
+013_catalogue_soumissions.sql
   - catalogue_soumissions (user_id, payload JSON, statut, created_at, reviewed_at)
 ```
+
+> **Note :** la migration `012_utilisateur_profil.sql` (prénom, pseudo) est déjà livrée en v0.7.2.
 
 | # | Tâche |
 |---|--------|
@@ -269,29 +289,128 @@ Pages : `/foyers.php`, `/utilisateurs.php`, `/mon-compte.php`.
 
 ---
 
-## Phase 6 — Mes BD
+## Phase 6 — Export PDF & partage visiteur
 
-**Objectif :** gérer les bandes dessinées comme les films (collection, envies, statistiques).
+**Objectif :** permettre d’**exporter en PDF** la bibliothèque et la wishlist depuis leurs pages respectives, et d’ouvrir une **vue visiteur** en lecture seule via une **URL partagée** (sans connexion, sans aucune modification possible).
 
-**Dépend de :** phases 2 et 4 (recommandé).
+**Dépend de :** phases 2 et 4 (collection foyer + wishlist personnelle déjà en place).
 
 ### Migrations SQL prévues
 
 ```text
-013_oeuvres_bd_metadata.sql
+014_share_links.sql
+  - share_links (token_hash, scope collection|wishlist, foyer_id ou user_id,
+    label optionnel, expires_at, revoked_at, created_by)
+```
+
+> L’export PDF peut s’appuyer sur les données existantes (pas de table dédiée obligatoire).
+
+| # | Tâche |
+|---|--------|
+| 6.1 | **Export PDF** depuis **Mes films** : liste de la collection du foyer (filtres / tri courants reflétés dans le document) |
+| 6.2 | **Export PDF** depuis **Mes envies** : liste de la wishlist de l’utilisateur connecté |
+| 6.3 | Mise en page PDF lisible (titres, années, réalisateurs, affiches optionnelles en miniature) |
+| 6.4 | Lien partagé **bibliothèque** : URL publique `/partage/…` → vue lecture seule de la collection du foyer |
+| 6.5 | Lien partagé **wishlist** : URL publique → vue lecture seule de la wishlist de l’utilisateur qui a généré le lien |
+| 6.6 | Gestion des liens : créer, copier, révoquer, expiration optionnelle (page Paramètres ou Mes films / Mes envies) |
+| 6.7 | Pages visiteur : **aucun** formulaire POST, pas de CSRF utile côté visiteur ; pas d’accès admin ni catalogue |
+
+**Critère terminé :** depuis Mes films, un PDF de la collection peut être téléchargé ; depuis Mes envies, un PDF des envies idem ; un invité avec l’URL partagée consulte la liste sans pouvoir modifier, supprimer ni ajouter.
+
+### Points d’attention (phase 6)
+
+- **Confidentialité** : le lien partagé ne doit pas exposer d’autres données (notes privées d’autres membres, e-mails, etc.).
+- **Sécurité** : jeton long et non devinable ; possibilité de révoquer à tout moment.
+- **Wishlist** : le lien est **personnel** (un utilisateur = sa wishlist), la collection partagée suit le **foyer**.
+
+---
+
+## Phase 7 — Mes BD
+
+**Objectif :** gérer les bandes dessinées comme les films (collection, envies, statistiques).
+
+**Dépend de :** phases 2, 4 et 6 (recommandé : export / partage films déjà stabilisés).
+
+### Migrations SQL prévues
+
+```text
+015_oeuvres_bd_metadata.sql
   - champs spécifiques BD sur oeuvres (série, tome, ISBN, …)
   - moncine_kind = 'bd'
 ```
 
 | # | Tâche |
 |---|--------|
-| 6.1 | Page Mes BD (collection + wishlist) |
-| 6.2 | Formulaires ajout / modification BD |
-| 6.3 | Import CSV étendu (format BD) |
-| 6.4 | Statistiques et filtres BD |
-| 6.5 | Soumissions BD (réutilise phase 5) |
+| 7.1 | Page Mes BD (collection + wishlist) |
+| 7.2 | Formulaires ajout / modification BD |
+| 7.3 | Import CSV étendu (format BD) |
+| 7.4 | Statistiques et filtres BD |
+| 7.5 | Soumissions BD (réutilise phase 5) |
+| 7.6 | Export PDF et partage visiteur BD (réutilise phase 6) |
 
 **Critère terminé :** une BD peut être ajoutée, classée en collection ou envie, notée et exportée.
+
+---
+
+## Phase 8 — Collections de magazines
+
+**Objectif :** gérer des **collections de magazines** (titre de la revue, numéros, organisation) dans la bibliothèque du foyer, sur le même modèle que films et BD (collection / envies, fiche par numéro ou par parution).
+
+**Dépend de :** phases 4 et 7 (recommandé : foyers + habitudes « type d’œuvre » déjà en place pour BD).
+
+### Migrations SQL prévues
+
+```text
+016_magazine_collections.sql
+  - magazine_collections (nom, éditeur, périodicité, description, …)
+  - magazine_numeros (collection_id, numero, date_parution, titre_numero, …)
+  - lien bibliotheque / oeuvres ou tables dédiées selon modèle retenu
+  - moncine_kind = 'magazine' sur oeuvres si catalogue unifié
+```
+
+| # | Tâche |
+|---|--------|
+| 8.1 | Modèle de données magazines (collection + numéros) |
+| 8.2 | Page **Mes magazines** (liste des collections, numéros possédés / manquants) |
+| 8.3 | Ajout / édition d’une collection et d’un numéro |
+| 8.4 | Intégration foyer (collection partagée) et envies personnelles |
+| 8.5 | Import / export CSV magazines (schéma à définir) |
+| 8.6 | Filtres et statistiques de base (par collection, par année) |
+
+**Critère terminé :** une collection « Tintin magazine » (ex.) peut être créée, ses numéros référencés, et chaque numéro ajouté à la collection du foyer ou aux envies d’un membre.
+
+---
+
+## Phase 9 — Magazines PDF & lecteur
+
+**Objectif :** associer un **fichier PDF** à un numéro de magazine déjà référencé, le stocker de façon sécurisée sur le serveur, et proposer un **lecteur PDF** dans l’application (consultation dans le navigateur, sans téléchargement obligatoire).
+
+**Dépend de :** phase 8 (numéros de magazine en base).
+
+### Migrations SQL prévues
+
+```text
+017_magazine_pdf.sql
+  - magazine_fichiers (numero_id, chemin_relatif, taille_octets, checksum, uploaded_at)
+  - métadonnées optionnelles (nombre de pages, langue)
+```
+
+| # | Tâche |
+|---|--------|
+| 9.1 | Stockage des PDF (`MONCINE_DATA_PATH` / dossier dédié hors `www/`) |
+| 9.2 | Upload admin ou utilisateur autorisé (taille max, types MIME `application/pdf`) |
+| 9.3 | Fiche numéro : lien « Lire le PDF » si fichier présent |
+| 9.4 | Lecteur PDF intégré (page dédiée ou visionneuse embarquée) |
+| 9.5 | Contrôle d’accès (membres du foyer, pas d’URL publique directe vers le fichier) |
+| 9.6 | Sauvegarde / export : documenter l’emplacement des PDF pour la migration de serveur |
+
+**Critère terminé :** un numéro possède un PDF consultable depuis Moncine par les membres du foyer ; sans PDF, la fiche numéro reste utilisable (métadonnées seules).
+
+### Points d’attention (phase 9)
+
+- **Volume disque** : les PDF peuvent être lourds ; quotas ou alertes admin à prévoir.
+- **Droits d’auteur** : usage personnel / foyer uniquement ; pas de diffusion publique des fichiers.
+- **Performance** : streaming ou affichage par pages selon la taille des fichiers.
 
 ---
 
@@ -328,7 +447,9 @@ Fonctionnalité transversale déjà partiellement en place :
 | Collection foyer | `foyer_id` sur `bibliotheque` (collection) |
 | Wishlist | `user_id` personnel |
 | BD | Même table `oeuvres`, type `bd` via `moncine_kind` |
-| Chemins données | Variable `MONCINE_DATA_PATH` (base, clés API, affiches) |
+| Export PDF / partage | PDF généré côté serveur ; liens visiteur par jeton (phase 6) |
+| Magazines | Collections + numéros (phase 8) ; PDF hors web public (phase 9) |
+| Chemins données | Variable `MONCINE_DATA_PATH` (base, clés API, affiches, PDF magazines) |
 
 ---
 
