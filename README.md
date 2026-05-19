@@ -1,6 +1,6 @@
 # Moncine
 
-**Version : 0.7.0**
+**Version : 0.7.1**
 
 **Auteur :** Stéphane MATER  
 **Licence :** [GNU General Public License v3.0 ou ultérieure](LICENSE) (GPL-3.0-or-later)
