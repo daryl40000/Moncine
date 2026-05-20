@@ -848,6 +848,26 @@ textarea {
     justify-content: center;
 }
 
+/* Ancre + barre Préc./Suiv. : visible sous l’en-tête au changement de fiche */
+#film-list-nav {
+    scroll-margin-top: 5.5rem;
+}
+
+.film-list-nav-anchor {
+    position: sticky;
+    top: 4.75rem;
+    z-index: 90;
+    margin: 0.35rem 0 0.85rem;
+    padding: 0.15rem 0 0.35rem;
+    background: var(--bg);
+    box-shadow: 0 6px 12px -8px rgba(0, 0, 0, 0.65);
+}
+
+.film-list-nav-anchor .film-list-pager {
+    margin: 0;
+    border-bottom: 1px solid var(--border);
+}
+
 .film-detail__body > .film-list-pager {
     margin-top: 1.25rem;
 }
@@ -938,6 +958,41 @@ textarea {
 #film-detail,
 #catalogue-list {
     scroll-margin-top: 5.5rem;
+}
+
+#catalog-list-nav,
+#catalog-oeuvre-nav {
+    scroll-margin-top: 5.5rem;
+}
+
+.catalog-list-nav-anchor,
+.catalog-oeuvre-nav-anchor {
+    position: sticky;
+    top: 4.75rem;
+    z-index: 90;
+    margin: 0.35rem 0 0.85rem;
+    padding: 0.15rem 0 0.35rem;
+    background: var(--bg);
+    box-shadow: 0 6px 12px -8px rgba(0, 0, 0, 0.65);
+}
+
+.catalog-list-nav-anchor .catalog-list-pager,
+.catalog-oeuvre-nav-anchor .catalog-oeuvre-pager {
+    margin: 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.catalog-oeuvre-pager {
+    justify-content: center;
+}
+
+.film-detail__body > .catalog-oeuvre-pager {
+    margin-top: 1.25rem;
+}
+
+.catalog-admin-table__actions .btn-icon {
+    min-width: 2.25rem;
+    min-height: 2.25rem;
 }
 
 .site-nav__admin {
