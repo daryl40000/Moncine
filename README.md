@@ -1,6 +1,6 @@
 # Moncine
 
-**Version : 0.7.4**
+**Version : 0.7.6**
 
 **Auteur :** Stéphane MATER  
 **Licence :** [GNU General Public License v3.0 ou ultérieure](LICENSE) (GPL-3.0-or-later)
@@ -21,11 +21,13 @@ Application web pour gérer une **dvdthèque personnelle** : films, envies, note
 | Exemplaire personnel | Support, format image/son (séparés du catalogue) |
 | Maintenance catalogue | Doublons, fusion de fiches, journal admin, nettoyage affiches |
 | Soumissions catalogue | Proposer une œuvre (utilisateur) ; validation admin ; **notifications** in-app + e-mail |
+| Profil & recherche | Ville optionnelle ; recherche par pseudo/ville ; masquer son profil de la recherche |
 | Données | Import / export CSV, affiches |
 
 ### Prochaines étapes (v0.7 → v1.0)
 
 - ~~Soumissions au catalogue~~ (v0.7.4)
+- ~~Profil ville & recherche utilisateurs~~ (v0.7.6)
 - Amis & groupes famille (foyers créés par les utilisateurs, plus par l’admin)
 - Prêts entre utilisateurs
 - Stockage fichiers (dossier share YunoHost + S3)

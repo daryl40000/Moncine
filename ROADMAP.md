@@ -24,7 +24,7 @@ Fonctionnalités métier visées :
 5. **Stockage de fichiers** volumineux (PDF magazines, etc.) : dossier partagé type YunoHost + option **stockage objet S3**
 6. **Export PDF** de la bibliothèque / des envies + **accès visiteur** par URL partagée (lecture seule)
 7. Page **Mes BD** (collection + wishlist)
-8. **Soumissions** au catalogue (préremplissage → validation admin)
+8. ~~**Soumissions** au catalogue~~ — **livré v0.7.4** (propositions, validation admin, notifications)
 9. **Collections de magazines** (titres, numéros, organisation par collection)
 10. **Magazines en PDF** + **lecteur PDF** (s’appuie sur la couche stockage)
 
@@ -32,7 +32,7 @@ Fonctionnalités métier visées :
 
 ## État actuel
 
-**Version applicative : 0.7.4**
+**Version applicative : 0.7.6**
 
 Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 
@@ -45,8 +45,25 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | **Comptes (phase 1)** | Connexion, déconnexion, premier admin, CRUD utilisateurs, rôles, protection des pages |
 | **Mots de passe (phase 1 bis)** | Mon compte, changement de mot de passe, oublié par e-mail, reset admin |
 | **Exemplaire personnel (phase 2)** | `format_image` / `format_son` sur `bibliotheque` ; formulaire « mon exemplaire » ; enrichissement catalogue réservé admin |
-| **Migrations SQL** | `SchemaMigrator`, CLI `php lib/cli/migrate.php`, migrations `001` → `006` |
-| **Tests** | PHPUnit sur import/export CSV et maintenance catalogue |
+| **Admin catalogue (phase 3)** | Liste, fiche œuvre, maintenance, affiche manuelle |
+| **Foyers (phase 4)** | Collection partagée, envies / historique personnels |
+| **Profil (v0.7.2)** | Prénom, pseudo, menu Paramètres / Gestion, navigation fiches |
+| **Soumissions catalogue (phase 5, v0.7.4)** | Proposer, valider, refuser ; notifications in-app + e-mail |
+| **Profil & recherche (v0.7.6)** | Ville optionnelle, recherche par pseudo/ville, opt-out recherche, cloche compacte |
+| **Migrations SQL** | `SchemaMigrator`, CLI `php lib/cli/migrate.php`, migrations `001` → `015` |
+| **Tests** | PHPUnit (import, catalogue, foyers, soumissions, notifications) |
+
+### Point d’étape — mai 2026
+
+**Phase 5 validée.** **v0.7.6** : profil (ville), recherche d’utilisateurs, visibilité dans la recherche. Prochaine évolution : **phase 6** (amis et groupes « famille », un seul groupe actif par personne en v1).
+
+| Version | Contenu principal |
+|---------|-------------------|
+| 0.7.0 | Foyers & collection partagée |
+| 0.7.1 | Affiche manuelle admin (catalogue) |
+| 0.7.2 | Profil, menus, navigation Préc./Suiv. entre fiches |
+| 0.7.4 | Soumissions catalogue + notifications + UX catalogue |
+| 0.7.6 | Ville, recherche utilisateurs, opt-out recherche, cloche notifications |
 
 ### Prochaines étapes
 
@@ -55,7 +72,8 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | Phase 3 — Admin catalogue | ✅ Livré (v0.6) |
 | Phase 4 — Foyers & famille | ✅ Livré (v0.7) |
 | Phase 5 — Soumissions catalogue | ✅ Livré (v0.7.4) |
-| Phase 6 — Amis & groupes famille (foyers utilisateurs) | À faire |
+| Pré-phase 6 — Profil ville & recherche utilisateurs | ✅ Livré (v0.7.6) |
+| Phase 6 — Amis & groupes famille (foyers utilisateurs) | **Prochaine** |
 | Phase 7 — Prêts entre utilisateurs | À faire |
 | Phase 8 — Stockage fichiers (local + S3) | À faire |
 | Phase 9 — Export PDF & partage visiteur | À faire |
@@ -292,25 +310,28 @@ Pages : `/foyers.php`, `/utilisateurs.php`, `/mon-compte.php`.
 
 **Dépend de :** phase 3 (recommandé) ou phase 1 (minimum).
 
-### Migrations SQL prévues
+### Migrations SQL livrées
 
 ```text
+012_utilisateur_profil.sql   -- prénom, pseudo (v0.7.2)
 013_catalogue_soumissions.sql
-  - catalogue_soumissions (user_id, payload JSON, statut, created_at, reviewed_at)
+014_notifications.sql
 ```
-
-> **Note :** la migration `012_utilisateur_profil.sql` (prénom, pseudo) est déjà livrée en v0.7.2.
 
 | # | Tâche |
 |---|--------|
-| 5.1 | Formulaire « proposer une œuvre » (préremplissage TMDB optionnel) | ✅ |
-| 5.2 | File d’attente admin (approuver / rejeter / modifier) | ✅ |
-| 5.3 | À l’approbation : création dans `oeuvres` + notification in-app et e-mail | ✅ |
+| 5.1 | Formulaire « proposer une œuvre » (TMDB optionnel, autocomplétion) | ✅ |
+| 5.2 | File d’attente admin (approuver / rejeter / modifier la fiche) | ✅ |
+| 5.3 | Notification admin (nouvelle proposition) et utilisateur (acceptée / refusée), in-app + e-mail | ✅ |
 | 5.4 | Aucune écriture directe dans `oeuvres` par un utilisateur non admin | ✅ |
+| 5.5 | Menus : Paramètres (Compte, Proposer, Importer) ; Gestion admin ; pas de « Proposer » pour l’admin | ✅ |
+| 5.6 | Navigation Préc./Suiv. (fiches film, fiches catalogue, pagination liste catalogue) | ✅ |
 
-Pages : `/proposer-oeuvre.php`, `/mes-soumissions.php`, `/soumissions-catalogue.php` (admin).
+Pages : `/proposer-oeuvre.php`, `/mes-soumissions.php`, `/soumissions-catalogue.php`, `/notifications.php`.
 
-**Critère terminé :** une proposition validée apparaît dans le catalogue ; une rejetée ne laisse aucune trace dans `oeuvres`.
+**Critère terminé :** une proposition validée apparaît dans le catalogue ; une rejetée ne laisse aucune trace dans `oeuvres` ; les parties concernées sont notifiées.
+
+> **Après migration :** `php lib/cli/migrate.php` (applique `013` et `014` si besoin).
 
 ---
 
@@ -342,7 +363,7 @@ flowchart LR
 ### Migrations SQL prévues
 
 ```text
-014_friendships_and_groups.sql
+016_friendships_and_groups.sql
   - friendships (requester_id, addressee_id, status pending|accepted|blocked, …)
   - foyers : kind = 'famille' | …, created_by_user_id, created_at
   - group_members (foyer_id, user_id, role founder|member, joined_at, invited_by)
@@ -616,6 +637,8 @@ Fonctionnalité transversale déjà partiellement en place :
 | Collection foyer | `foyer_id` sur `bibliotheque` (collection) |
 | Wishlist | `user_id` personnel |
 | BD | Même table `oeuvres`, type `bd` via `moncine_kind` |
+| Soumissions catalogue | Table `catalogue_soumissions` ; validation admin ; utilisateurs non admin ne créent plus d’œuvres directement (v0.7.4) |
+| Notifications | Table `notifications` ; e-mail optionnel (`MailService`, `MONCINE_MAIL_FROM`) |
 | Amis / foyers | Amis = socle ; **groupe famille** = ancien foyer, **créé par les utilisateurs** (plus par l’admin) ; table `foyers` + `group_members` (phase 6) |
 | Prêts | Table `loans` liée à `bibliotheque` (phase 7) |
 | Stockage fichiers | `MONCINE_MEDIA_PATH` + backends `local` / `s3` (phase 8) |
@@ -639,8 +662,8 @@ Fonctionnalité transversale déjà partiellement en place :
 
 ### Historique
 
-- 2026-05-19 — Version **0.7.4** : phase **5** — soumissions au catalogue (proposer, valider, refuser)
-- 2026-05-19 — Version **0.7.2** : menu Gestion / Paramètres, navigation entre fiches et pagination catalogue améliorée
+- 2026-05-19 — **Phase 5 validée** — version **0.7.4** : soumissions catalogue, notifications, navigation catalogue/fiches, menus Compte / Paramètres / Gestion
+- 2026-05-19 — Version **0.7.2** : profil (prénom, pseudo), menu Gestion / Paramètres, navigation Préc./Suiv. entre fiches film
 - 2026-05-19 — Version **0.7.1** : dépôt d’affiche manuel sur une fiche catalogue (admin)
 - 2026-05-16 — Phases **1**, **1 bis** et **2** livrées (comptes, mots de passe, champs exemplaire)
 - 2026-05-19 — Roadmap recentrée sur les **fonctionnalités logicielles** ; séparation upstream / packaging externalisée
@@ -663,9 +686,11 @@ Fonctionnalité transversale déjà partiellement en place :
 | Format exemplaire | `sql/migrations/005_*.sql`, `lib/CatalogSchema.php` |
 | Import / export | `www/import.php`, `www/export.php` |
 | Maintenance catalogue | `www/maintenance-catalogue.php`, `lib/CatalogMaintenance.php` |
+| Soumissions & notifications | `lib/CatalogSubmission.php`, `lib/NotificationService.php`, `www/proposer-oeuvre.php`, `www/soumissions-catalogue.php` |
+| Navigation listes | `lib/FilmListContext.php`, `lib/CatalogListContext.php` |
 | Schéma | `sql/schema.sql` |
 | CLI migrations | `lib/cli/migrate.php` |
 
 ---
 
-*Dernière mise à jour : mai 2026 — document vivant : mettre à jour le statut des phases à chaque livraison.*
+*Dernière mise à jour : 19 mai 2026 — v0.7.6 (profil/recherche) ; prochaine cible : phase 6.*
