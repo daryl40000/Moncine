@@ -32,7 +32,7 @@ Fonctionnalités métier visées :
 
 ## État actuel
 
-**Version applicative : 0.7.7**
+**Version applicative : 0.7.8**
 
 Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 
@@ -51,12 +51,13 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | **Soumissions catalogue (phase 5, v0.7.4)** | Proposer, valider, refuser ; notifications in-app + e-mail |
 | **Profil & recherche (v0.7.6)** | Ville optionnelle, recherche par pseudo/ville, opt-out recherche, cloche compacte |
 | **Amis & groupes famille (phase 6, v0.7.7)** | Demandes d’ami, groupe famille utilisateur, invitations, admin foyers lecture seule |
+| **Envies groupe & UX (v0.7.8)** | Envies agrégées du groupe, votes « Moi aussi », ajout direct après proposition acceptée |
 | **Migrations SQL** | `SchemaMigrator`, CLI `php lib/cli/migrate.php`, migrations `001` → `016` |
 | **Tests** | PHPUnit (import, catalogue, foyers, soumissions, notifications) |
 
 ### Point d’étape — mai 2026
 
-**Phase 6 validée (v0.7.7).** Amis, groupes famille créés par les utilisateurs, collection partagée conservée. Prochaine évolution : **phase 7** (prêts).
+**Version actuelle : 0.7.8.** Phase 6 (amis & groupes) livrée en v0.7.7 ; envies du groupe et UX ajout rapide en v0.7.8. Prochaine évolution : **phase 7** (prêts).
 
 | Version | Contenu principal |
 |---------|-------------------|
@@ -66,6 +67,7 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | 0.7.4 | Soumissions catalogue + notifications + UX catalogue |
 | 0.7.6 | Ville, recherche utilisateurs, opt-out recherche, cloche notifications |
 | 0.7.7 | Amis, groupes famille, invitations, admin foyers lecture seule |
+| 0.7.8 | Envies du groupe, notifications proposition acceptée, ajout en un clic |
 
 ### Prochaines étapes
 
@@ -695,4 +697,4 @@ Fonctionnalité transversale déjà partiellement en place :
 
 ---
 
-*Dernière mise à jour : 19 mai 2026 — v0.7.7 (phase 6) ; prochaine cible : phase 7 (prêts).*
+*Dernière mise à jour : 19 mai 2026 — v0.7.8 ; prochaine cible : phase 7 (prêts).*
