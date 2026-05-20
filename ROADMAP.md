@@ -32,7 +32,7 @@ Fonctionnalités métier visées :
 
 ## État actuel
 
-**Version applicative : 0.7.6**
+**Version applicative : 0.7.7**
 
 Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 
@@ -50,12 +50,13 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | **Profil (v0.7.2)** | Prénom, pseudo, menu Paramètres / Gestion, navigation fiches |
 | **Soumissions catalogue (phase 5, v0.7.4)** | Proposer, valider, refuser ; notifications in-app + e-mail |
 | **Profil & recherche (v0.7.6)** | Ville optionnelle, recherche par pseudo/ville, opt-out recherche, cloche compacte |
-| **Migrations SQL** | `SchemaMigrator`, CLI `php lib/cli/migrate.php`, migrations `001` → `015` |
+| **Amis & groupes famille (phase 6, v0.7.7)** | Demandes d’ami, groupe famille utilisateur, invitations, admin foyers lecture seule |
+| **Migrations SQL** | `SchemaMigrator`, CLI `php lib/cli/migrate.php`, migrations `001` → `016` |
 | **Tests** | PHPUnit (import, catalogue, foyers, soumissions, notifications) |
 
 ### Point d’étape — mai 2026
 
-**Phase 5 validée.** **v0.7.6** : profil (ville), recherche d’utilisateurs, visibilité dans la recherche. Prochaine évolution : **phase 6** (amis et groupes « famille », un seul groupe actif par personne en v1).
+**Phase 6 validée (v0.7.7).** Amis, groupes famille créés par les utilisateurs, collection partagée conservée. Prochaine évolution : **phase 7** (prêts).
 
 | Version | Contenu principal |
 |---------|-------------------|
@@ -64,6 +65,7 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | 0.7.2 | Profil, menus, navigation Préc./Suiv. entre fiches |
 | 0.7.4 | Soumissions catalogue + notifications + UX catalogue |
 | 0.7.6 | Ville, recherche utilisateurs, opt-out recherche, cloche notifications |
+| 0.7.7 | Amis, groupes famille, invitations, admin foyers lecture seule |
 
 ### Prochaines étapes
 
@@ -73,8 +75,8 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | Phase 4 — Foyers & famille | ✅ Livré (v0.7) |
 | Phase 5 — Soumissions catalogue | ✅ Livré (v0.7.4) |
 | Pré-phase 6 — Profil ville & recherche utilisateurs | ✅ Livré (v0.7.6) |
-| Phase 6 — Amis & groupes famille (foyers utilisateurs) | **Prochaine** |
-| Phase 7 — Prêts entre utilisateurs | À faire |
+| Phase 6 — Amis & groupes famille (foyers utilisateurs) | ✅ Livré (v0.7.7) |
+| Phase 7 — Prêts entre utilisateurs | **Prochaine** |
 | Phase 8 — Stockage fichiers (local + S3) | À faire |
 | Phase 9 — Export PDF & partage visiteur | À faire |
 | Phase 10 — Mes BD | À faire |
@@ -377,16 +379,16 @@ flowchart LR
 
 | # | Tâche |
 |---|--------|
-| 6.1 | **Demandes d’ami** : envoyer / accepter / refuser (e-mail ou pseudo) |
-| 6.2 | Page **Mes amis** (liste, demandes en attente) |
-| 6.3 | **Créer un groupe famille** : deux amis (ou plus) valident la création commune ; nom du groupe |
-| 6.4 | **Inviter un ami** dans le groupe (invitation acceptée par l’invité) |
-| 6.5 | **Quitter le groupe** / transfert du rôle fondateur (règles minimales v1) |
-| 6.6 | **Bibliothèque partagée** : réutiliser `bibliotheque.foyer_id` pour le `foyer_id` du groupe |
-| 6.7 | **Migration v0.7** : foyers admin existants → groupes famille ; fondateur = premier admin ou utilisateur désigné |
-| 6.8 | **Retrait admin** : supprimer ou désactiver la création / affectation foyer par l’admin (`/foyers.php` → lecture seule ou suppression) |
-| 6.9 | Visibilité : profil / wishlist d’un ami **si autorisé** (optionnel v1) |
-| 6.10 | Modération admin : signalement / blocage compte (pas gestion des groupes) |
+| 6.1 | **Demandes d’ami** : envoyer / accepter / refuser (+ notifications) | ✅ |
+| 6.2 | Page **Mes amis** (liste, demandes en attente) | ✅ |
+| 6.3 | **Créer un groupe famille** (nom, un groupe actif par utilisateur) | ✅ |
+| 6.4 | **Inviter un ami** dans le groupe (invitation acceptée par l’invité) | ✅ |
+| 6.5 | **Quitter le groupe** / transfert du rôle fondateur (v1 minimal) | ✅ |
+| 6.6 | **Bibliothèque partagée** : `bibliotheque.foyer_id` du groupe | ✅ |
+| 6.7 | **Migration v0.7** : foyers → groupes + `group_members` | ✅ |
+| 6.8 | **Retrait admin** : `/foyers.php` lecture seule ; comptes sans affectation foyer | ✅ |
+| 6.9 | Visibilité profil / wishlist ami | — (phase ultérieure) |
+| 6.10 | Modération admin signalement / blocage | — (phase ultérieure) |
 
 **Critère terminé :** Alice et Bob sont amis ; ils créent ensemble le groupe « Famille Martin » ; leur collection DVD est commune ; leurs envies restent séparées ; l’admin ne crée plus de foyer depuis l’interface Gestion.
 
@@ -693,4 +695,4 @@ Fonctionnalité transversale déjà partiellement en place :
 
 ---
 
-*Dernière mise à jour : 19 mai 2026 — v0.7.6 (profil/recherche) ; prochaine cible : phase 6.*
+*Dernière mise à jour : 19 mai 2026 — v0.7.7 (phase 6) ; prochaine cible : phase 7 (prêts).*
