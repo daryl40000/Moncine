@@ -10,21 +10,23 @@ Les phases sont **ordonnées par dépendances** : chaque étape s’appuie sur l
 
 | Acteur | Capacités |
 |--------|-----------|
-| **Administrateur** | Gère le catalogue d’œuvres partagé (films, BD, magazines), valide les propositions, enrichit les fiches via TMDB |
-| **Utilisateur** | Gère sa bibliothèque : collection du foyer, **sa** wishlist, **ses** notes et visions |
-| **Sous-utilisateur « famille »** | Même collection physique que le foyer ; wishlist et historique **personnels** |
+| **Administrateur** | Gère le **catalogue** d’œuvres partagé, valide les propositions, enrichit les fiches via TMDB — **ne gère plus les foyers** (phase 6) |
+| **Utilisateur** | **Amis**, création de **groupes famille** avec d’autres amis, bibliothèque partagée du groupe, **sa** wishlist, **ses** notes et visions ; prêts |
+| **Membre d’un groupe « famille »** | Même collection physique que le groupe ; wishlist et historique **personnels** (comme aujourd’hui avec le foyer v0.7) |
 | **Tous** | Ne modifient pas les métadonnées catalogue — seulement les infos de **leur** exemplaire (`support`, format image/son, etc.) |
 
 Fonctionnalités métier visées :
 
-1. Comptes **admin** / **utilisateur** (connexion, gestion admin, changement et réinitialisation de mot de passe)
-2. Foyers et sous-comptes **famille**
-3. **Export PDF** de la bibliothèque (depuis Mes films) et des **envies** (depuis Mes envies)
-4. **Accès visiteur** en lecture seule via URL partagée (bibliothèque du foyer et wishlist personnelle)
-5. Page **Mes BD** (collection + wishlist)
-6. **Soumissions** au catalogue (préremplissage → validation admin)
-7. **Collections de magazines** (titres, numéros, organisation par collection)
-8. **Magazines en PDF** stockés localement + **lecteur PDF** intégré
+1. Comptes **admin** / **utilisateur** (connexion, gestion des comptes, changement et réinitialisation de mot de passe)
+2. **Réseau d’amis** (demandes, acceptation) — **socle** du système social
+3. **Groupes « famille » / foyer** : créés **par les utilisateurs** (amis qui s’associent), avec bibliothèque partagée — **remplace** la gestion admin des foyers (phase 4)
+4. **Prêts** : savoir quoi a été prêté, à qui, quand, et le retour
+5. **Stockage de fichiers** volumineux (PDF magazines, etc.) : dossier partagé type YunoHost + option **stockage objet S3**
+6. **Export PDF** de la bibliothèque / des envies + **accès visiteur** par URL partagée (lecture seule)
+7. Page **Mes BD** (collection + wishlist)
+8. **Soumissions** au catalogue (préremplissage → validation admin)
+9. **Collections de magazines** (titres, numéros, organisation par collection)
+10. **Magazines en PDF** + **lecteur PDF** (s’appuie sur la couche stockage)
 
 ---
 
@@ -53,10 +55,13 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | Phase 3 — Admin catalogue | ✅ Livré (v0.6) |
 | Phase 4 — Foyers & famille | ✅ Livré (v0.7) |
 | Phase 5 — Soumissions catalogue | À faire |
-| Phase 6 — Export PDF & partage visiteur | À faire |
-| Phase 7 — Mes BD | À faire |
-| Phase 8 — Collections de magazines | À faire |
-| Phase 9 — Magazines PDF & lecteur | À faire |
+| Phase 6 — Amis & groupes famille (foyers utilisateurs) | À faire |
+| Phase 7 — Prêts entre utilisateurs | À faire |
+| Phase 8 — Stockage fichiers (local + S3) | À faire |
+| Phase 9 — Export PDF & partage visiteur | À faire |
+| Phase 10 — Mes BD | À faire |
+| Phase 11 — Collections de magazines | À faire |
+| Phase 12 — Magazines PDF & lecteur | À faire |
 
 ---
 
@@ -70,10 +75,13 @@ flowchart TD
     P3[Phase 3 - Admin catalogue]
     P4[Phase 4 - Foyers]
     P5[Phase 5 - Soumissions]
-    P6[Phase 6 - Export PDF et partage]
-    P7[Phase 7 - Mes BD]
-    P8[Phase 8 - Collections magazines]
-    P9[Phase 9 - PDF magazines lecteur]
+    P6[Phase 6 - Amis et groupes famille]
+    P7[Phase 7 - Prets]
+    P8[Phase 8 - Stockage fichiers]
+    P9[Phase 9 - Export PDF et partage]
+    P10[Phase 10 - Mes BD]
+    P11[Phase 11 - Magazines]
+    P12[Phase 12 - PDF magazines]
 
     P1 --> P1b
     P1 --> P2
@@ -81,13 +89,19 @@ flowchart TD
     P1b --> P2
     P2 --> P4
     P3 --> P5
-    P2 --> P6
     P4 --> P6
-    P5 --> P7
-    P2 --> P7
+    P1 --> P6
+    P6 --> P7
     P4 --> P7
-    P7 --> P8
     P8 --> P9
+    P2 --> P9
+    P4 --> P9
+    P5 --> P10
+    P2 --> P10
+    P4 --> P10
+    P8 --> P12
+    P10 --> P11
+    P11 --> P12
 ```
 
 ---
@@ -125,13 +139,17 @@ app_metadata (
 oeuvres              -- catalogue partagé (films, BD, magazines, …)
 bibliotheque         -- lien foyer/user + statut + champs perso exemplaire
 historique           -- visions + notes (+ user_id)
-utilisateurs         -- comptes (role, foyer_id)
-foyers               -- ménage / famille
+utilisateurs         -- comptes (role ; lien groupe via group_members)
+foyers               -- groupes « famille » (type famille), créés par les utilisateurs (phase 6)
+group_members        -- appartenance user ↔ groupe (rôle fondateur / membre)
+friendships          -- liens amis (prérequis pour créer ou rejoindre un groupe)
 catalogue_soumissions
-share_links          -- jetons URL partagée lecture seule (phase 6)
-magazine_collections -- titres / séries de magazines (phase 8)
-magazine_numeros     -- numéros rattachés à une collection (phase 8)
-magazine_fichiers    -- PDF ou chemins locaux (phase 9)
+loans                -- prêts d’exemplaires (phase 7)
+stored_objects       -- métadonnées fichiers (chemin local ou clé S3) (phase 8)
+share_links          -- jetons URL partagée lecture seule (phase 9)
+magazine_collections -- titres / séries de magazines (phase 11)
+magazine_numeros     -- numéros rattachés à une collection (phase 11)
+magazine_fichiers    -- lien vers stored_objects (phase 12)
 schema_migrations
 app_metadata
 sessions             -- si sessions en base
@@ -261,6 +279,8 @@ Pages : `/foyers.php`, `/utilisateurs.php`, `/mon-compte.php`.
 
 **Critère terminé :** deux membres d’un même foyer voient la même collection ; leurs envies et notes restent séparées.
 
+> **Évolution prévue (phase 6)** : le modèle ci-dessus reste **valide techniquement** (tables `foyers`, `foyer_id`, collection partagée), mais la **gouvernance** change. L’admin ne crée plus les foyers : des **amis** créent ensemble un **groupe famille** qui reprend les mêmes droits (bibliothèque commune, envies perso). Les foyers v0.7 seront **migrés** vers ce modèle ; `/foyers.php` admin sera retiré ou remplacé par une gestion côté utilisateur.
+
 ---
 
 ## Phase 5 — Soumissions catalogue
@@ -289,7 +309,151 @@ Pages : `/foyers.php`, `/utilisateurs.php`, `/mon-compte.php`.
 
 ---
 
-## Phase 6 — Export PDF & partage visiteur
+## Phase 6 — Amis & groupes « famille » (nouveau modèle de foyer)
+
+**Objectif :** le **réseau d’amis** devient le socle social. Le **foyer** n’est plus un objet créé par l’**admin** : c’est un **groupe d’amis** de type **famille** (ou **foyer**), que **deux utilisateurs amis** (ou plus) **créent ensemble** et auquel ils invitent d’autres amis. Ce groupe conserve tout ce que fait le foyer actuel : **bibliothèque partagée**, envies et historique **personnels** par membre.
+
+**Dépend de :** phases 1 et 4 (comptes + modèle collection partagée déjà en place — à faire évoluer).
+
+### Principe (remplace la gestion admin des foyers)
+
+| Avant (v0.7, phase 4) | Après (phase 6) |
+|------------------------|-----------------|
+| L’admin crée un foyer et affecte les utilisateurs | Deux **amis** créent ensemble un groupe **famille** |
+| `/foyers.php` réservé admin | **Mes groupes** / **Créer un groupe famille** côté utilisateur |
+| `utilisateurs.foyer_id` imposé par admin | Appartenance via **group_members** ; un user peut appartenir à un groupe (règle à préciser : un seul groupe famille actif ou plusieurs — v1 : **un groupe famille principal**) |
+| Amis et foyers séparés | **Amis d’abord** → puis groupe famille = ancien « foyer » |
+
+```mermaid
+flowchart LR
+    A[Utilisateur A] <-->|demande acceptée| B[Utilisateur B]
+    A --> G[Groupe famille]
+    B --> G
+    G --> C[Collection partagée bibliotheque]
+    A --> W1[Wishlist perso A]
+    B --> W2[Wishlist perso B]
+```
+
+### Migrations SQL prévues
+
+```text
+014_friendships_and_groups.sql
+  - friendships (requester_id, addressee_id, status pending|accepted|blocked, …)
+  - foyers : kind = 'famille' | …, created_by_user_id, created_at
+  - group_members (foyer_id, user_id, role founder|member, joined_at, invited_by)
+  - migration données : chaque foyer v0.7 → groupe famille + membres existants
+  - utilisateurs : foyer_id conservé comme groupe actif ou dérivé de group_members
+```
+
+> Le nom de table **`foyers`** peut être conservé en base pour limiter la casse (migrations 008–011), mais l’**interface** et les **droits** parlent de **groupe famille**.
+
+### Tâches
+
+| # | Tâche |
+|---|--------|
+| 6.1 | **Demandes d’ami** : envoyer / accepter / refuser (e-mail ou pseudo) |
+| 6.2 | Page **Mes amis** (liste, demandes en attente) |
+| 6.3 | **Créer un groupe famille** : deux amis (ou plus) valident la création commune ; nom du groupe |
+| 6.4 | **Inviter un ami** dans le groupe (invitation acceptée par l’invité) |
+| 6.5 | **Quitter le groupe** / transfert du rôle fondateur (règles minimales v1) |
+| 6.6 | **Bibliothèque partagée** : réutiliser `bibliotheque.foyer_id` pour le `foyer_id` du groupe |
+| 6.7 | **Migration v0.7** : foyers admin existants → groupes famille ; fondateur = premier admin ou utilisateur désigné |
+| 6.8 | **Retrait admin** : supprimer ou désactiver la création / affectation foyer par l’admin (`/foyers.php` → lecture seule ou suppression) |
+| 6.9 | Visibilité : profil / wishlist d’un ami **si autorisé** (optionnel v1) |
+| 6.10 | Modération admin : signalement / blocage compte (pas gestion des groupes) |
+
+**Critère terminé :** Alice et Bob sont amis ; ils créent ensemble le groupe « Famille Martin » ; leur collection DVD est commune ; leurs envies restent séparées ; l’admin ne crée plus de foyer depuis l’interface Gestion.
+
+### Ce qui ne change pas (héritage phase 4)
+
+- Collection = lignes `bibliotheque` liées au **groupe** (`foyer_id`).
+- Envies et historique = **par utilisateur** (`user_id`).
+- Sous-comptes « famille » sans e-mail propre : à redéfinir (compte enfant rattaché à un adulte du groupe — phase ultérieure ou règle v1 simplifiée).
+
+### Points d’attention (phase 6)
+
+- **Utilisateur sans groupe** : bibliothèque personnelle seule jusqu’à création ou invitation dans un groupe famille.
+- **Un ou plusieurs groupes** : v1 recommandé = **un groupe famille actif** par utilisateur pour éviter la confusion des collections.
+- **Compatibilité** : sauvegarde obligatoire avant migration ; script de reprise des foyers admin existants.
+
+---
+
+## Phase 7 — Prêts entre utilisateurs
+
+**Objectif :** suivre ce qui a été **prêté** (DVD, BD, magazine…), **à qui**, **quand**, et le **retour** — à un ami Moncine ou à une personne externe (nom libre).
+
+**Dépend de :** phases 4 et 6 (recommandé).
+
+### Migrations SQL prévues
+
+```text
+015_loans.sql
+  - loans (bibliotheque_id, lender_user_id, borrower_user_id NULL,
+    borrower_name TEXT, loaned_at, due_at, returned_at, note)
+```
+
+| # | Tâche |
+|---|--------|
+| 7.1 | Marquer un exemplaire comme **prêté** (date de départ) |
+| 7.2 | Bénéficiaire : utilisateur **ami** ou **nom libre** |
+| 7.3 | Date de retour prévue et **retour effectif** |
+| 7.4 | Vues **Prêts en cours** / **Historique** |
+| 7.5 | Indicateur sur la fiche (« prêté à … ») |
+| 7.6 | Rappels d’échéance — optionnel v1 |
+
+**Critère terminé :** les exemplaires prêtés sont identifiables ; un retour remet l’exemplaire en disponible.
+
+---
+
+## Phase 8 — Stockage de fichiers (dossier partagé & S3)
+
+**Objectif :** stocker les **fichiers volumineux** (PDF magazines, etc.) hors `www/`, avec un dossier personnalisable type **YunoHost** et une option **stockage objet S3** (MinIO, Scaleway, AWS, B2…) pour des volumes économiques.
+
+**Dépend de :** phase 1 (configuration instance). **Prérequis** pour la phase 12 (PDF magazines).
+
+### Configuration cible (exemple YunoHost)
+
+```text
+/home/yunohost.multimedia/share/moncine/
+  ├── objects/     # PDF et binaires
+  ├── posters/     # affiches (migration possible)
+  └── exports/     # PDF générés
+```
+
+| Variable | Exemple | Rôle |
+|----------|---------|------|
+| `MONCINE_DATA_PATH` | `…/data` | SQLite, clés API |
+| `MONCINE_MEDIA_PATH` | `/home/yunohost.multimedia/share/moncine` | Racine médias |
+| `MONCINE_STORAGE_BACKEND` | `local` ou `s3` | Moteur |
+| `MONCINE_S3_*` | endpoint, bucket, clés | Si S3 |
+
+### Migrations SQL prévues
+
+```text
+016_stored_objects.sql
+  - stored_objects (backend local|s3, path_or_key, mime, size_bytes, checksum, …)
+  - app_metadata : chemins et mode de stockage
+```
+
+| # | Tâche |
+|---|--------|
+| 8.1 | Interface **`ObjectStorage`** (put, get, delete, stream) |
+| 8.2 | Backend **filesystem local** (`MONCINE_MEDIA_PATH`) |
+| 8.3 | Backend **S3-compatible** |
+| 8.4 | Config admin : local vs S3, test de connexion |
+| 8.5 | Doc déploiement YunoHost (droits, backup du share) |
+| 8.6 | Lecture des fichiers **via PHP** (pas d’URL publique directe) |
+
+**Critère terminé :** dossier share ou bucket S3 configurable ; le code métier ne dépend plus d’un chemin fixe sous `www/`.
+
+### Points d’attention (phase 8)
+
+- **Coût** : S3 économique en volume ; lifecycle pour archives froides.
+- **Backup** : inclure share local et bucket dans la stratégie de sauvegarde.
+
+---
+
+## Phase 9 — Export PDF & partage visiteur
 
 **Objectif :** permettre d’**exporter en PDF** la bibliothèque et la wishlist depuis leurs pages respectives, et d’ouvrir une **vue visiteur** en lecture seule via une **URL partagée** (sans connexion, sans aucune modification possible).
 
@@ -298,7 +462,7 @@ Pages : `/foyers.php`, `/utilisateurs.php`, `/mon-compte.php`.
 ### Migrations SQL prévues
 
 ```text
-014_share_links.sql
+017_share_links.sql
   - share_links (token_hash, scope collection|wishlist, foyer_id ou user_id,
     label optionnel, expires_at, revoked_at, created_by)
 ```
@@ -307,17 +471,17 @@ Pages : `/foyers.php`, `/utilisateurs.php`, `/mon-compte.php`.
 
 | # | Tâche |
 |---|--------|
-| 6.1 | **Export PDF** depuis **Mes films** : liste de la collection du foyer (filtres / tri courants reflétés dans le document) |
-| 6.2 | **Export PDF** depuis **Mes envies** : liste de la wishlist de l’utilisateur connecté |
-| 6.3 | Mise en page PDF lisible (titres, années, réalisateurs, affiches optionnelles en miniature) |
-| 6.4 | Lien partagé **bibliothèque** : URL publique `/partage/…` → vue lecture seule de la collection du foyer |
-| 6.5 | Lien partagé **wishlist** : URL publique → vue lecture seule de la wishlist de l’utilisateur qui a généré le lien |
-| 6.6 | Gestion des liens : créer, copier, révoquer, expiration optionnelle (page Paramètres ou Mes films / Mes envies) |
-| 6.7 | Pages visiteur : **aucun** formulaire POST, pas de CSRF utile côté visiteur ; pas d’accès admin ni catalogue |
+| 9.1 | **Export PDF** depuis **Mes films** : liste de la collection du foyer (filtres / tri courants reflétés dans le document) |
+| 9.2 | **Export PDF** depuis **Mes envies** : liste de la wishlist de l’utilisateur connecté |
+| 9.3 | Mise en page PDF lisible (titres, années, réalisateurs, affiches optionnelles en miniature) |
+| 9.4 | Lien partagé **bibliothèque** : URL publique `/partage/…` → vue lecture seule de la collection du foyer |
+| 9.5 | Lien partagé **wishlist** : URL publique → vue lecture seule de la wishlist de l’utilisateur qui a généré le lien |
+| 9.6 | Gestion des liens : créer, copier, révoquer, expiration optionnelle (page Paramètres ou Mes films / Mes envies) |
+| 9.7 | Pages visiteur : **aucun** formulaire POST, pas de CSRF utile côté visiteur ; pas d’accès admin ni catalogue |
 
 **Critère terminé :** depuis Mes films, un PDF de la collection peut être téléchargé ; depuis Mes envies, un PDF des envies idem ; un invité avec l’URL partagée consulte la liste sans pouvoir modifier, supprimer ni ajouter.
 
-### Points d’attention (phase 6)
+### Points d’attention (phase 9)
 
 - **Confidentialité** : le lien partagé ne doit pas exposer d’autres données (notes privées d’autres membres, e-mails, etc.).
 - **Sécurité** : jeton long et non devinable ; possibilité de révoquer à tout moment.
@@ -325,43 +489,43 @@ Pages : `/foyers.php`, `/utilisateurs.php`, `/mon-compte.php`.
 
 ---
 
-## Phase 7 — Mes BD
+## Phase 10 — Mes BD
 
 **Objectif :** gérer les bandes dessinées comme les films (collection, envies, statistiques).
 
-**Dépend de :** phases 2, 4 et 6 (recommandé : export / partage films déjà stabilisés).
+**Dépend de :** phases 2, 4 et 9 (recommandé : export / partage films déjà stabilisés).
 
 ### Migrations SQL prévues
 
 ```text
-015_oeuvres_bd_metadata.sql
+018_oeuvres_bd_metadata.sql
   - champs spécifiques BD sur oeuvres (série, tome, ISBN, …)
   - moncine_kind = 'bd'
 ```
 
 | # | Tâche |
 |---|--------|
-| 7.1 | Page Mes BD (collection + wishlist) |
-| 7.2 | Formulaires ajout / modification BD |
-| 7.3 | Import CSV étendu (format BD) |
-| 7.4 | Statistiques et filtres BD |
-| 7.5 | Soumissions BD (réutilise phase 5) |
-| 7.6 | Export PDF et partage visiteur BD (réutilise phase 6) |
+| 10.1 | Page Mes BD (collection + wishlist) |
+| 10.2 | Formulaires ajout / modification BD |
+| 10.3 | Import CSV étendu (format BD) |
+| 10.4 | Statistiques et filtres BD |
+| 10.5 | Soumissions BD (réutilise phase 5) |
+| 10.6 | Export PDF, partage visiteur et prêts BD (réutilise phases 7 et 9) |
 
 **Critère terminé :** une BD peut être ajoutée, classée en collection ou envie, notée et exportée.
 
 ---
 
-## Phase 8 — Collections de magazines
+## Phase 11 — Collections de magazines
 
 **Objectif :** gérer des **collections de magazines** (titre de la revue, numéros, organisation) dans la bibliothèque du foyer, sur le même modèle que films et BD (collection / envies, fiche par numéro ou par parution).
 
-**Dépend de :** phases 4 et 7 (recommandé : foyers + habitudes « type d’œuvre » déjà en place pour BD).
+**Dépend de :** phases 4 et 10 (recommandé : foyers + habitudes « type d’œuvre » déjà en place pour BD).
 
 ### Migrations SQL prévues
 
 ```text
-016_magazine_collections.sql
+019_magazine_collections.sql
   - magazine_collections (nom, éditeur, périodicité, description, …)
   - magazine_numeros (collection_id, numero, date_parution, titre_numero, …)
   - lien bibliotheque / oeuvres ou tables dédiées selon modèle retenu
@@ -370,47 +534,47 @@ Pages : `/foyers.php`, `/utilisateurs.php`, `/mon-compte.php`.
 
 | # | Tâche |
 |---|--------|
-| 8.1 | Modèle de données magazines (collection + numéros) |
-| 8.2 | Page **Mes magazines** (liste des collections, numéros possédés / manquants) |
-| 8.3 | Ajout / édition d’une collection et d’un numéro |
-| 8.4 | Intégration foyer (collection partagée) et envies personnelles |
-| 8.5 | Import / export CSV magazines (schéma à définir) |
-| 8.6 | Filtres et statistiques de base (par collection, par année) |
+| 11.1 | Modèle de données magazines (collection + numéros) |
+| 11.2 | Page **Mes magazines** (liste des collections, numéros possédés / manquants) |
+| 11.3 | Ajout / édition d’une collection et d’un numéro |
+| 11.4 | Intégration foyer (collection partagée) et envies personnelles |
+| 11.5 | Import / export CSV magazines (schéma à définir) |
+| 11.6 | Filtres et statistiques de base (par collection, par année) |
 
 **Critère terminé :** une collection « Tintin magazine » (ex.) peut être créée, ses numéros référencés, et chaque numéro ajouté à la collection du foyer ou aux envies d’un membre.
 
 ---
 
-## Phase 9 — Magazines PDF & lecteur
+## Phase 12 — Magazines PDF & lecteur
 
-**Objectif :** associer un **fichier PDF** à un numéro de magazine déjà référencé, le stocker de façon sécurisée sur le serveur, et proposer un **lecteur PDF** dans l’application (consultation dans le navigateur, sans téléchargement obligatoire).
+**Objectif :** associer un **fichier PDF** à un numéro de magazine, via la **couche stockage (phase 8)**, et proposer un **lecteur PDF** intégré.
 
-**Dépend de :** phase 8 (numéros de magazine en base).
+**Dépend de :** phases 8 et 11 (stockage objets + numéros magazine en base).
 
 ### Migrations SQL prévues
 
 ```text
-017_magazine_pdf.sql
-  - magazine_fichiers (numero_id, chemin_relatif, taille_octets, checksum, uploaded_at)
+020_magazine_pdf.sql
+  - magazine_fichiers (numero_id, stored_object_id, …)
   - métadonnées optionnelles (nombre de pages, langue)
 ```
 
 | # | Tâche |
 |---|--------|
-| 9.1 | Stockage des PDF (`MONCINE_DATA_PATH` / dossier dédié hors `www/`) |
-| 9.2 | Upload admin ou utilisateur autorisé (taille max, types MIME `application/pdf`) |
-| 9.3 | Fiche numéro : lien « Lire le PDF » si fichier présent |
-| 9.4 | Lecteur PDF intégré (page dédiée ou visionneuse embarquée) |
-| 9.5 | Contrôle d’accès (membres du foyer, pas d’URL publique directe vers le fichier) |
-| 9.6 | Sauvegarde / export : documenter l’emplacement des PDF pour la migration de serveur |
+| 12.1 | Upload PDF → `stored_objects` (local ou S3) |
+| 12.2 | Fiche numéro : lien « Lire le PDF » |
+| 12.3 | Lecteur PDF (streaming via ObjectStorage) |
+| 12.4 | Contrôle d’accès (foyer ; pas d’URL publique vers le binaire) |
+| 12.5 | Quotas espace disque / bucket |
+| 12.6 | Doc sauvegarde share YunoHost et bucket S3 |
 
-**Critère terminé :** un numéro possède un PDF consultable depuis Moncine par les membres du foyer ; sans PDF, la fiche numéro reste utilisable (métadonnées seules).
+**Critère terminé :** PDF consultable depuis Moncine ; fichier sous `MONCINE_MEDIA_PATH` ou S3, pas sous `www/`.
 
-### Points d’attention (phase 9)
+### Points d’attention (phase 12)
 
-- **Volume disque** : les PDF peuvent être lourds ; quotas ou alertes admin à prévoir.
-- **Droits d’auteur** : usage personnel / foyer uniquement ; pas de diffusion publique des fichiers.
-- **Performance** : streaming ou affichage par pages selon la taille des fichiers.
+- **Volume** : S3 adapté aux gros catalogues PDF.
+- **Droits d’auteur** : usage personnel / foyer uniquement.
+- **Performance** : streaming par pages.
 
 ---
 
@@ -447,9 +611,12 @@ Fonctionnalité transversale déjà partiellement en place :
 | Collection foyer | `foyer_id` sur `bibliotheque` (collection) |
 | Wishlist | `user_id` personnel |
 | BD | Même table `oeuvres`, type `bd` via `moncine_kind` |
-| Export PDF / partage | PDF généré côté serveur ; liens visiteur par jeton (phase 6) |
-| Magazines | Collections + numéros (phase 8) ; PDF hors web public (phase 9) |
-| Chemins données | Variable `MONCINE_DATA_PATH` (base, clés API, affiches, PDF magazines) |
+| Amis / foyers | Amis = socle ; **groupe famille** = ancien foyer, **créé par les utilisateurs** (plus par l’admin) ; table `foyers` + `group_members` (phase 6) |
+| Prêts | Table `loans` liée à `bibliotheque` (phase 7) |
+| Stockage fichiers | `MONCINE_MEDIA_PATH` + backends `local` / `s3` (phase 8) |
+| Export PDF / partage | PDF généré côté serveur ; liens visiteur par jeton (phase 9) |
+| Magazines | Collections + numéros (phase 11) ; PDF via ObjectStorage (phase 12) |
+| Chemins données | `MONCINE_DATA_PATH` (SQLite, clés) ; `MONCINE_MEDIA_PATH` (objets, affiches) |
 
 ---
 

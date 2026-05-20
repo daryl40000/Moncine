@@ -25,7 +25,10 @@ Application web pour gérer une **dvdthèque personnelle** : films, envies, note
 ### Prochaines étapes (v0.7 → v1.0)
 
 - Soumissions au catalogue
-- Export PDF bibliothèque / envies & liens partagés lecture seule
+- Amis & groupes famille (foyers créés par les utilisateurs, plus par l’admin)
+- Prêts entre utilisateurs
+- Stockage fichiers (dossier share YunoHost + S3)
+- Export PDF & liens partagés lecture seule
 - Mes BD
 - Collections de magazines
 - Magazines PDF & lecteur intégré
