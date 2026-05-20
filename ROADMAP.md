@@ -32,7 +32,7 @@ Fonctionnalités métier visées :
 
 ## État actuel
 
-**Version applicative : 0.7.2**
+**Version applicative : 0.7.4**
 
 Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 
@@ -54,7 +54,7 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 |-------|--------|
 | Phase 3 — Admin catalogue | ✅ Livré (v0.6) |
 | Phase 4 — Foyers & famille | ✅ Livré (v0.7) |
-| Phase 5 — Soumissions catalogue | À faire |
+| Phase 5 — Soumissions catalogue | ✅ Livré (v0.7.4) |
 | Phase 6 — Amis & groupes famille (foyers utilisateurs) | À faire |
 | Phase 7 — Prêts entre utilisateurs | À faire |
 | Phase 8 — Stockage fichiers (local + S3) | À faire |
@@ -144,6 +144,7 @@ foyers               -- groupes « famille » (type famille), créés par les ut
 group_members        -- appartenance user ↔ groupe (rôle fondateur / membre)
 friendships          -- liens amis (prérequis pour créer ou rejoindre un groupe)
 catalogue_soumissions
+notifications          -- alertes in-app (soumissions catalogue, etc.)
 loans                -- prêts d’exemplaires (phase 7)
 stored_objects       -- métadonnées fichiers (chemin local ou clé S3) (phase 8)
 share_links          -- jetons URL partagée lecture seule (phase 9)
@@ -283,9 +284,11 @@ Pages : `/foyers.php`, `/utilisateurs.php`, `/mon-compte.php`.
 
 ---
 
-## Phase 5 — Soumissions catalogue
+## Phase 5 — Soumissions catalogue ✅
 
 **Objectif :** les utilisateurs proposent de nouvelles œuvres ; l’admin valide avant insertion dans `oeuvres`.
+
+**Statut : livré** (v0.7.4, migration `013_catalogue_soumissions.sql`).
 
 **Dépend de :** phase 3 (recommandé) ou phase 1 (minimum).
 
@@ -300,10 +303,12 @@ Pages : `/foyers.php`, `/utilisateurs.php`, `/mon-compte.php`.
 
 | # | Tâche |
 |---|--------|
-| 5.1 | Formulaire « proposer une œuvre » (préremplissage TMDB optionnel) |
-| 5.2 | File d’attente admin (approuver / rejeter / modifier) |
-| 5.3 | À l’approbation : création dans `oeuvres` + notification |
-| 5.4 | Aucune écriture directe dans `oeuvres` par un utilisateur non admin |
+| 5.1 | Formulaire « proposer une œuvre » (préremplissage TMDB optionnel) | ✅ |
+| 5.2 | File d’attente admin (approuver / rejeter / modifier) | ✅ |
+| 5.3 | À l’approbation : création dans `oeuvres` + notification in-app et e-mail | ✅ |
+| 5.4 | Aucune écriture directe dans `oeuvres` par un utilisateur non admin | ✅ |
+
+Pages : `/proposer-oeuvre.php`, `/mes-soumissions.php`, `/soumissions-catalogue.php` (admin).
 
 **Critère terminé :** une proposition validée apparaît dans le catalogue ; une rejetée ne laisse aucune trace dans `oeuvres`.
 
@@ -634,6 +639,7 @@ Fonctionnalité transversale déjà partiellement en place :
 
 ### Historique
 
+- 2026-05-19 — Version **0.7.4** : phase **5** — soumissions au catalogue (proposer, valider, refuser)
 - 2026-05-19 — Version **0.7.2** : menu Gestion / Paramètres, navigation entre fiches et pagination catalogue améliorée
 - 2026-05-19 — Version **0.7.1** : dépôt d’affiche manuel sur une fiche catalogue (admin)
 - 2026-05-16 — Phases **1**, **1 bis** et **2** livrées (comptes, mots de passe, champs exemplaire)
