@@ -7,6 +7,21 @@ Les numéros suivent le [versionnement sémantique](https://semver.org/lang/fr/)
 
 ---
 
+## [0.8.1] — 2026-05-19
+
+### Sécurité
+
+- **Partage visiteur** : limite anti brute-force par **adresse IP** (en plus de la session), quota de **10 liens actifs** par compte, en-têtes `X-Robots-Tag: noindex` et `Cache-Control: no-store` sur les pages `/partage.php` et `/partage-film.php`.
+- **En-têtes globaux** : `Content-Security-Policy` (scripts depuis `/assets/js/` uniquement ; styles inline autorisés pour les graphiques), **HSTS** envoyé uniquement en HTTPS (production).
+- **Recherche SQL** : échappement LIKE unifié via `LikePattern` dans tout le catalogue et les collections.
+- Script inline du catalogue déplacé vers `app.js` (compatible CSP `script-src 'self'`).
+
+### Tests
+
+- `ShareSecurityTest`, `LikePatternTest`, `SecurityHeadersTest`.
+
+---
+
 ## [0.8.0] — 2026-05-19
 
 ### Ajouté

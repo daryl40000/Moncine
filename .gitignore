@@ -12,6 +12,7 @@
 /install_seed/*.zip
 /install_seed/*.ods
 /data/install_seed/
+/data/share_rate_limit/
 
 # Fichiers système
 .DS_Store
