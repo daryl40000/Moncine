@@ -33,9 +33,12 @@ Application web pour gérer une **dvdthèque personnelle** : films, envies, note
 - ~~Amis & groupes famille~~ (v0.7.7)
 - ~~Envies du groupe & ajout rapide~~ (v0.7.8)
 - ~~UX thème sombre & composant filtres (ui-pill)~~ (v0.7.9)
+- ~~Sécurité sociale (recherche, blocage, limites)~~ (v0.7.10)
+- **Partage visiteur** — lien lecture seule Mes films / Mes envies + fiche film (phase 7, prochaine)
+- **EAN multiples** par œuvre catalogue (DVD, Blu-ray, 4K…) — phase 6 bis, pour recherche d’achat plus tard
 - Prêts entre utilisateurs
 - Stockage fichiers (dossier share YunoHost + S3)
-- Export PDF & liens partagés lecture seule
+- Export PDF
 - Mes BD
 - Collections de magazines
 - Magazines PDF & lecteur intégré

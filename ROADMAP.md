@@ -20,19 +20,21 @@ Fonctionnalités métier visées :
 1. Comptes **admin** / **utilisateur** (connexion, gestion des comptes, changement et réinitialisation de mot de passe)
 2. **Réseau d’amis** (demandes, acceptation) — **socle** du système social
 3. **Groupes « famille » / foyer** : créés **par les utilisateurs** (amis qui s’associent), avec bibliothèque partagée — **remplace** la gestion admin des foyers (phase 4)
-4. **Prêts** : savoir quoi a été prêté, à qui, quand, et le retour
-5. **Stockage de fichiers** volumineux (PDF magazines, etc.) : dossier partagé type YunoHost + option **stockage objet S3**
-6. **Export PDF** de la bibliothèque / des envies + **accès visiteur** par URL partagée (lecture seule)
-7. Page **Mes BD** (collection + wishlist)
-8. ~~**Soumissions** au catalogue~~ — **livré v0.7.4** (propositions, validation admin, notifications)
-9. **Collections de magazines** (titres, numéros, organisation par collection)
-10. **Magazines en PDF** + **lecteur PDF** (s’appuie sur la couche stockage)
+4. **Partage visiteur** : lien URL en **lecture seule** vers **Mes films** et **Mes envies** (fiche film consultable, aucune modification)
+5. **Prêts** : savoir quoi a été prêté, à qui, quand, et le retour
+6. **Stockage de fichiers** volumineux (PDF magazines, etc.) : dossier partagé type YunoHost + option **stockage objet S3**
+7. **Export PDF** de la bibliothèque / des envies
+8. Page **Mes BD** (collection + wishlist)
+9. ~~**Soumissions** au catalogue~~ — **livré v0.7.4** (propositions, validation admin, notifications)
+10. **EAN multiples par œuvre** (catalogue) : un code-barres par édition / support (DVD, Blu-ray, 4K…) — socle pour **recherche d’achat** ultérieure
+11. **Collections de magazines** (titres, numéros, organisation par collection)
+12. **Magazines en PDF** + **lecteur PDF** (s’appuie sur la couche stockage)
 
 ---
 
 ## État actuel
 
-**Version applicative : 0.7.9**
+**Version applicative : 0.7.10**
 
 Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 
@@ -53,12 +55,13 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | **Amis & groupes famille (phase 6, v0.7.7)** | Demandes d’ami, groupe famille utilisateur, invitations, admin foyers lecture seule |
 | **Envies groupe & UX (v0.7.8)** | Envies agrégées du groupe, votes « Moi aussi », ajout direct après proposition acceptée |
 | **UX & release (v0.7.9)** | Liens lisibles thème sombre, composant `.ui-pill`, `CHANGELOG.md`, tags `v0.7.x` |
+| **Sécurité sociale (v0.7.10)** | LIKE recherche, rate limit amis/recherche, blocage utilisateur |
 | **Migrations SQL** | `SchemaMigrator`, CLI `php lib/cli/migrate.php`, migrations `001` → `016` |
 | **Tests** | PHPUnit (import, catalogue, foyers, soumissions, notifications) |
 
 ### Point d’étape — mai 2026
 
-**Version actuelle : 0.7.9.** Phase 6 (amis & groupes) livrée en v0.7.7 ; envies du groupe en v0.7.8 ; UX thème sombre et dette release (CHANGELOG, tags, `.ui-pill`) en v0.7.9. Prochaine évolution : **phase 7** (prêts).
+**Version actuelle : 0.7.10.** Phase 6 (amis & groupes) livrée en v0.7.7 ; envies du groupe en v0.7.8 ; UX et sécurité sociale en v0.7.9–0.7.10. **Prochaine évolution : phase 7** (partage visiteur — lien lecture seule Mes films / Mes envies).
 
 | Version | Contenu principal |
 |---------|-------------------|
@@ -70,6 +73,7 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | 0.7.7 | Amis, groupes famille, invitations, admin foyers lecture seule |
 | 0.7.8 | Envies du groupe, notifications proposition acceptée, ajout en un clic |
 | 0.7.9 | UX thème sombre, composant `.ui-pill`, CHANGELOG, tags Git alignés |
+| 0.7.10 | Sécurité sociale (LIKE, rate limit, blocage utilisateur) |
 
 ### Prochaines étapes
 
@@ -80,12 +84,14 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | Phase 5 — Soumissions catalogue | ✅ Livré (v0.7.4) |
 | Pré-phase 6 — Profil ville & recherche utilisateurs | ✅ Livré (v0.7.6) |
 | Phase 6 — Amis & groupes famille (foyers utilisateurs) | ✅ Livré (v0.7.7) |
-| Phase 7 — Prêts entre utilisateurs | **Prochaine** |
-| Phase 8 — Stockage fichiers (local + S3) | À faire |
-| Phase 9 — Export PDF & partage visiteur | À faire |
-| Phase 10 — Mes BD | À faire |
-| Phase 11 — Collections de magazines | À faire |
-| Phase 12 — Magazines PDF & lecteur | À faire |
+| Phase 6 bis — EAN multiples par œuvre (catalogue) | À faire (peut être en parallèle de la phase 7) |
+| Phase 7 — Partage visiteur (lien lecture seule) | **Prochaine** |
+| Phase 8 — Prêts entre utilisateurs | À faire |
+| Phase 9 — Stockage fichiers (local + S3) | À faire |
+| Phase 10 — Export PDF | À faire |
+| Phase 11 — Mes BD | À faire |
+| Phase 12 — Collections de magazines | À faire |
+| Phase 13 — Magazines PDF & lecteur | À faire |
 
 ---
 
@@ -100,12 +106,14 @@ flowchart TD
     P4[Phase 4 - Foyers]
     P5[Phase 5 - Soumissions]
     P6[Phase 6 - Amis et groupes famille]
-    P7[Phase 7 - Prets]
-    P8[Phase 8 - Stockage fichiers]
-    P9[Phase 9 - Export PDF et partage]
-    P10[Phase 10 - Mes BD]
-    P11[Phase 11 - Magazines]
-    P12[Phase 12 - PDF magazines]
+    P6b[Phase 6 bis - EAN catalogue]
+    P7[Phase 7 - Partage visiteur]
+    P8[Phase 8 - Prets]
+    P9[Phase 9 - Stockage fichiers]
+    P10[Phase 10 - Export PDF]
+    P11[Phase 11 - Mes BD]
+    P12[Phase 12 - Magazines]
+    P13[Phase 13 - PDF magazines]
 
     P1 --> P1b
     P1 --> P2
@@ -115,17 +123,21 @@ flowchart TD
     P3 --> P5
     P4 --> P6
     P1 --> P6
-    P6 --> P7
     P4 --> P7
-    P8 --> P9
-    P2 --> P9
-    P4 --> P9
-    P5 --> P10
+    P2 --> P7
+    P3 --> P6b
+    P6b --> P7
+    P6 --> P8
+    P4 --> P8
+    P9 --> P13
     P2 --> P10
     P4 --> P10
-    P8 --> P12
-    P10 --> P11
+    P7 --> P10
+    P5 --> P11
+    P2 --> P11
+    P4 --> P11
     P11 --> P12
+    P12 --> P13
 ```
 
 ---
@@ -410,38 +422,226 @@ flowchart LR
 
 ---
 
-## Phase 7 — Prêts entre utilisateurs
+## Phase 6 bis — EAN multiples par œuvre (catalogue)
 
-**Objectif :** suivre ce qui a été **prêté** (DVD, BD, magazine…), **à qui**, **quand**, et le **retour** — à un ami Moncine ou à une personne externe (nom libre).
+**Objectif :** sur une **fiche catalogue** (`oeuvres`), enregistrer **plusieurs codes EAN** pour le **même film** (ou la même œuvre), selon l’**édition physique** : par exemple un EAN pour le **DVD**, un autre pour le **Blu-ray**, un autre pour le **Blu-ray 4K**.
 
-**Dépend de :** phases 4 et 6 (recommandé).
+Ces codes sont des **métadonnées catalogue** (partagées par tous les foyers), distinctes de l’EAN éventuel saisi sur **un exemplaire** dans `bibliotheque` (mon exemplaire personnel).
+
+**Usage futur :** alimenter une **recherche d’achat** (comparateurs de prix, marketplaces, alertes stock) — phase dédiée **hors périmètre v1** de cette étape ; la phase 6 bis pose uniquement le **modèle de données** et l’**interface de gestion**.
+
+**Dépend de :** phase 3 (catalogue admin) ; `SupportPhysique` (DVD / Blu-ray / Blu-ray 4K) déjà en place pour les exemplaires.
+
+### Situation actuelle
+
+| Emplacement | Rôle aujourd’hui |
+|------------|------------------|
+| `bibliotheque.ean` | Code-barres saisi sur **mon exemplaire** (collection ou envie) |
+| `oeuvres` | Pas de liste d’EAN au niveau catalogue |
+
+### Modèle cible
+
+```text
+oeuvre_eans
+  - id
+  - oeuvre_id       → oeuvres(id)
+  - ean             TEXT NOT NULL   (chiffres uniquement, 8–14 car.)
+  - support_physique TEXT NOT NULL  -- 'dvd' | 'bluray' | 'bluray_4k' | '' (édition générique)
+  - label           TEXT            -- libellé libre optionnel « Édition digibook »
+  - source          TEXT            -- 'manual' | 'import' | 'submission' (optionnel)
+  - created_at
+
+  UNIQUE (oeuvre_id, support_physique)   -- un EAN par type de support et par œuvre
+  UNIQUE (ean)                           -- un EAN ne pointe que vers une œuvre
+```
+
+> Le champ `bibliotheque.ean` reste possible pour l’exemplaire réellement possédé ; à terme, choisir un **support** dans le formulaire peut **proposer** l’EAN catalogue correspondant.
 
 ### Migrations SQL prévues
 
 ```text
-015_loans.sql
+023_oeuvre_eans.sql
+  - table oeuvre_eans (voir ci-dessus)
+  - index oeuvre_id, index ean
+  - migration optionnelle : recopier les EAN distincts déjà présents sur bibliotheque
+    vers oeuvre_eans si support_physique renseigné (script PHP post-migration)
+```
+
+> Numérotation **023** pour ne pas croiser 017 (partage visiteur) ni 018+ (prêts, stockage…). Peut être livrée **en parallèle** de la phase 7.
+
+### Tâches
+
+| # | Tâche |
+|---|--------|
+| 6b.1 | Table + repository `OeuvreEanRepository` (CRUD, liste par `oeuvre_id`, recherche par EAN) |
+| 6b.2 | Fiche **catalogue** (`oeuvre.php` / admin) : section « Codes EAN » avec ajout / suppression par support |
+| 6b.3 | Validation : EAN numérique, longueur, unicité globale, support parmi `SupportPhysique` ou vide |
+| 6b.4 | Soumissions catalogue : champs optionnels EAN + support dans la proposition ; reprise à la validation |
+| 6b.5 | Formulaire **Mes films** / ajout : si support choisi, **suggestion** de l’EAN catalogue (préremplissage `bibliotheque.ean`) |
+| 6b.6 | Import CSV catalogue : colonnes optionnelles `ean_dvd`, `ean_bluray`, `ean_bluray_4k` (ou format lignes multiples) |
+| 6b.7 | Tests PHPUnit : unicité EAN, plusieurs supports sur une œuvre, résolution œuvre par scan EAN |
+
+### Recherche d’achat (phase ultérieure — rappel)
+
+| # | Idée (non livré en 6 bis) |
+|---|---------------------------|
+| — | Rechercher un film par **scan** ou saisie EAN → retrouver l’œuvre catalogue |
+| — | Comparer les prix / disponibilité par support (API externe ou liens) |
+| — | Alertes « bon plan » sur un EAN de la wishlist |
+
+La phase 6 bis **prépare** ces évolutions sans implémenter d’API marchande en v1.
+
+### Critère terminé
+
+Sur la fiche catalogue d’un film, l’admin (ou une proposition validée) peut enregistrer **au moins deux EAN** pour des supports différents (ex. DVD + Blu-ray) ; la recherche par EAN renvoie **une seule** œuvre ; aucun doublon d’EAN sur deux œuvres différentes.
+
+### Points d’attention
+
+- **BD / magazines** : même mécanisme via `moncine_kind` et supports adaptés plus tard (phase 11+).
+- **EAN invalide ou doublon import** : rejet avec message clair en admin.
+- **Confidentialité** : les EAN catalogue ne sont pas des données personnelles ; visibles sur fiche catalogue comme le reste des métadonnées partagées.
+
+---
+
+## Phase 7 — Partage visiteur (lien lecture seule)
+
+**Objectif :** permettre à un utilisateur connecté de **générer un lien** qu’il envoie à un proche (sans compte Moncine). Le **visiteur** ouvre une page publique en **lecture seule** :
+
+- **Mes films** : la collection du **groupe famille** (foyer), comme sur l’écran connecté mais sans boutons d’action ;
+- **Mes envies** : la wishlist **personnelle** de l’utilisateur qui a créé le lien ;
+- **Fiche film** : en cliquant sur un titre, le visiteur voit la fiche (métadonnées catalogue + infos exemplaire partagées), **sans** pouvoir modifier, noter, prêter, supprimer ou accéder au reste du site.
+
+**Aucune modification** n’est possible pour le visiteur : pas de formulaires POST utiles, pas d’accès admin, catalogue, comptes, import, ni aux données d’autres membres (e-mails, notes privées, historique détaillé d’autrui).
+
+**Dépend de :** phases 2 et 4 (collection + wishlist) ; phase 6 utile (groupe famille) mais pas bloquante.
+
+### Principe
+
+| Élément | Règle |
+|---------|--------|
+| Qui crée le lien | Utilisateur **connecté** (Paramètres, Mes films ou Mes envies) |
+| Portée **collection** | `foyer_id` du groupe actif → liste = **Mes films** du foyer |
+| Portée **wishlist** | `user_id` du créateur → liste = **ses** envies uniquement |
+| URL | Chemin dédié, ex. `/partage/{jeton}` — jeton **long**, **aléatoire**, **non devinable** |
+| Stockage jeton | En base : **hash** du jeton uniquement (comme un mot de passe), jamais le jeton en clair après création |
+| Expiration | Optionnelle (`expires_at`) ; révocation immédiate par le propriétaire |
+| Visiteur | **GET uniquement** ; pages hors `Auth::enforceWebAccess()` mais contrôlées par service dédié |
+
+```mermaid
+flowchart LR
+    U[Utilisateur connecté]
+    U -->|Crée lien + copie URL| L[share_links]
+    V[Visiteur sans compte]
+    V -->|GET /partage/token| P[Pages visiteur]
+    P -->|Liste| F[Mes films ou Mes envies]
+    P -->|Clic film| D[Fiche film lecture seule]
+    L -.->|Valide hash + scope| P
+```
+
+### Migrations SQL prévues
+
+```text
+017_share_links.sql
+  - share_links (
+      id, token_hash, scope TEXT NOT NULL,  -- 'collection' | 'wishlist'
+      foyer_id INTEGER NULL,                -- si scope = collection
+      user_id INTEGER NOT NULL,             -- créateur du lien
+      label TEXT,                           -- nom optionnel « Lien famille »
+      created_at, expires_at, revoked_at,
+      last_access_at, access_count
+    )
+  - index sur token_hash (unique), user_id, foyer_id
+```
+
+> Numérotation : **017** (après 016 amis/groupes). Les prêts passeront en **018**.
+
+### Tâches fonctionnelles
+
+| # | Tâche |
+|---|--------|
+| 7.1 | Page **Mes films** / **Mes envies** : bouton « Partager en lecture seule » → création lien + affichage URL à copier |
+| 7.2 | Page **Paramètres** (ou section dédiée) : liste des liens actifs, **révoquer**, date d’expiration, libellé |
+| 7.3 | Route publique **`/partage.php`** (ou rewrite) : validation jeton → redirection vers vue collection ou wishlist |
+| 7.4 | Vue visiteur **liste films** (grille ou liste, alignée sur l’existant) — **sans** barre d’édition, import, quiz |
+| 7.5 | Vue visiteur **liste envies** — idem |
+| 7.6 | Vue visiteur **fiche film** : métadonnées œuvre + exemplaire (support, saga, affiche) ; lien retour vers la liste du partage |
+| 7.7 | Navigation Préc./Suiv. **limitée** aux films visibles dans le scope du lien (pas toute la base) |
+
+### Exigences de sécurité (anti-abus / « piratage »)
+
+| # | Mesure |
+|---|--------|
+| S1 | Jeton **≥ 32 octets** aléatoires (`random_bytes`) ; affiché **une seule fois** à la création |
+| S2 | En base : **`token_hash`** (ex. `hash('sha256', $token)`) — fuite SQL ≠ accès direct |
+| S3 | Chaque requête visiteur : résolution par hash + vérif **non révoqué** + **non expiré** + scope cohérent |
+| S4 | **Rate limiting** sur `/partage/*` (par IP et par jeton) — anti brute-force du token |
+| S5 | **GET seulement** sur routes visiteur ; aucun POST/PUT/DELETE sans session |
+| S6 | Le visiteur **ne peut pas** deviner d’autres `film_id` : fiche accessible **uniquement** si le film appartient au scope du lien (requête filtrée par `share_link_id` + `foyer_id` / `user_id`) |
+| S7 | Pas d’exposition : e-mails, mots de passe, utilisateurs du foyer, envies des **autres** membres, admin, maintenance, TMDB clés API |
+| S8 | Pas d’**énumération** : message générique « Lien invalide ou expiré » (même code HTTP 404 ou 403 selon choix documenté) |
+| S9 | En-têtes : `X-Robots-Tag: noindex`, `Referrer-Policy`, pas de session visiteur inutile |
+| S10 | Journal optionnel : `access_count`, `last_access_at` pour détecter un lien trop diffusé |
+| S11 | Le propriétaire peut **révoquer** instantanément ; changement de foyer / quitter le groupe **invalide** les liens collection concernés |
+
+### Pages et fichiers cibles (indicatif)
+
+| Fichier | Rôle |
+|---------|------|
+| `lib/ShareLinkService.php` | Création, révocation, validation jeton, résolution scope |
+| `lib/ShareLinkRepository.php` | Accès SQL `share_links` |
+| `www/partage.php` | Point d’entrée visiteur (token en query ou path) |
+| `www/gerer-partages.php` | Gestion des liens (connecté, POST + CSRF) |
+| `templates/partage_*.php` | Listes et fiche film **visiteur** (templates séparés des pages membre) |
+| `lib/Auth.php` | Ajouter chemins `/partage.php`, `/partage-film.php` (ou équivalent) à `PUBLIC_PATHS` |
+
+### Critère terminé
+
+1. Depuis **Mes films**, l’utilisateur copie un lien ; un invité voit la **collection du foyer** et peut ouvrir chaque **fiche** en lecture seule.  
+2. Depuis **Mes envies**, il copie un lien ; l’invité voit **ses envies** uniquement.  
+3. L’invité ne peut **rien modifier** ni accéder au reste de Moncine sans connexion.  
+4. Un lien **révoqué** ou **expiré** ne fonctionne plus ; un jeton invalide ne donne aucune information sur l’existence d’un compte.
+
+### Points d’attention (phase 7)
+
+- **Wishlist** = personnelle ; **collection** = partagée par le groupe : deux liens distincts, deux scopes.  
+- **Affiches** : servies comme aujourd’hui si déjà publiques côté app ; pas d’URL directe vers `data/` hors contrôle PHP si politique stricte.  
+- **Export PDF** : reporté à la **phase 10** (même domaine « partage », livrable différent).  
+- Tests PHPUnit : validation jeton, scope film, refus ID hors scope, révocation.
+
+---
+
+## Phase 8 — Prêts entre utilisateurs
+
+**Objectif :** suivre ce qui a été **prêté** (DVD, BD, magazine…), **à qui**, **quand**, et le **retour** — à un ami Moncine ou à une personne externe (nom libre).
+
+**Dépend de :** phases 4, 6 et 7 (recommandé : partage visiteur stabilisé avant prêts).
+
+### Migrations SQL prévues
+
+```text
+018_loans.sql
   - loans (bibliotheque_id, lender_user_id, borrower_user_id NULL,
     borrower_name TEXT, loaned_at, due_at, returned_at, note)
 ```
 
 | # | Tâche |
 |---|--------|
-| 7.1 | Marquer un exemplaire comme **prêté** (date de départ) |
-| 7.2 | Bénéficiaire : utilisateur **ami** ou **nom libre** |
-| 7.3 | Date de retour prévue et **retour effectif** |
-| 7.4 | Vues **Prêts en cours** / **Historique** |
-| 7.5 | Indicateur sur la fiche (« prêté à … ») |
-| 7.6 | Rappels d’échéance — optionnel v1 |
+| 8.1 | Marquer un exemplaire comme **prêté** (date de départ) |
+| 8.2 | Bénéficiaire : utilisateur **ami** ou **nom libre** |
+| 8.3 | Date de retour prévue et **retour effectif** |
+| 8.4 | Vues **Prêts en cours** / **Historique** |
+| 8.5 | Indicateur sur la fiche (« prêté à … ») |
+| 8.6 | Rappels d’échéance — optionnel v1 |
 
 **Critère terminé :** les exemplaires prêtés sont identifiables ; un retour remet l’exemplaire en disponible.
 
 ---
 
-## Phase 8 — Stockage de fichiers (dossier partagé & S3)
+## Phase 9 — Stockage de fichiers (dossier partagé & S3)
 
 **Objectif :** stocker les **fichiers volumineux** (PDF magazines, etc.) hors `www/`, avec un dossier personnalisable type **YunoHost** et une option **stockage objet S3** (MinIO, Scaleway, AWS, B2…) pour des volumes économiques.
 
-**Dépend de :** phase 1 (configuration instance). **Prérequis** pour la phase 12 (PDF magazines).
+**Dépend de :** phase 1 (configuration instance). **Prérequis** pour la phase 13 (PDF magazines).
 
 ### Configuration cible (exemple YunoHost)
 
@@ -462,102 +662,93 @@ flowchart LR
 ### Migrations SQL prévues
 
 ```text
-016_stored_objects.sql
+019_stored_objects.sql
   - stored_objects (backend local|s3, path_or_key, mime, size_bytes, checksum, …)
   - app_metadata : chemins et mode de stockage
 ```
 
 | # | Tâche |
 |---|--------|
-| 8.1 | Interface **`ObjectStorage`** (put, get, delete, stream) |
-| 8.2 | Backend **filesystem local** (`MONCINE_MEDIA_PATH`) |
-| 8.3 | Backend **S3-compatible** |
-| 8.4 | Config admin : local vs S3, test de connexion |
-| 8.5 | Doc déploiement YunoHost (droits, backup du share) |
-| 8.6 | Lecture des fichiers **via PHP** (pas d’URL publique directe) |
+| 9.1 | Interface **`ObjectStorage`** (put, get, delete, stream) |
+| 9.2 | Backend **filesystem local** (`MONCINE_MEDIA_PATH`) |
+| 9.3 | Backend **S3-compatible** |
+| 9.4 | Config admin : local vs S3, test de connexion |
+| 9.5 | Doc déploiement YunoHost (droits, backup du share) |
+| 9.6 | Lecture des fichiers **via PHP** (pas d’URL publique directe) |
 
 **Critère terminé :** dossier share ou bucket S3 configurable ; le code métier ne dépend plus d’un chemin fixe sous `www/`.
 
-### Points d’attention (phase 8)
+### Points d’attention (phase 9)
 
 - **Coût** : S3 économique en volume ; lifecycle pour archives froides.
 - **Backup** : inclure share local et bucket dans la stratégie de sauvegarde.
 
 ---
 
-## Phase 9 — Export PDF & partage visiteur
+## Phase 10 — Export PDF
 
-**Objectif :** permettre d’**exporter en PDF** la bibliothèque et la wishlist depuis leurs pages respectives, et d’ouvrir une **vue visiteur** en lecture seule via une **URL partagée** (sans connexion, sans aucune modification possible).
+**Objectif :** permettre d’**exporter en PDF** la bibliothèque et la wishlist depuis **Mes films** et **Mes envies** (utilisateur connecté).
 
-**Dépend de :** phases 2 et 4 (collection foyer + wishlist personnelle déjà en place).
+**Dépend de :** phases 2, 4 et **7** (mêmes périmètres de données que le partage visiteur).
+
+> Le **partage par lien** (phase 7) est livré **avant** cette phase ; l’export PDF réutilise les listes déjà filtrées côté foyer / utilisateur.
 
 ### Migrations SQL prévues
 
-```text
-017_share_links.sql
-  - share_links (token_hash, scope collection|wishlist, foyer_id ou user_id,
-    label optionnel, expires_at, revoked_at, created_by)
-```
-
-> L’export PDF peut s’appuyer sur les données existantes (pas de table dédiée obligatoire).
+Aucune table obligatoire (génération à la volée). Option : métadonnée `app_metadata` pour modèle de mise en page.
 
 | # | Tâche |
 |---|--------|
-| 9.1 | **Export PDF** depuis **Mes films** : liste de la collection du foyer (filtres / tri courants reflétés dans le document) |
-| 9.2 | **Export PDF** depuis **Mes envies** : liste de la wishlist de l’utilisateur connecté |
-| 9.3 | Mise en page PDF lisible (titres, années, réalisateurs, affiches optionnelles en miniature) |
-| 9.4 | Lien partagé **bibliothèque** : URL publique `/partage/…` → vue lecture seule de la collection du foyer |
-| 9.5 | Lien partagé **wishlist** : URL publique → vue lecture seule de la wishlist de l’utilisateur qui a généré le lien |
-| 9.6 | Gestion des liens : créer, copier, révoquer, expiration optionnelle (page Paramètres ou Mes films / Mes envies) |
-| 9.7 | Pages visiteur : **aucun** formulaire POST, pas de CSRF utile côté visiteur ; pas d’accès admin ni catalogue |
+| 10.1 | **Export PDF** depuis **Mes films** : collection du foyer (filtres / tri courants reflétés) |
+| 10.2 | **Export PDF** depuis **Mes envies** : wishlist personnelle |
+| 10.3 | Mise en page lisible (titres, années, réalisateurs, affiches optionnelles en miniature) |
 
-**Critère terminé :** depuis Mes films, un PDF de la collection peut être téléchargé ; depuis Mes envies, un PDF des envies idem ; un invité avec l’URL partagée consulte la liste sans pouvoir modifier, supprimer ni ajouter.
+**Critère terminé :** depuis Mes films et Mes envies, un PDF téléchargeable reflète la liste affichée à l’écran.
 
-### Points d’attention (phase 9)
+### Points d’attention (phase 10)
 
-- **Confidentialité** : le lien partagé ne doit pas exposer d’autres données (notes privées d’autres membres, e-mails, etc.).
-- **Sécurité** : jeton long et non devinable ; possibilité de révoquer à tout moment.
-- **Wishlist** : le lien est **personnel** (un utilisateur = sa wishlist), la collection partagée suit le **foyer**.
+- Pas d’exposer de données hors périmètre (notes d’autres membres, e-mails).
+- Taille du PDF raisonnable (pagination, limite de lignes si besoin).
 
 ---
 
-## Phase 10 — Mes BD
+## Phase 11 — Mes BD
 
 **Objectif :** gérer les bandes dessinées comme les films (collection, envies, statistiques).
 
-**Dépend de :** phases 2, 4 et 9 (recommandé : export / partage films déjà stabilisés).
+**Dépend de :** phases 2, 4, 7 et 10 (recommandé : partage visiteur et export films stabilisés).
 
 ### Migrations SQL prévues
 
 ```text
-018_oeuvres_bd_metadata.sql
+020_oeuvres_bd_metadata.sql
   - champs spécifiques BD sur oeuvres (série, tome, ISBN, …)
   - moncine_kind = 'bd'
 ```
 
 | # | Tâche |
 |---|--------|
-| 10.1 | Page Mes BD (collection + wishlist) |
-| 10.2 | Formulaires ajout / modification BD |
-| 10.3 | Import CSV étendu (format BD) |
-| 10.4 | Statistiques et filtres BD |
-| 10.5 | Soumissions BD (réutilise phase 5) |
-| 10.6 | Export PDF, partage visiteur et prêts BD (réutilise phases 7 et 9) |
+| 11.1 | Page Mes BD (collection + wishlist) |
+| 11.2 | Formulaires ajout / modification BD |
+| 11.3 | Import CSV étendu (format BD) |
+| 11.4 | Statistiques et filtres BD |
+| 11.5 | Soumissions BD (réutilise phase 5) |
+| 11.6 | Partage visiteur, export PDF et prêts BD (réutilise phases 7, 8 et 10) |
 
 **Critère terminé :** une BD peut être ajoutée, classée en collection ou envie, notée et exportée.
 
 ---
 
-## Phase 11 — Collections de magazines
+## Phase 12 — Collections de magazines
 
 **Objectif :** gérer des **collections de magazines** (titre de la revue, numéros, organisation) dans la bibliothèque du foyer, sur le même modèle que films et BD (collection / envies, fiche par numéro ou par parution).
 
-**Dépend de :** phases 4 et 10 (recommandé : foyers + habitudes « type d’œuvre » déjà en place pour BD).
+**Dépend de :** phases 4 et 11 (recommandé : foyers + habitudes « type d’œuvre » déjà en place pour BD).
 
 ### Migrations SQL prévues
 
 ```text
-019_magazine_collections.sql
+021_magazine_collections.sql
   - magazine_collections (nom, éditeur, périodicité, description, …)
   - magazine_numeros (collection_id, numero, date_parution, titre_numero, …)
   - lien bibliotheque / oeuvres ou tables dédiées selon modèle retenu
@@ -566,43 +757,43 @@ flowchart LR
 
 | # | Tâche |
 |---|--------|
-| 11.1 | Modèle de données magazines (collection + numéros) |
-| 11.2 | Page **Mes magazines** (liste des collections, numéros possédés / manquants) |
-| 11.3 | Ajout / édition d’une collection et d’un numéro |
-| 11.4 | Intégration foyer (collection partagée) et envies personnelles |
-| 11.5 | Import / export CSV magazines (schéma à définir) |
-| 11.6 | Filtres et statistiques de base (par collection, par année) |
+| 12.1 | Modèle de données magazines (collection + numéros) |
+| 12.2 | Page **Mes magazines** (liste des collections, numéros possédés / manquants) |
+| 12.3 | Ajout / édition d’une collection et d’un numéro |
+| 12.4 | Intégration foyer (collection partagée) et envies personnelles |
+| 12.5 | Import / export CSV magazines (schéma à définir) |
+| 12.6 | Filtres et statistiques de base (par collection, par année) |
 
 **Critère terminé :** une collection « Tintin magazine » (ex.) peut être créée, ses numéros référencés, et chaque numéro ajouté à la collection du foyer ou aux envies d’un membre.
 
 ---
 
-## Phase 12 — Magazines PDF & lecteur
+## Phase 13 — Magazines PDF & lecteur
 
-**Objectif :** associer un **fichier PDF** à un numéro de magazine, via la **couche stockage (phase 8)**, et proposer un **lecteur PDF** intégré.
+**Objectif :** associer un **fichier PDF** à un numéro de magazine, via la **couche stockage (phase 9)**, et proposer un **lecteur PDF** intégré.
 
-**Dépend de :** phases 8 et 11 (stockage objets + numéros magazine en base).
+**Dépend de :** phases 9 et 12 (stockage objets + numéros magazine en base).
 
 ### Migrations SQL prévues
 
 ```text
-020_magazine_pdf.sql
+022_magazine_pdf.sql
   - magazine_fichiers (numero_id, stored_object_id, …)
   - métadonnées optionnelles (nombre de pages, langue)
 ```
 
 | # | Tâche |
 |---|--------|
-| 12.1 | Upload PDF → `stored_objects` (local ou S3) |
-| 12.2 | Fiche numéro : lien « Lire le PDF » |
-| 12.3 | Lecteur PDF (streaming via ObjectStorage) |
-| 12.4 | Contrôle d’accès (foyer ; pas d’URL publique vers le binaire) |
-| 12.5 | Quotas espace disque / bucket |
-| 12.6 | Doc sauvegarde share YunoHost et bucket S3 |
+| 13.1 | Upload PDF → `stored_objects` (local ou S3) |
+| 13.2 | Fiche numéro : lien « Lire le PDF » |
+| 13.3 | Lecteur PDF (streaming via ObjectStorage) |
+| 13.4 | Contrôle d’accès (foyer ; pas d’URL publique vers le binaire) |
+| 13.5 | Quotas espace disque / bucket |
+| 13.6 | Doc sauvegarde share YunoHost et bucket S3 |
 
 **Critère terminé :** PDF consultable depuis Moncine ; fichier sous `MONCINE_MEDIA_PATH` ou S3, pas sous `www/`.
 
-### Points d’attention (phase 12)
+### Points d’attention (phase 13)
 
 - **Volume** : S3 adapté aux gros catalogues PDF.
 - **Droits d’auteur** : usage personnel / foyer uniquement.
@@ -647,10 +838,12 @@ Fonctionnalité transversale déjà partiellement en place :
 | Soumissions catalogue | Table `catalogue_soumissions` ; validation admin ; utilisateurs non admin ne créent plus d’œuvres directement (v0.7.4) |
 | Notifications | Table `notifications` ; e-mail optionnel (`MailService`, `MONCINE_MAIL_FROM`) |
 | Amis / foyers | Amis = socle ; **groupe famille** = ancien foyer, **créé par les utilisateurs** (plus par l’admin) ; table `foyers` + `group_members` (phase 6) |
-| Prêts | Table `loans` liée à `bibliotheque` (phase 7) |
-| Stockage fichiers | `MONCINE_MEDIA_PATH` + backends `local` / `s3` (phase 8) |
-| Export PDF / partage | PDF généré côté serveur ; liens visiteur par jeton (phase 9) |
-| Magazines | Collections + numéros (phase 11) ; PDF via ObjectStorage (phase 12) |
+| EAN catalogue | Table `oeuvre_eans` (oeuvre + support + ean unique) ; socle recherche d’achat (phase 6 bis) |
+| Partage visiteur | Jeton hashé, scope collection\|wishlist, pages GET lecture seule (phase 7) |
+| Prêts | Table `loans` liée à `bibliotheque` (phase 8) |
+| Stockage fichiers | `MONCINE_MEDIA_PATH` + backends `local` / `s3` (phase 9) |
+| Export PDF | PDF généré côté serveur (phase 10) |
+| Magazines | Collections + numéros (phase 12) ; PDF via ObjectStorage (phase 13) |
 | Chemins données | `MONCINE_DATA_PATH` (SQLite, clés) ; `MONCINE_MEDIA_PATH` (objets, affiches) |
 
 ---
@@ -699,7 +892,16 @@ Fonctionnalité transversale déjà partiellement en place :
 | CLI migrations | `lib/cli/migrate.php` |
 | Journal des versions | `CHANGELOG.md` |
 | Styles UI (pilules / filtres) | `www/assets/css/style.css` (`.ui-pill`, `.ui-pill-bar`) |
+| Partage visiteur (à venir) | `lib/ShareLinkService.php`, `www/partage.php`, migration `017_share_links.sql` |
+| EAN catalogue (à venir) | `lib/OeuvreEanRepository.php`, migration `023_oeuvre_eans.sql` |
 
 ---
 
-*Dernière mise à jour : 21 mai 2026 — v0.7.9 ; prochaine cible : phase 7 (prêts).*
+### Historique roadmap (récent)
+
+- 2026-05-21 — **Phase 7 redéfinie** : partage visiteur (lien lecture seule Mes films / Mes envies + fiche film) **avant** les prêts ; anciennes phases 7–12 renumérotées en 8–13 ; export PDF séparé (phase 10).
+- 2026-05-21 — **Phase 6 bis** : EAN multiples par œuvre catalogue (DVD / Blu-ray / 4K), préparation recherche d’achat.
+
+---
+
+*Dernière mise à jour : 21 mai 2026 — v0.7.10 ; prochaine cible : **phase 7** (partage visiteur sécurisé).*
