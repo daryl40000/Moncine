@@ -34,22 +34,20 @@ body {
     min-height: 100vh;
 }
 
-/* Liens dans le contenu : couleur explicite (pas le bleu/violet par défaut du navigateur) */
-main a:not(.btn):not(.btn-primary):not(.btn-secondary):not(.btn-sm):not(.logo):not(.add-film-choice__card):not(.add-film-choice__submit):not(.collection-grid__link):not(.collection-kind-filters__btn):not(.collection-view-toggle__btn):not(.collection-toolbar__tab):not(.wishlist-scope-tabs__tab):not(.notification-list__link):not(.list-pager__link):not(.support-filters__link):not(.support-filters__link--active),
+/* Liens de lecture (zones ciblées — pas de sélecteur :not() géant sur tout main) */
 .lead a,
-.hint a:not(.btn),
+.hint a:not(.btn):not(.ui-pill):not(.ui-pill-bar__item),
 .collection-page__footer-links a,
 .alert a,
-.account-page a:not(.btn),
-.social-page a:not(.btn),
-.notifications-page a:not(.btn) {
+.account-page a:not(.btn):not(.ui-pill),
+.social-page a:not(.btn):not(.ui-pill),
+.notifications-page a:not(.btn):not(.ui-pill) {
     color: var(--link);
     text-decoration: underline;
     text-underline-offset: 0.15em;
     text-decoration-thickness: 1px;
 }
 
-main a:not(.btn):not(.logo):not(.add-film-choice__card):not(.collection-kind-filters__btn):not(.collection-view-toggle__btn):not(.collection-toolbar__tab):not(.wishlist-scope-tabs__tab):visited,
 .lead a:visited,
 .hint a:visited,
 .collection-page__footer-links a:visited,
@@ -57,8 +55,6 @@ main a:not(.btn):not(.logo):not(.add-film-choice__card):not(.collection-kind-fil
     color: var(--link-visited);
 }
 
-main a:not(.btn):not(.logo):not(.add-film-choice__card):not(.collection-kind-filters__btn):not(.collection-view-toggle__btn):not(.collection-toolbar__tab):not(.wishlist-scope-tabs__tab):hover,
-main a:not(.btn):not(.logo):not(.add-film-choice__card):not(.collection-kind-filters__btn):not(.collection-view-toggle__btn):not(.collection-toolbar__tab):not(.wishlist-scope-tabs__tab):focus-visible,
 .lead a:hover,
 .hint a:hover,
 .collection-page__footer-links a:hover,
@@ -66,19 +62,109 @@ main a:not(.btn):not(.logo):not(.add-film-choice__card):not(.collection-kind-fil
     color: var(--link-hover);
 }
 
-/* Onglets Mes films : texte foncé sur fond jaune (tous états de lien, y compris :visited) */
-main a.collection-kind-filters__btn.is-active,
-main a.collection-kind-filters__btn.is-active:link,
-main a.collection-kind-filters__btn.is-active:visited,
-main a.collection-kind-filters__btn.is-active:hover,
-main a.collection-kind-filters__btn.is-active:focus-visible,
-main a.collection-view-toggle__btn.is-active,
-main a.collection-view-toggle__btn.is-active:link,
-main a.collection-view-toggle__btn.is-active:visited,
-main a.collection-view-toggle__btn.is-active:hover,
-main a.collection-view-toggle__btn.is-active:focus-visible {
-    color: var(--on-accent);
+/* Pilules de navigation (filtres, onglets) — style autonome, indépendant des liens de contenu */
+.ui-pill-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 1.25rem;
+}
+
+a.ui-pill,
+button.ui-pill {
+    display: inline-block;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
     text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+a.ui-pill:link,
+a.ui-pill:visited {
+    color: var(--text);
+    text-decoration: none;
+}
+
+a.ui-pill:hover,
+button.ui-pill:hover {
+    border-color: var(--accent);
+}
+
+a.ui-pill.ui-pill--active,
+a.ui-pill.ui-pill--active:link,
+a.ui-pill.ui-pill--active:visited,
+a.ui-pill.ui-pill--active:hover,
+a.ui-pill.ui-pill--active:focus-visible,
+button.ui-pill.ui-pill--active {
+    background: var(--accent);
+    border-color: var(--accent-hover);
+    color: var(--on-accent);
+    font-weight: 700;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    text-decoration: none;
+}
+
+a.ui-pill.ui-pill--outline-accent,
+a.ui-pill.ui-pill--outline-accent:link,
+a.ui-pill.ui-pill--outline-accent:visited {
+    margin-left: 0.15rem;
+    border-color: rgba(232, 185, 35, 0.45);
+    color: var(--accent);
+}
+
+a.ui-pill.ui-pill--outline-accent:hover {
+    background: rgba(232, 185, 35, 0.12);
+    color: var(--text);
+}
+
+.ui-pill-bar {
+    display: inline-flex;
+    gap: 0;
+    margin: 0.75rem 0 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+a.ui-pill-bar__item {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+    text-decoration: none;
+    background: var(--bg);
+    border-right: 1px solid var(--border);
+    transition: background 0.15s, color 0.15s;
+}
+
+a.ui-pill-bar__item:last-child {
+    border-right: none;
+}
+
+a.ui-pill-bar__item:link,
+a.ui-pill-bar__item:visited {
+    color: var(--muted);
+    text-decoration: none;
+}
+
+a.ui-pill-bar__item:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+a.ui-pill-bar__item.ui-pill--active,
+a.ui-pill-bar__item.ui-pill--active:link,
+a.ui-pill-bar__item.ui-pill--active:visited,
+a.ui-pill-bar__item.ui-pill--active:hover,
+a.ui-pill-bar__item.ui-pill--active:focus-visible {
+    color: var(--on-accent);
+    font-weight: 700;
+    background: var(--accent);
 }
 
 /* Liens « titre » (films, tableaux) : jaune doré, sans soulignement par défaut */
@@ -1751,50 +1837,6 @@ textarea {
     background: linear-gradient(145deg, var(--bg) 0%, var(--border) 100%);
 }
 
-.collection-view-toggle {
-    display: inline-flex;
-    gap: 0;
-    margin: 0.75rem 0 0;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.collection-view-toggle__btn {
-    padding: 0.4rem 0.85rem;
-    font-size: 0.9rem;
-    color: var(--muted);
-    text-decoration: none;
-    background: var(--bg);
-    border-right: 1px solid var(--border);
-}
-
-.collection-view-toggle__btn:last-child {
-    border-right: none;
-}
-
-.collection-view-toggle__btn:hover {
-    color: var(--text);
-    background: rgba(255, 255, 255, 0.06);
-}
-
-.collection-view-toggle__btn.is-active:hover,
-.collection-view-toggle__btn.is-active:focus-visible,
-.collection-view-toggle__btn.is-active:visited:hover {
-    color: var(--on-accent);
-    background: var(--accent-hover);
-}
-
-.collection-view-toggle__btn.is-active {
-    color: var(--on-accent);
-    font-weight: 700;
-    background: var(--accent);
-}
-
-.collection-view-toggle__btn.is-active:visited {
-    color: var(--on-accent);
-}
-
 .collection-grid-bar {
     display: flex;
     flex-wrap: wrap;
@@ -2071,32 +2113,7 @@ a.support-link:hover {
 }
 
 .support-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
     margin: 1rem 0 1.25rem;
-}
-
-.support-filters__link {
-    display: inline-block;
-    padding: 0.35rem 0.75rem;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    text-decoration: none;
-    font-size: 0.9rem;
-}
-
-.support-filters__link:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-}
-
-.support-filters__link--active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #1a1a22;
-    font-weight: 600;
 }
 
 .export-panel,
@@ -2687,56 +2704,6 @@ textarea {
     display: none !important;
 }
 
-.collection-kind-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 0 0 1.25rem;
-}
-
-.collection-kind-filters__btn {
-    display: inline-block;
-    padding: 0.4rem 0.85rem;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text);
-    text-decoration: none;
-    font-size: 0.9rem;
-}
-
-.collection-kind-filters__btn:hover {
-    border-color: var(--accent);
-}
-
-.collection-kind-filters__btn.is-active {
-    background: var(--accent);
-    border-color: var(--accent-hover);
-    color: var(--on-accent);
-    font-weight: 700;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-    text-decoration: none;
-}
-
-.collection-kind-filters__btn.is-active:hover,
-.collection-kind-filters__btn.is-active:focus-visible,
-.collection-kind-filters__btn.is-active:visited {
-    color: var(--on-accent);
-    background: var(--accent-hover);
-    border-color: var(--accent-hover);
-}
-
-.collection-kind-filters__btn--sagas {
-    margin-left: 0.15rem;
-    border-color: rgba(232, 185, 35, 0.45);
-    color: var(--accent);
-}
-
-.collection-kind-filters__btn--sagas:hover {
-    background: rgba(232, 185, 35, 0.12);
-    color: var(--text);
-}
-
 .tag--kind {
     display: inline-block;
     padding: 0.15rem 0.5rem;
@@ -2821,36 +2788,6 @@ textarea {
 
 .catalog-submission-table td {
     vertical-align: top;
-}
-
-/* Mes envies — onglets groupe */
-.wishlist-scope-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 0 0 1rem;
-}
-
-.wishlist-scope-tabs__tab {
-    display: inline-block;
-    padding: 0.45rem 0.9rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 0.95rem;
-}
-
-.wishlist-scope-tabs__tab:hover {
-    color: var(--text);
-    border-color: var(--accent);
-}
-
-.wishlist-scope-tabs__tab--active {
-    color: var(--accent);
-    border-color: var(--accent);
-    background: rgba(232, 185, 35, 0.12);
-    font-weight: 600;
 }
 
 .wishlist-vote-badge {
