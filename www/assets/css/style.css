@@ -1,15 +1,24 @@
 /* Moncine — styles de base (thème sombre « cinéma ») */
 
 :root {
+    color-scheme: dark;
     --bg: #0f0f12;
     --surface: #1a1a22;
+    --surface-muted: #22222e;
     --text: #f2f2f5;
-    --muted: #a0a0b0;
+    --muted: #b4b4c4;
     --accent: #e8b923;
     --accent-hover: #f5cc4a;
     --border: #2e2e3a;
     --success: #4ade80;
     --warning: #fbbf24;
+    /* Liens : tons clairs lisibles sur fond sombre (évite bleu/violet navigateur) */
+    --link: #f5d76e;
+    --link-hover: #fff0b8;
+    --link-visited: #e8d4a8;
+    --link-admin: #c5e8ff;
+    --link-secondary: #d4c4ff;
+    --on-accent: #0a0a0e;
 }
 
 * {
@@ -23,6 +32,88 @@ body {
     color: var(--text);
     line-height: 1.5;
     min-height: 100vh;
+}
+
+/* Liens dans le contenu : couleur explicite (pas le bleu/violet par défaut du navigateur) */
+main a:not(.btn):not(.btn-primary):not(.btn-secondary):not(.btn-sm):not(.logo):not(.add-film-choice__card):not(.add-film-choice__submit):not(.collection-grid__link):not(.collection-kind-filters__btn):not(.collection-view-toggle__btn):not(.collection-toolbar__tab):not(.wishlist-scope-tabs__tab):not(.notification-list__link):not(.list-pager__link):not(.support-filters__link):not(.support-filters__link--active),
+.lead a,
+.hint a:not(.btn),
+.collection-page__footer-links a,
+.alert a,
+.account-page a:not(.btn),
+.social-page a:not(.btn),
+.notifications-page a:not(.btn) {
+    color: var(--link);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    text-decoration-thickness: 1px;
+}
+
+main a:not(.btn):not(.logo):not(.add-film-choice__card):not(.collection-kind-filters__btn):not(.collection-view-toggle__btn):not(.collection-toolbar__tab):not(.wishlist-scope-tabs__tab):visited,
+.lead a:visited,
+.hint a:visited,
+.collection-page__footer-links a:visited,
+.alert a:visited {
+    color: var(--link-visited);
+}
+
+main a:not(.btn):not(.logo):not(.add-film-choice__card):not(.collection-kind-filters__btn):not(.collection-view-toggle__btn):not(.collection-toolbar__tab):not(.wishlist-scope-tabs__tab):hover,
+main a:not(.btn):not(.logo):not(.add-film-choice__card):not(.collection-kind-filters__btn):not(.collection-view-toggle__btn):not(.collection-toolbar__tab):not(.wishlist-scope-tabs__tab):focus-visible,
+.lead a:hover,
+.hint a:hover,
+.collection-page__footer-links a:hover,
+.alert a:hover {
+    color: var(--link-hover);
+}
+
+/* Onglets Mes films : texte foncé sur fond jaune (tous états de lien, y compris :visited) */
+main a.collection-kind-filters__btn.is-active,
+main a.collection-kind-filters__btn.is-active:link,
+main a.collection-kind-filters__btn.is-active:visited,
+main a.collection-kind-filters__btn.is-active:hover,
+main a.collection-kind-filters__btn.is-active:focus-visible,
+main a.collection-view-toggle__btn.is-active,
+main a.collection-view-toggle__btn.is-active:link,
+main a.collection-view-toggle__btn.is-active:visited,
+main a.collection-view-toggle__btn.is-active:hover,
+main a.collection-view-toggle__btn.is-active:focus-visible {
+    color: var(--on-accent);
+    text-decoration: none;
+}
+
+/* Liens « titre » (films, tableaux) : jaune doré, sans soulignement par défaut */
+.film-link,
+.films-table--sortable th a,
+.breadcrumb a,
+a.saga-link,
+.sagas-list__link,
+a.personne-link,
+a.support-link,
+.collection-grid-sort__link,
+.stats-ranked-list__link,
+.support-chart__link,
+.add-film-choice-intro__title {
+    color: var(--link);
+    text-decoration: none;
+}
+
+.film-link:hover,
+.films-table--sortable th a:hover,
+.breadcrumb a:hover,
+a.saga-link:hover,
+.sagas-list__link:hover,
+a.personne-link:hover,
+a.support-link:hover,
+.collection-grid-sort__link:hover,
+.stats-ranked-list__link:hover,
+.support-chart__link:hover {
+    color: var(--link-hover);
+    text-decoration: underline;
+}
+
+.films-table--sortable th.sorted a {
+    color: var(--link-hover);
+    font-weight: 600;
 }
 
 .container {
@@ -57,11 +148,11 @@ body {
     width: 3.5rem;
     height: 3.5rem;
     object-fit: contain;
-    filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.45));
+    filter: drop-shadow(0 0 8px rgba(232, 185, 35, 0.45));
 }
 
 .logo:hover .logo__img {
-    filter: drop-shadow(0 0 12px rgba(0, 230, 255, 0.65));
+    filter: drop-shadow(0 0 12px rgba(245, 204, 74, 0.65));
 }
 
 .site-header__brand {
@@ -89,7 +180,7 @@ body {
 .header-notifications:focus-visible,
 .header-notifications--current {
     color: var(--accent);
-    background: rgba(0, 210, 255, 0.08);
+    background: rgba(232, 185, 35, 0.12);
 }
 
 .header-notifications__icon {
@@ -257,6 +348,11 @@ textarea {
 .alert-info {
     background: #1e293b;
     border: 1px solid #334155;
+    color: var(--text);
+}
+
+.alert-info a {
+    color: var(--link-hover);
 }
 
 .alert-success {
@@ -325,13 +421,13 @@ textarea {
 }
 
 .btn-accent {
-    background: #6366f1;
-    color: #fff;
+    background: var(--accent);
+    color: #1a1a10;
     font-weight: 600;
 }
 
 .btn-accent:hover {
-    background: #818cf8;
+    background: var(--accent-hover);
 }
 
 .form-actions--split {
@@ -629,8 +725,8 @@ textarea {
 }
 
 .rating-badge--pas_mal {
-    color: #93c5fd;
-    border: 1px solid #93c5fd;
+    color: #b8dcff;
+    border: 1px solid #7eb8e8;
 }
 
 .rating-badge--pourquoi_pas {
@@ -654,7 +750,7 @@ textarea {
     font-size: 1rem;
     font-weight: 700;
     color: var(--accent);
-    background: rgba(99, 102, 241, 0.12);
+    background: rgba(232, 185, 35, 0.15);
     border-radius: 6px;
 }
 
@@ -711,7 +807,7 @@ textarea {
     margin: 0 0.25rem 0.25rem 0;
     padding: 0.15rem 0.45rem;
     font-size: 0.75rem;
-    background: rgba(99, 102, 241, 0.15);
+    background: rgba(232, 185, 35, 0.15);
     border-radius: 4px;
     color: var(--accent);
 }
@@ -888,7 +984,7 @@ textarea {
 
 .add-film-choice__card--wishlist:hover,
 .add-film-choice__card--wishlist .add-film-choice__submit:hover {
-    border-color: #7dd3fc;
+    border-color: var(--link-secondary);
 }
 
 .add-film-choice__form:focus-within {
@@ -951,7 +1047,7 @@ textarea {
 
 .catalog-title-autocomplete__option:hover,
 .catalog-title-autocomplete__option.is-active {
-    background: rgba(0, 210, 255, 0.12);
+    background: rgba(232, 185, 35, 0.12);
 }
 
 .catalog-title-autocomplete__option-label {
@@ -983,7 +1079,7 @@ textarea {
     padding: 0.5rem 0.75rem;
     border: 1px dashed var(--border);
     border-radius: 8px;
-    background: rgba(0, 210, 255, 0.06);
+    background: rgba(232, 185, 35, 0.08);
 }
 
 /* Barre de navigation discrète (fiches film, pagination catalogue) */
@@ -1048,7 +1144,7 @@ textarea {
 }
 
 .list-pager__link {
-    color: var(--accent, #7dd3fc);
+    color: var(--link);
     text-decoration: none;
     padding: 0.15rem 0;
 }
@@ -1056,7 +1152,7 @@ textarea {
 .list-pager__link:hover,
 .list-pager__link:focus-visible {
     text-decoration: underline;
-    color: var(--text);
+    color: var(--link-hover);
 }
 
 .list-pager__link.is-disabled {
@@ -1097,7 +1193,7 @@ textarea {
 .list-pager__goto-btn {
     font: inherit;
     font-size: 0.85rem;
-    color: var(--accent, #7dd3fc);
+    color: var(--link);
     background: none;
     border: none;
     padding: 0.15rem 0.35rem;
@@ -1107,7 +1203,7 @@ textarea {
 
 .list-pager__goto-btn:hover,
 .list-pager__goto-btn:focus-visible {
-    color: var(--text);
+    color: var(--link-hover);
 }
 
 #film-detail,
@@ -1151,7 +1247,12 @@ textarea {
 }
 
 .site-nav__admin {
-    color: #7dd3fc;
+    color: var(--link-admin);
+}
+
+.site-nav__menu--gestion .site-nav__menu-summary,
+.site-nav__submenu .site-nav__admin {
+    color: var(--link-admin);
 }
 
 .site-nav__settings {
@@ -1673,14 +1774,25 @@ textarea {
 }
 
 .collection-view-toggle__btn:hover {
-    color: var(--accent);
-    background: rgba(0, 0, 0, 0.03);
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.collection-view-toggle__btn.is-active:hover,
+.collection-view-toggle__btn.is-active:focus-visible,
+.collection-view-toggle__btn.is-active:visited:hover {
+    color: var(--on-accent);
+    background: var(--accent-hover);
 }
 
 .collection-view-toggle__btn.is-active {
-    color: var(--accent);
-    font-weight: 600;
-    background: var(--card, var(--bg));
+    color: var(--on-accent);
+    font-weight: 700;
+    background: var(--accent);
+}
+
+.collection-view-toggle__btn.is-active:visited {
+    color: var(--on-accent);
 }
 
 .collection-grid-bar {
@@ -2241,24 +2353,13 @@ textarea {
 }
 
 .film-link {
-    color: var(--accent);
-    text-decoration: none;
     font-weight: 500;
-}
-
-.film-link:hover {
-    text-decoration: underline;
 }
 
 .breadcrumb {
     color: var(--muted);
     font-size: 0.9rem;
     margin-bottom: 1rem;
-}
-
-.breadcrumb a {
-    color: var(--accent);
-    text-decoration: none;
 }
 
 .film-detail {
@@ -2493,7 +2594,7 @@ textarea {
 }
 
 .support-chart__bar {
-    background: linear-gradient(90deg, rgba(99, 102, 241, 0.45), rgba(129, 140, 248, 0.85));
+    background: linear-gradient(90deg, rgba(232, 185, 35, 0.45), rgba(245, 204, 74, 0.85));
 }
 
 .support-chart__pct {
@@ -2610,19 +2711,29 @@ textarea {
 
 .collection-kind-filters__btn.is-active {
     background: var(--accent);
-    border-color: var(--accent);
-    color: #1a1a10;
-    font-weight: 600;
+    border-color: var(--accent-hover);
+    color: var(--on-accent);
+    font-weight: 700;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    text-decoration: none;
+}
+
+.collection-kind-filters__btn.is-active:hover,
+.collection-kind-filters__btn.is-active:focus-visible,
+.collection-kind-filters__btn.is-active:visited {
+    color: var(--on-accent);
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
 }
 
 .collection-kind-filters__btn--sagas {
     margin-left: 0.15rem;
-    border-color: rgba(0, 210, 255, 0.45);
+    border-color: rgba(232, 185, 35, 0.45);
     color: var(--accent);
 }
 
 .collection-kind-filters__btn--sagas:hover {
-    background: rgba(0, 210, 255, 0.12);
+    background: rgba(232, 185, 35, 0.12);
     color: var(--text);
 }
 
@@ -2631,13 +2742,13 @@ textarea {
     padding: 0.15rem 0.5rem;
     font-size: 0.8rem;
     border-radius: 4px;
-    background: rgba(99, 102, 241, 0.12);
+    background: rgba(232, 185, 35, 0.12);
     color: var(--text);
     white-space: nowrap;
 }
 
 .tag--kind-serie {
-    background: rgba(56, 189, 248, 0.15);
+    background: rgba(184, 220, 255, 0.15);
 }
 
 .tag--kind-documentaire {
@@ -2680,25 +2791,25 @@ textarea {
 }
 
 .submission-badge--pending {
-    background: #fff3cd;
-    color: #664d03;
+    background: rgba(251, 191, 36, 0.2);
+    color: #fde68a;
 }
 
 .submission-badge--approved {
-    background: #d1e7dd;
-    color: #0f5132;
+    background: rgba(74, 222, 128, 0.15);
+    color: #86efac;
 }
 
 .submission-badge--rejected {
-    background: #f8d7da;
-    color: #842029;
+    background: rgba(248, 113, 113, 0.15);
+    color: #fca5a5;
 }
 
 .submission-user-note {
     margin: 1rem 0;
     padding: 0.75rem 1rem;
-    border-left: 3px solid var(--accent, #3d6b9c);
-    background: var(--surface-muted, #f4f6f8);
+    border-left: 3px solid var(--accent);
+    background: var(--surface-muted);
 }
 
 .form-actions--stack {
@@ -2738,7 +2849,7 @@ textarea {
 .wishlist-scope-tabs__tab--active {
     color: var(--accent);
     border-color: var(--accent);
-    background: rgba(0, 210, 255, 0.08);
+    background: rgba(232, 185, 35, 0.12);
     font-weight: 600;
 }
 
@@ -2774,11 +2885,11 @@ textarea {
 }
 
 .notification-list__item {
-    border-bottom: 1px solid var(--border, #e2e6ea);
+    border-bottom: 1px solid var(--border);
 }
 
 .notification-list__item--unread {
-    background: var(--surface-muted, #f4f8fc);
+    background: var(--surface-muted);
 }
 
 .notification-list__link {
@@ -2789,7 +2900,15 @@ textarea {
 }
 
 .notification-list__link:hover {
-    background: var(--surface-hover, #eef2f6);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.notification-list__link .notification-list__title {
+    color: var(--link);
+}
+
+.notification-list__link:hover .notification-list__title {
+    color: var(--link-hover);
 }
 
 .notification-list__title {
