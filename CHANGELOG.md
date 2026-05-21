@@ -7,6 +7,24 @@ Les numéros suivent le [versionnement sémantique](https://semver.org/lang/fr/)
 
 ---
 
+## [0.8.2] — 2026-05-19
+
+### Ajouté
+
+- **Versions recherchées sur les envies** : table `wishlist_targets` (migration `024_wishlist_targets.sql`) — plusieurs combinaisons **support + EAN** par film en wishlist, distinctes de l’EAN catalogue et de l’exemplaire futur en collection.
+- Fiche film (envie) : panneau « Versions que je cherche », ajout manuel ou depuis les EAN catalogue de l’œuvre.
+- Liste **Mes envies** : colonne récapitulative des versions recherchées.
+
+### Tests
+
+- `WishlistTargetsTest` (ajouts multiples, promotion vers collection, import depuis EAN catalogue).
+
+### Prochaine évolution (roadmap)
+
+- Phase **7 bis** : affichage des versions sur le partage visiteur, comparateur de prix (support + EAN), pré-remplissage du support au « J’ai acheté ».
+
+---
+
 ## [0.8.1] — 2026-05-19
 
 ### Sécurité
