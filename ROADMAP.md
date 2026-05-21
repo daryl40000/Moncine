@@ -20,13 +20,13 @@ Fonctionnalités métier visées :
 1. Comptes **admin** / **utilisateur** (connexion, gestion des comptes, changement et réinitialisation de mot de passe)
 2. **Réseau d’amis** (demandes, acceptation) — **socle** du système social
 3. **Groupes « famille » / foyer** : créés **par les utilisateurs** (amis qui s’associent), avec bibliothèque partagée — **remplace** la gestion admin des foyers (phase 4)
-4. **Partage visiteur** : lien URL en **lecture seule** vers **Mes films** et **Mes envies** (fiche film consultable, aucune modification)
+4. ~~**Partage visiteur**~~ — **livré v0.8.0** : lien URL en **lecture seule** vers **Mes films** et **Mes envies** (fiche film consultable, aucune modification)
 5. **Prêts** : savoir quoi a été prêté, à qui, quand, et le retour
 6. **Stockage de fichiers** volumineux (PDF magazines, etc.) : dossier partagé type YunoHost + option **stockage objet S3**
 7. **Export PDF** de la bibliothèque / des envies
 8. Page **Mes BD** (collection + wishlist)
 9. ~~**Soumissions** au catalogue~~ — **livré v0.7.4** (propositions, validation admin, notifications)
-10. **EAN multiples par œuvre** (catalogue) : un code-barres par édition / support (DVD, Blu-ray, 4K…) — socle pour **recherche d’achat** ultérieure
+10. ~~**EAN multiples par œuvre** (catalogue)~~ — **livré v0.8.0** : un code-barres par édition / support (DVD, Blu-ray, 4K…) — socle pour **recherche d’achat** ultérieure
 11. **Collections de magazines** (titres, numéros, organisation par collection)
 12. **Magazines en PDF** + **lecteur PDF** (s’appuie sur la couche stockage)
 
@@ -34,7 +34,7 @@ Fonctionnalités métier visées :
 
 ## État actuel
 
-**Version applicative : 0.7.10**
+**Version applicative : 0.8.0**
 
 Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 
@@ -56,12 +56,14 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | **Envies groupe & UX (v0.7.8)** | Envies agrégées du groupe, votes « Moi aussi », ajout direct après proposition acceptée |
 | **UX & release (v0.7.9)** | Liens lisibles thème sombre, composant `.ui-pill`, `CHANGELOG.md`, tags `v0.7.x` |
 | **Sécurité sociale (v0.7.10)** | LIKE recherche, rate limit amis/recherche, blocage utilisateur |
-| **Migrations SQL** | `SchemaMigrator`, CLI `php lib/cli/migrate.php`, migrations `001` → `016` |
+| **EAN catalogue (v0.8.0)** | Table `oeuvre_eans`, admin fiche œuvre, suggestion EAN exemplaire |
+| **Partage visiteur (v0.8.0)** | Liens lecture seule collection / envies, pages publiques sécurisées |
+| **Migrations SQL** | `SchemaMigrator`, CLI `php lib/cli/migrate.php`, migrations `001` → `016`, `017`, `023` |
 | **Tests** | PHPUnit (import, catalogue, foyers, soumissions, notifications) |
 
 ### Point d’étape — mai 2026
 
-**Version actuelle : 0.7.10.** Phase 6 (amis & groupes) livrée en v0.7.7 ; envies du groupe en v0.7.8 ; UX et sécurité sociale en v0.7.9–0.7.10. **Prochaine évolution : phase 7** (partage visiteur — lien lecture seule Mes films / Mes envies).
+**Version actuelle : 0.8.0.** Phases 6 bis (EAN catalogue) et 7 (partage visiteur) livrées. **Prochaine évolution : phase 8** (prêts entre utilisateurs).
 
 | Version | Contenu principal |
 |---------|-------------------|
@@ -74,6 +76,7 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | 0.7.8 | Envies du groupe, notifications proposition acceptée, ajout en un clic |
 | 0.7.9 | UX thème sombre, composant `.ui-pill`, CHANGELOG, tags Git alignés |
 | 0.7.10 | Sécurité sociale (LIKE, rate limit, blocage utilisateur) |
+| 0.8.0 | EAN multiples catalogue + partage visiteur (liens lecture seule) |
 
 ### Prochaines étapes
 
@@ -84,9 +87,9 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | Phase 5 — Soumissions catalogue | ✅ Livré (v0.7.4) |
 | Pré-phase 6 — Profil ville & recherche utilisateurs | ✅ Livré (v0.7.6) |
 | Phase 6 — Amis & groupes famille (foyers utilisateurs) | ✅ Livré (v0.7.7) |
-| Phase 6 bis — EAN multiples par œuvre (catalogue) | À faire (peut être en parallèle de la phase 7) |
-| Phase 7 — Partage visiteur (lien lecture seule) | **Prochaine** |
-| Phase 8 — Prêts entre utilisateurs | À faire |
+| Phase 6 bis — EAN multiples par œuvre (catalogue) | ✅ Livré (v0.8.0) |
+| Phase 7 — Partage visiteur (lien lecture seule) | ✅ Livré (v0.8.0) |
+| Phase 8 — Prêts entre utilisateurs | **Prochaine** |
 | Phase 9 — Stockage fichiers (local + S3) | À faire |
 | Phase 10 — Export PDF | À faire |
 | Phase 11 — Mes BD | À faire |
@@ -424,6 +427,8 @@ flowchart LR
 
 ## Phase 6 bis — EAN multiples par œuvre (catalogue)
 
+**Statut : livré** (v0.8.0, migration `023_oeuvre_eans.sql`).
+
 **Objectif :** sur une **fiche catalogue** (`oeuvres`), enregistrer **plusieurs codes EAN** pour le **même film** (ou la même œuvre), selon l’**édition physique** : par exemple un EAN pour le **DVD**, un autre pour le **Blu-ray**, un autre pour le **Blu-ray 4K**.
 
 Ces codes sont des **métadonnées catalogue** (partagées par tous les foyers), distinctes de l’EAN éventuel saisi sur **un exemplaire** dans `bibliotheque` (mon exemplaire personnel).
@@ -432,12 +437,14 @@ Ces codes sont des **métadonnées catalogue** (partagées par tous les foyers),
 
 **Dépend de :** phase 3 (catalogue admin) ; `SupportPhysique` (DVD / Blu-ray / Blu-ray 4K) déjà en place pour les exemplaires.
 
-### Situation actuelle
+### Situation actuelle (v0.8.0)
 
-| Emplacement | Rôle aujourd’hui |
-|------------|------------------|
-| `bibliotheque.ean` | Code-barres saisi sur **mon exemplaire** (collection ou envie) |
-| `oeuvres` | Pas de liste d’EAN au niveau catalogue |
+| Emplacement | Rôle |
+|------------|------|
+| `bibliotheque.ean` | Code-barres sur **mon exemplaire** (collection ou envie) |
+| `oeuvre_eans` | EAN **catalogue** par œuvre et par support (DVD / Blu-ray / 4K) |
+| Fiche œuvre admin | Section « Codes EAN catalogue » + formulaire d’ajout |
+| Fiche film | Suggestion d’EAN catalogue selon le support choisi |
 
 ### Modèle cible
 
@@ -473,13 +480,13 @@ oeuvre_eans
 
 | # | Tâche |
 |---|--------|
-| 6b.1 | Table + repository `OeuvreEanRepository` (CRUD, liste par `oeuvre_id`, recherche par EAN) |
-| 6b.2 | Fiche **catalogue** (`oeuvre.php` / admin) : section « Codes EAN » avec ajout / suppression par support |
-| 6b.3 | Validation : EAN numérique, longueur, unicité globale, support parmi `SupportPhysique` ou vide |
-| 6b.4 | Soumissions catalogue : champs optionnels EAN + support dans la proposition ; reprise à la validation |
-| 6b.5 | Formulaire **Mes films** / ajout : si support choisi, **suggestion** de l’EAN catalogue (préremplissage `bibliotheque.ean`) |
-| 6b.6 | Import CSV catalogue : colonnes optionnelles `ean_dvd`, `ean_bluray`, `ean_bluray_4k` (ou format lignes multiples) |
-| 6b.7 | Tests PHPUnit : unicité EAN, plusieurs supports sur une œuvre, résolution œuvre par scan EAN |
+| 6b.1 | Table + repository `OeuvreEanRepository` (CRUD, liste par `oeuvre_id`, recherche par EAN) | ✅ |
+| 6b.2 | Fiche **catalogue** (`oeuvre.php` / admin) : section « Codes EAN » avec ajout / suppression par support | ✅ |
+| 6b.3 | Validation : EAN numérique, longueur, unicité globale, support parmi `SupportPhysique` | ✅ |
+| 6b.4 | Soumissions catalogue : champs optionnels EAN + support dans la proposition ; reprise à la validation | — (ultérieur) |
+| 6b.5 | Formulaire **Mes films** : suggestion de l’EAN catalogue selon le support | ✅ |
+| 6b.6 | Import CSV catalogue : colonnes EAN multiples | — (ultérieur) |
+| 6b.7 | Tests PHPUnit : unicité EAN, plusieurs supports sur une œuvre | ✅ |
 
 ### Recherche d’achat (phase ultérieure — rappel)
 
@@ -504,6 +511,8 @@ Sur la fiche catalogue d’un film, l’admin (ou une proposition validée) peut
 ---
 
 ## Phase 7 — Partage visiteur (lien lecture seule)
+
+**Statut : livré** (v0.8.0, migration `017_share_links.sql`).
 
 **Objectif :** permettre à un utilisateur connecté de **générer un lien** qu’il envoie à un proche (sans compte Moncine). Le **visiteur** ouvre une page publique en **lecture seule** :
 
@@ -559,13 +568,13 @@ flowchart LR
 
 | # | Tâche |
 |---|--------|
-| 7.1 | Page **Mes films** / **Mes envies** : bouton « Partager en lecture seule » → création lien + affichage URL à copier |
-| 7.2 | Page **Paramètres** (ou section dédiée) : liste des liens actifs, **révoquer**, date d’expiration, libellé |
-| 7.3 | Route publique **`/partage.php`** (ou rewrite) : validation jeton → redirection vers vue collection ou wishlist |
-| 7.4 | Vue visiteur **liste films** (grille ou liste, alignée sur l’existant) — **sans** barre d’édition, import, quiz |
-| 7.5 | Vue visiteur **liste envies** — idem |
-| 7.6 | Vue visiteur **fiche film** : métadonnées œuvre + exemplaire (support, saga, affiche) ; lien retour vers la liste du partage |
-| 7.7 | Navigation Préc./Suiv. **limitée** aux films visibles dans le scope du lien (pas toute la base) |
+| 7.1 | Page **Mes films** / **Mes envies** : bouton « Partager » → `/gerer-partages.php` | ✅ |
+| 7.2 | Page **Paramètres** : section partage + `/gerer-partages.php` (créer, révoquer, libellé) | ✅ |
+| 7.3 | Route publique **`/partage.php`** : validation jeton, liste collection ou wishlist | ✅ |
+| 7.4 | Vue visiteur : **Liste** / **Vignettes**, affiches, filtres type, recherche, tri (comme Mes films) | ✅ |
+| 7.5 | Scope **wishlist** : liste personnelle du créateur uniquement | ✅ |
+| 7.6 | Vue visiteur **`/partage-film.php`** : fiche lecture seule + retour liste | ✅ |
+| 7.7 | Navigation Préc./Suiv. entre fiches du scope partagé | — (ultérieur) |
 
 ### Exigences de sécurité (anti-abus / « piratage »)
 
@@ -591,7 +600,7 @@ flowchart LR
 | `lib/ShareLinkRepository.php` | Accès SQL `share_links` |
 | `www/partage.php` | Point d’entrée visiteur (token en query ou path) |
 | `www/gerer-partages.php` | Gestion des liens (connecté, POST + CSRF) |
-| `templates/partage_*.php` | Listes et fiche film **visiteur** (templates séparés des pages membre) |
+| `templates/partage.php`, `partage-film.php`, `_partage_collection_*.php` | Listes et fiche film **visiteur** |
 | `lib/Auth.php` | Ajouter chemins `/partage.php`, `/partage-film.php` (ou équivalent) à `PUBLIC_PATHS` |
 
 ### Critère terminé
@@ -823,7 +832,7 @@ Fonctionnalité transversale déjà partiellement en place :
 4. Test **upgrade** depuis la version précédente sur une base de test
 5. Tests PHPUnit (`composer test`)
 6. Notes de version : migrations, actions manuelles éventuelles
-7. Entrée dans **`CHANGELOG.md`** et tag Git annoté **`vX.Y.Z`** (ex. `v0.7.9`)
+7. Entrée dans **`CHANGELOG.md`** et tag Git annoté **`vX.Y.Z`** (ex. `v0.8.0`)
 
 ---
 
@@ -892,16 +901,17 @@ Fonctionnalité transversale déjà partiellement en place :
 | CLI migrations | `lib/cli/migrate.php` |
 | Journal des versions | `CHANGELOG.md` |
 | Styles UI (pilules / filtres) | `www/assets/css/style.css` (`.ui-pill`, `.ui-pill-bar`) |
-| Partage visiteur (à venir) | `lib/ShareLinkService.php`, `www/partage.php`, migration `017_share_links.sql` |
-| EAN catalogue (à venir) | `lib/OeuvreEanRepository.php`, migration `023_oeuvre_eans.sql` |
+| Partage visiteur (v0.8.0) | `lib/ShareLinkService.php`, `www/partage.php`, `www/gerer-partages.php`, `017_share_links.sql` |
+| EAN catalogue (v0.8.0) | `lib/OeuvreEanRepository.php`, `www/enregistrer-oeuvre-ean.php`, `023_oeuvre_eans.sql` |
 
 ---
 
 ### Historique roadmap (récent)
 
+- 2026-05-19 — **Version 0.8.0** : phases **6 bis** (EAN catalogue) et **7** (partage visiteur) livrées ; liste partagée avec affiches et modes Liste / Vignettes.
 - 2026-05-21 — **Phase 7 redéfinie** : partage visiteur (lien lecture seule Mes films / Mes envies + fiche film) **avant** les prêts ; anciennes phases 7–12 renumérotées en 8–13 ; export PDF séparé (phase 10).
 - 2026-05-21 — **Phase 6 bis** : EAN multiples par œuvre catalogue (DVD / Blu-ray / 4K), préparation recherche d’achat.
 
 ---
 
-*Dernière mise à jour : 21 mai 2026 — v0.7.10 ; prochaine cible : **phase 7** (partage visiteur sécurisé).*
+*Dernière mise à jour : 19 mai 2026 — v0.8.0 ; prochaine cible : **phase 8** (prêts entre utilisateurs).*

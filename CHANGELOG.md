@@ -3,7 +3,29 @@
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Les numéros suivent le [versionnement sémantique](https://semver.org/lang/fr/).
 
-**Tags Git :** à partir de **v0.7.9**, les releases sont taguées `v0.7.x`. Le tag historique `0.7` couvrait plusieurs versions intermédiaires non taguées individuellement.
+**Tags Git :** releases taguées `v0.7.x` puis **`v0.8.0`** à partir de cette version. Le tag historique `0.7` couvrait plusieurs versions intermédiaires non taguées individuellement.
+
+---
+
+## [0.8.0] — 2026-05-19
+
+### Ajouté
+
+- **Phase 6 bis — EAN catalogue** : table `oeuvre_eans`, gestion sur la fiche œuvre admin (un EAN par support DVD / Blu-ray / 4K), suggestion sur le formulaire « mon exemplaire ».
+- **Phase 7 — Partage visiteur** : liens lecture seule (collection du foyer ou envies personnelles), pages publiques `/partage.php` et `/partage-film.php`, gestion `/gerer-partages.php`, expiration 90 jours, révocation, limite anti brute-force.
+
+### Amélioré
+
+- Page partagée visiteur : même confort que **Mes films** — affiches, bascule **Liste** / **Vignettes**, filtres par type (Tout, Films, Séries…), recherche et tri.
+
+### Migrations
+
+- `017_share_links.sql` — liens de partage (`share_links`)
+- `023_oeuvre_eans.sql` — codes EAN catalogue (`oeuvre_eans`)
+
+### Déploiement
+
+Après mise à jour du code : `php lib/cli/migrate.php` (applique les migrations 017 et 023 si besoin).
 
 ---
 

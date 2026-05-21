@@ -938,6 +938,38 @@ textarea {
     margin: 0;
 }
 
+.collection-page__head-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.share-link-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+}
+
+.share-link-list__item {
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-subtle, #333);
+}
+
+.share-visitor-page__badge {
+    margin-bottom: 1rem;
+}
+
+.share-visitor-page__head.collection-page__head {
+    margin-bottom: 0.25rem;
+}
+
+.collection-grid__support {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
 .collection-page__hint {
     margin-bottom: 0.75rem;
 }

@@ -1,6 +1,6 @@
 # Moncine
 
-**Version : 0.7.10**
+**Version : 0.8.0**
 
 **Auteur :** Stéphane MATER  
 **Licence :** [GNU General Public License v3.0 ou ultérieure](LICENSE) (GPL-3.0-or-later)
@@ -9,7 +9,7 @@ Application web pour gérer une **dvdthèque personnelle** : films, envies, note
 
 ---
 
-## Fonctionnalités actuelles (v0.7)
+## Fonctionnalités actuelles (v0.8)
 
 | Domaine | Disponible |
 |---------|------------|
@@ -24,9 +24,11 @@ Application web pour gérer une **dvdthèque personnelle** : films, envies, note
 | Profil & recherche | Ville optionnelle ; recherche par pseudo/ville ; masquer son profil de la recherche |
 | Amis & groupe famille | Demandes d’ami ; créer / rejoindre un groupe ; collection partagée |
 | Envies du groupe | Voir les envies de tous les membres ; tri par demandes ; bouton « Moi aussi » |
+| Partage visiteur | Lien lecture seule Mes films / Mes envies + fiche film (sans compte) |
+| EAN catalogue | Plusieurs codes-barres par œuvre (DVD, Blu-ray, 4K) pour le catalogue |
 | Données | Import / export CSV, affiches |
 
-### Prochaines étapes (v0.7 → v1.0)
+### Prochaines étapes (v0.8 → v1.0)
 
 - ~~Soumissions au catalogue~~ (v0.7.4)
 - ~~Profil ville & recherche utilisateurs~~ (v0.7.6)
@@ -34,9 +36,9 @@ Application web pour gérer une **dvdthèque personnelle** : films, envies, note
 - ~~Envies du groupe & ajout rapide~~ (v0.7.8)
 - ~~UX thème sombre & composant filtres (ui-pill)~~ (v0.7.9)
 - ~~Sécurité sociale (recherche, blocage, limites)~~ (v0.7.10)
-- **Partage visiteur** — lien lecture seule Mes films / Mes envies + fiche film (phase 7, prochaine)
-- **EAN multiples** par œuvre catalogue (DVD, Blu-ray, 4K…) — phase 6 bis, pour recherche d’achat plus tard
-- Prêts entre utilisateurs
+- ~~Partage visiteur~~ (v0.8.0)
+- ~~EAN multiples par œuvre catalogue~~ (v0.8.0)
+- **Prêts entre utilisateurs** (phase 8, prochaine)
 - Stockage fichiers (dossier share YunoHost + S3)
 - Export PDF
 - Mes BD
@@ -58,6 +60,8 @@ Détail : [ROADMAP.md](ROADMAP.md). Historique des versions : [CHANGELOG.md](CHA
 | `lib/Database.php` | SQLite + migrations automatiques |
 | `lib/FilmRepository.php` | Accès aux films de l’utilisateur courant |
 | `www/*.php` | Une page = un fichier (contrôleur léger) |
+| `www/partage.php` | Liste partagée visiteur (lecture seule, sans compte) |
+| `www/gerer-partages.php` | Création / révocation des liens de partage |
 | `templates/*.php` | HTML affiché (via `View::render`) |
 
 ---
@@ -128,7 +132,12 @@ Documentation mots de passe : [doc/comptes-mot-de-passe.md](doc/comptes-mot-de-p
 
 Les fichiers dans `sql/migrations_legacy/` ne sont **pas** appliqués (historique uniquement).
 
-**Important (v0.7)** : sauvegardez `data/moncine.db` avant une mise à jour — la migration foyers regroupe les collections existantes.
+**Important** : sauvegardez `data/moncine.db` avant une mise à jour.
+
+| Version | Migrations notables |
+|---------|---------------------|
+| v0.7 | Foyers, collection partagée (`008`–`011`) |
+| **v0.8.0** | Partage visiteur (`017_share_links`), EAN catalogue (`023_oeuvre_eans`) |
 
 ---
 

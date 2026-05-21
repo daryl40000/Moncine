@@ -45,9 +45,14 @@ $sortHeader = static function (string $label, string $column) use ($sortBy, $sor
 <section class="collection-page">
     <div class="collection-page__head">
         <h1>Mes films</h1>
-        <a class="btn btn-primary" href="<?= Moncine\View::escape(Moncine\View::addFilmUrl(Moncine\LibraryStatut::COLLECTION)) ?>">
-            Ajouter un film
-        </a>
+        <div class="collection-page__head-actions">
+            <a class="btn btn-secondary" href="/gerer-partages.php?scope=<?= Moncine\ShareLinkScope::COLLECTION ?>">
+                Partager
+            </a>
+            <a class="btn btn-primary" href="<?= Moncine\View::escape(Moncine\View::addFilmUrl(Moncine\LibraryStatut::COLLECTION)) ?>">
+                Ajouter un film
+            </a>
+        </div>
     </div>
 
     <form method="get" action="/films.php" class="collection-search import-form">
