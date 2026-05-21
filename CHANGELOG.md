@@ -7,6 +7,21 @@ Les numéros suivent le [versionnement sémantique](https://semver.org/lang/fr/)
 
 ---
 
+## [0.7.10] — 2026-05-21
+
+### Sécurité (fonctions sociales)
+
+- Recherche utilisateurs : échappement des caractères spéciaux SQL `LIKE` (`%`, `_`) — une recherche « % » ne liste plus tout le monde.
+- Limitation d’abus : max **20 demandes d’ami / 24 h** et **30 recherches / minute** par compte.
+- **Blocage** d’utilisateur : plus de demande d’ami, plus d’invitation groupe, masqué de la recherche ; liste et déblocage dans **Mes amis**.
+- Page `bloquer-utilisateur.php` (POST + CSRF) depuis la recherche.
+
+### Déploiement
+
+- Aucune migration SQL.
+
+---
+
 ## [0.7.9] — 2026-05-21
 
 ### Amélioré
