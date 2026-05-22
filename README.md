@@ -1,6 +1,6 @@
 # Moncine
 
-**Version : 0.8.2**
+**Version : 0.8.3**
 
 **Auteur :** Stéphane MATER  
 **Licence :** [GNU General Public License v3.0 ou ultérieure](LICENSE) (GPL-3.0-or-later)
@@ -39,6 +39,7 @@ Application web pour gérer une **dvdthèque personnelle** : films, envies, note
 - ~~Partage visiteur~~ (v0.8.0)
 - ~~EAN multiples par œuvre catalogue~~ (v0.8.0)
 - ~~Versions recherchées sur les envies (support + EAN)~~ (v0.8.2)
+- ~~Profil public utilisateur (amis / groupe)~~ (v0.8.3)
 - **Suite cibles d’achat** (phase 7 bis, prochaine) : partage visiteur, comparateur de prix, pré-remplissage « J’ai acheté »
 - Prêts entre utilisateurs (phase 8)
 - Stockage fichiers (dossier share YunoHost + S3)
@@ -141,6 +142,7 @@ Les fichiers dans `sql/migrations_legacy/` ne sont **pas** appliqués (historiqu
 | v0.7 | Foyers, collection partagée (`008`–`011`) |
 | **v0.8.0** | Partage visiteur (`017_share_links`), EAN catalogue (`023_oeuvre_eans`) |
 | **v0.8.2** | Versions recherchées sur envies (`024_wishlist_targets`) |
+| **v0.8.3** | Profil public `/utilisateur.php` (stats, vignettes, listes lecture seule) |
 
 ---
 

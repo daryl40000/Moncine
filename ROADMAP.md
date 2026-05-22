@@ -28,15 +28,16 @@ Fonctionnalités métier visées :
 9. ~~**Soumissions** au catalogue~~ — **livré v0.7.4** (propositions, validation admin, notifications)
 10. ~~**EAN multiples par œuvre** (catalogue)~~ — **livré v0.8.0** : un code-barres par édition / support (DVD, Blu-ray, 4K…) — socle pour **recherche d’achat** ultérieure
 10 bis. ~~**Versions recherchées sur les envies**~~ — **livré v0.8.2** : plusieurs supports et EAN par envie (`wishlist_targets`) — complément personnel pour futurs comparateurs de prix
-10 ter. **Suite cibles d’achat (envies)** — **prochaine (phase 7 bis)** : versions visibles sur partage visiteur, comparateur de prix (support + EAN), pré-remplissage du support au « J’ai acheté »
-11. **Collections de magazines** (titres, numéros, organisation par collection)
-12. **Magazines en PDF** + **lecteur PDF** (s’appuie sur la couche stockage)
+10 ter. ~~**Profil public utilisateur**~~ — **livré v0.8.3** : page profil (stats, vignettes), listes lecture seule, liens depuis Mes amis / groupe
+11. **Suite cibles d’achat (envies)** — **prochaine (phase 7 bis)** : versions visibles sur partage visiteur, comparateur de prix (support + EAN), pré-remplissage du support au « J’ai acheté »
+12. **Collections de magazines** (titres, numéros, organisation par collection)
+13. **Magazines en PDF** + **lecteur PDF** (s’appuie sur la couche stockage)
 
 ---
 
 ## État actuel
 
-**Version applicative : 0.8.2**
+**Version applicative : 0.8.3**
 
 Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 
@@ -61,12 +62,13 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | **EAN catalogue (v0.8.0)** | Table `oeuvre_eans`, admin fiche œuvre, suggestion EAN exemplaire |
 | **Partage visiteur (v0.8.0)** | Liens lecture seule collection / envies, pages publiques sécurisées |
 | **Cibles d’achat envies (v0.8.2)** | Table `wishlist_targets`, support + EAN multiples par envie, lien optionnel vers `oeuvre_eans` |
+| **Profil public (v0.8.3)** | `/utilisateur.php`, stats et vignettes pour amis / membres du groupe |
 | **Migrations SQL** | `SchemaMigrator`, CLI `php lib/cli/migrate.php`, migrations `001` → `016`, `017`, `023`, `024` |
 | **Tests** | PHPUnit (import, catalogue, foyers, soumissions, notifications) |
 
 ### Point d’étape — mai 2026
 
-**Version actuelle : 0.8.2.** Phases 6 bis (EAN catalogue), 7 (partage visiteur) et cibles d’achat sur envies (saisie) livrées. **Prochaine évolution : phase 7 bis** (suite cibles d’achat : partage, comparateur, « J’ai acheté »), puis **phase 8** (prêts).
+**Version actuelle : 0.8.3.** Profil public social livré. **Prochaine évolution : phase 7 bis** (suite cibles d’achat : partage, comparateur, « J’ai acheté »), puis **phase 8** (prêts).
 
 | Version | Contenu principal |
 |---------|-------------------|
@@ -81,6 +83,7 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | 0.7.10 | Sécurité sociale (LIKE, rate limit, blocage utilisateur) |
 | 0.8.0 | EAN multiples catalogue + partage visiteur (liens lecture seule) |
 | 0.8.2 | Versions recherchées sur envies (support + EAN multiples) |
+| 0.8.3 | Profil public utilisateur (amis / groupe) |
 
 ### Prochaines étapes
 
@@ -94,6 +97,7 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | Phase 6 bis — EAN multiples par œuvre (catalogue) | ✅ Livré (v0.8.0) |
 | Phase 7 — Partage visiteur (lien lecture seule) | ✅ Livré (v0.8.0) |
 | Cibles d’achat — envies (support + EAN) | ✅ Livré (v0.8.2) |
+| Profil public utilisateur (social) | ✅ Livré (v0.8.3) |
 | Phase 7 bis — Suite cibles d’achat (envies) | **Prochaine** |
 | Phase 8 — Prêts entre utilisateurs | À faire |
 | Phase 9 — Stockage fichiers (local + S3) | À faire |
@@ -954,11 +958,13 @@ Fonctionnalité transversale déjà partiellement en place :
 | Partage visiteur (v0.8.0) | `lib/ShareLinkService.php`, `www/partage.php`, `www/gerer-partages.php`, `017_share_links.sql` |
 | EAN catalogue (v0.8.0) | `lib/OeuvreEanRepository.php`, `www/enregistrer-oeuvre-ean.php`, `023_oeuvre_eans.sql` |
 | Cibles d’achat envies (v0.8.2) | `lib/WishlistTargetRepository.php`, `www/enregistrer-wishlist-cible.php`, `024_wishlist_targets.sql` |
+| Profil public (v0.8.3) | `lib/UserPublicProfileService.php`, `www/utilisateur.php`, `templates/utilisateur.php` |
 
 ---
 
 ### Historique roadmap (récent)
 
+- 2026-05-19 — **Version 0.8.3** : **profil public** (stats, vignettes, listes lecture seule) pour amis et membres du groupe.
 - 2026-05-19 — **Version 0.8.2** : saisie des **versions recherchées** sur les envies (`wishlist_targets`) ; **prochaine** : phase **7 bis** (partage, comparateur, « J’ai acheté »).
 - 2026-05-19 — **Version 0.8.0** : phases **6 bis** (EAN catalogue) et **7** (partage visiteur) livrées ; liste partagée avec affiches et modes Liste / Vignettes.
 - 2026-05-21 — **Phase 7 redéfinie** : partage visiteur (lien lecture seule Mes films / Mes envies + fiche film) **avant** les prêts ; anciennes phases 7–12 renumérotées en 8–13 ; export PDF séparé (phase 10).
@@ -966,4 +972,4 @@ Fonctionnalité transversale déjà partiellement en place :
 
 ---
 
-*Dernière mise à jour : 19 mai 2026 — v0.8.2 livrée ; prochaine cible : **phase 7 bis** (suite cibles d’achat sur envies), puis **phase 8** (prêts).*
+*Dernière mise à jour : 19 mai 2026 — v0.8.3 livrée ; prochaine cible : **phase 7 bis** (suite cibles d’achat sur envies), puis **phase 8** (prêts).*

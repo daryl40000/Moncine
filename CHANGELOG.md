@@ -7,6 +7,26 @@ Les numéros suivent le [versionnement sémantique](https://semver.org/lang/fr/)
 
 ---
 
+## [0.8.3] — 2026-05-19
+
+### Ajouté
+
+- **Profil public utilisateur** (`/utilisateur.php`) : visible par les **amis** et les **membres du même groupe** — pseudo, statistiques (collection, envies, films vus, films vus cette année), 5 derniers films vus et 5 derniers ajouts aux envies en **vignettes**.
+- Listes complètes en lecture seule : **collection**, **envies** et **films vus** (date et note par vision ; filtre par année depuis les statistiques).
+- Page **Mes amis** : section **membres du groupe** ; noms cliquables vers le profil (amis, demandes, groupe ; pas les comptes bloqués).
+- Page **Mon groupe famille** : noms des membres cliquables vers le profil.
+
+### Corrigé
+
+- Profil public : les **5 derniers films vus** n’affichent plus des titres sans vision réelle (jointure SQL `historique` ↔ `bibliotheque`).
+- Listes collection et envies sur le profil : affichage des films corrigé (`$films` / `$listFilms`).
+
+### Tests
+
+- `UserPublicProfileTest` (accès ami, membres du groupe, refus étranger, historique des visions).
+
+---
+
 ## [0.8.2] — 2026-05-19
 
 ### Ajouté
