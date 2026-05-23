@@ -7,6 +7,24 @@ Les numéros suivent le [versionnement sémantique](https://semver.org/lang/fr/)
 
 ---
 
+## [0.8.4] — 2026-05-19
+
+### Ajouté
+
+- **Statistiques** : carte **temps de vision cumulé** depuis le début (durée de chaque film × nombre de visionnages, re-visions incluses) — affichage **2h 30min** sous un jour, **3j 5h 30min** au-delà.
+- **Infobulle** sur le libellé de cette carte (icône **i** au survol) : explication du calcul et du format, sans texte permanent sous la carte.
+
+### Corrigé
+
+- **Correction TMDB par identifiant** : le **titre français** (fr-FR) de la fiche œuvre est mis à jour ; l’**enrichissement par titre** ne modifie pas le titre saisi.
+
+### Tests
+
+- `CollectionStatsDurationTest`, `CollectionStatsViewingDurationTest`.
+- `FilmEnricherTmdbTitleTest`.
+
+---
+
 ## [0.8.3] — 2026-05-19
 
 ### Ajouté
