@@ -110,7 +110,7 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique.
 | Profil public utilisateur (social) | ✅ Livré (v0.8.3) |
 | Phase 7 bis — Suite cibles d’achat (envies) | **Partielle** (sans comparateur prix) |
 | Phase 8 — Prêts entre utilisateurs | ✅ Livré (v0.8.9) |
-| Phase 9 — Stockage fichiers (local) | À faire |
+| Phase 9 — Stockage fichiers (local) | **Livré v0.9.0** |
 | Phase 10 — Export PDF | À faire |
 | Phase 11 — Mes BD | À faire |
 | Phase 12 — Collections de magazines | À faire |
@@ -710,7 +710,7 @@ flowchart LR
 
 ---
 
-## Phase 9 — Stockage de fichiers (dossier partagé)
+## Phase 9 — Stockage de fichiers (dossier partagé) — **livré v0.9.0**
 
 **Objectif :** stocker les **fichiers volumineux** (PDF magazines, etc.) hors `www/`, avec un dossier personnalisable type **YunoHost**.
 

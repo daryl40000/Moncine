@@ -14,6 +14,9 @@
 /data/install_seed/
 /data/share_rate_limit/
 
+# Fichiers médias volumineux (PDF, exports…)
+/data/media/
+
 # Fichiers système
 .DS_Store
 Thumbs.db
