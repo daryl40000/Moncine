@@ -1,6 +1,6 @@
 # Listes imprimables (Mes films / Mes envies)
 
-**Version : 0.9.2**
+**Version : 1.0.0**
 
 Alternative **légère** à l’export PDF côté serveur (phase 10 reportée pour compatibilité **YunoHost** : pas de Dompdf ni autre dépendance Composer en production).
 

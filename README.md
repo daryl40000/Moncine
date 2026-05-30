@@ -1,6 +1,6 @@
 # Moncine
 
-**Version : 0.9.6**
+**Version : 1.0.0**
 
 **Auteur :** Stéphane MATER  
 **Licence :** [GNU General Public License v3.0 ou ultérieure](LICENSE) (GPL-3.0-or-later)
@@ -9,7 +9,7 @@ Application web pour gérer une **dvdthèque personnelle** : films, envies, note
 
 ---
 
-## Fonctionnalités actuelles (v0.9)
+## Fonctionnalités actuelles (v1.0)
 
 | Domaine | Disponible |
 |---------|------------|
@@ -123,7 +123,9 @@ Ouvrir http://localhost:8080 — à la première visite, créez le **compte admi
 |----------|------|
 | `MONCINE_DATA_PATH` | Dossier des données (base SQLite, clés API, affiches). Par défaut : `./data/` |
 | `MONCINE_MEDIA_PATH` | Racine des fichiers volumineux (PDF, exports…). Par défaut : `./data/media/` |
-| `MONCINE_BASE_URL` | URL publique de l’app (liens dans les e-mails de réinitialisation de mot de passe) |
+| `MONCINE_BASE_URL` | URL publique de l’app (liens dans les e-mails : inscription, reset MDP, changement d’e-mail) |
+| `MONCINE_TRUST_PROXY` | Mettre `1` derrière Nginx/YunoHost pour le limiteur de tentatives (IP client via `X-Real-IP` / `X-Forwarded-For`) |
+| `MONCINE_MAIL_FROM` | Adresse expéditeur des e-mails transactionnels |
 
 ---
 
@@ -170,6 +172,8 @@ Les fichiers dans `sql/migrations_legacy/` ne sont **pas** appliqués (historiqu
 | **v0.9.3** | Inscription publique (`027`, `028`), throttle auth session + IP |
 | **v0.9.4** | Correctifs inscription / reset MDP (aucune migration SQL) |
 | **v0.9.5** | Suppression du compte depuis Mon compte (aucune migration SQL) |
+| **v0.9.6** | Durcissement sécurité comptes : inscription chiffrée, changement d’e-mail confirmé (`029`), `MONCINE_TRUST_PROXY` |
+| **v1.0.0** | **Version de production** — même schéma que 0.9.6 ; `schema.sql` inclut `email_change_requests` |
 
 ---
 

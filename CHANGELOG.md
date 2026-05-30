@@ -3,9 +3,30 @@
 Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/).
 Les numéros suivent le [versionnement sémantique](https://semver.org/lang/fr/).
 
-**Tags Git :** releases taguées `v0.7.x` puis **`v0.8.0`** à partir de cette version. Le tag historique `0.7` couvrait plusieurs versions intermédiaires non taguées individuellement.
+**Tags Git :** releases taguées `v0.7.x` puis **`v0.8.0`** ; **`v1.0.0`** = première version de production. Le tag historique `0.7` couvrait plusieurs versions intermédiaires non taguées individuellement.
 
 ---
+
+## [1.0.0] — 2026-05-30
+
+**Première version de production** (dvdthèque films, déploiement YunoHost ou serveur classique).
+
+### Livré
+
+- Fonctionnalités des versions **0.7** à **0.9.6** : collection, envies, prêts, partage visiteur, inscription publique, comptes, listes imprimables, stockage médias, etc.
+
+### Documentation & install
+
+- `sql/schema.sql` : table **`email_change_requests`** incluse (install fraîche alignée avec la migration `029`).
+- README, ROADMAP et prérequis déploiement alignés sur **1.0.0**.
+
+### Déploiement production (rappel)
+
+1. `php lib/cli/migrate.php` — migrations **001** à **029** appliquées.
+2. Variables recommandées (PHP-FPM) : `MONCINE_DATA_PATH`, `MONCINE_BASE_URL`, `MONCINE_MAIL_FROM`, **`MONCINE_TRUST_PROXY=1`** derrière un reverse proxy.
+3. Sauvegarde régulière de la base SQLite et du dossier données (`data/.keys/`, affiches, etc.).
+
+Aucune migration SQL supplémentaire par rapport à **0.9.6**.
 
 ## [0.9.6] — 2026-05-30
 

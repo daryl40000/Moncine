@@ -110,6 +110,23 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_inscription_requests_email_active
 CREATE INDEX IF NOT EXISTS idx_inscription_requests_status
     ON inscription_requests(status);
 
+CREATE TABLE IF NOT EXISTS email_change_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES utilisateurs(id) ON DELETE CASCADE,
+    new_email TEXT NOT NULL,
+    old_email TEXT NOT NULL,
+    token_hash TEXT NOT NULL,
+    expires_at TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_email_change_user_pending
+    ON email_change_requests(user_id)
+    WHERE expires_at > datetime('now');
+
+CREATE INDEX IF NOT EXISTS idx_email_change_token
+    ON email_change_requests(token_hash);
+
 CREATE TABLE IF NOT EXISTS oeuvres (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     titre TEXT NOT NULL,

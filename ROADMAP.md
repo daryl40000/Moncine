@@ -37,7 +37,7 @@ Fonctionnalités métier visées :
 
 ## État actuel
 
-**Version applicative : 0.9.5**
+**Version applicative : 1.0.0** (production)
 
 Application PHP + SQLite, déployable en local ou sur un serveur web classique (YunoHost : sans dépendance PDF serveur).
 
@@ -48,8 +48,8 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique (
 | **Catalogue & bibliothèque** | Tables `oeuvres`, `bibliotheque`, `historique` ; films, envies, import/export CSV |
 | **Enrichissement** | TMDB, OMDB, affiches, statistiques, quiz, sagas |
 | **Comptes (phase 1)** | Connexion, déconnexion, premier admin, CRUD utilisateurs, rôles, protection des pages |
-| **Mots de passe (phase 1 bis)** | Mon compte, changement de mot de passe, oublié par e-mail, reset admin, **suppression du compte** (v0.9.5, hors admin) |
-| **Inscription publique (v0.9.3–0.9.4)** | Confirmation e-mail, approbation admin, throttle — [doc/inscription-utilisateurs.md](doc/inscription-utilisateurs.md) |
+| **Mots de passe (phase 1 bis)** | Mon compte, changement de mot de passe, oublié par e-mail, reset admin, **suppression du compte** (v0.9.5, hors admin), **changement d’e-mail confirmé** (v0.9.6) |
+| **Inscription publique (v0.9.3–0.9.6)** | Confirmation e-mail, approbation admin, throttle, mot de passe chiffré en attente — [doc/inscription-utilisateurs.md](doc/inscription-utilisateurs.md) |
 | **Exemplaire personnel (phase 2)** | `format_image` / `format_son` sur `bibliotheque` ; formulaire « mon exemplaire » ; enrichissement catalogue réservé admin |
 | **Admin catalogue (phase 3)** | Liste, fiche œuvre, maintenance, affiche manuelle |
 | **Foyers (phase 4)** | Collection partagée, envies / historique personnels |
@@ -74,13 +74,14 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique (
 | **Questionnaire du soir (v0.9.0)** | UX proposition `/resultat.php` (notes + Autre tirage en haut) |
 | **Listes imprimables (v0.9.1)** | `/imprimer-films.php`, `/imprimer-envies.php`, `print-page.js` — [doc/listes-imprimables.md](doc/listes-imprimables.md) |
 | **Inscription publique (v0.9.3)** | `027`–`028`, pages `/inscription.php`, `/confirmer-inscription.php`, `/demandes-inscription.php` |
-| **Suppression compte (v0.9.5)** | `/parametres.php` — section « Supprimer mon compte » (utilisateurs non admin) |
-| **Migrations SQL** | `SchemaMigrator`, CLI `php lib/cli/migrate.php`, migrations `001` → `019`, `023`–`028` |
+| **Suppression compte (v0.9.5–0.9.6)** | `/parametres.php` — section « Supprimer mon compte » ; nettoyage foyers solo, partages, changement d’e-mail |
+| **Sécurité comptes (v0.9.6)** | `MONCINE_TRUST_PROXY`, jeton inscription hors URL, migration `029` (`email_change_requests`) |
+| **Migrations SQL** | `SchemaMigrator`, CLI `php lib/cli/migrate.php`, migrations `001` → `019`, `023`–`029` |
 | **Tests** | PHPUnit (import, catalogue, foyers, soumissions, notifications, stockage médias) |
 
 ### Point d’étape — mai 2026
 
-**Version actuelle : 0.9.5.** Inscription publique, suppression de compte depuis Mon compte, listes imprimables, prêts entre amis. **Export PDF serveur (phase 10)** et **comparateur de prix (7 bis.2)** reportés. Prochaine évolution majeure suggérée : **phase 11** (Mes BD).
+**Version actuelle : 1.0.0 (production).** Cycle 0.9 terminé : inscription, comptes durcis, suppression de compte, listes imprimables, prêts entre amis. **Export PDF serveur (phase 10)** et **comparateur de prix (7 bis.2)** reportés. Prochaine évolution majeure suggérée : **phase 11** (Mes BD).
 
 | Version | Contenu principal |
 |---------|-------------------|
@@ -108,6 +109,8 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique (
 | 0.9.3 | Inscription publique (`027`–`028`), throttle auth |
 | 0.9.4 | Correctifs inscription / `LockoutThrottleStore` |
 | 0.9.5 | Suppression du compte (Mon compte) |
+| 0.9.6 | Durcissement sécurité : inscription, changement d’e-mail (`029`), proxy |
+| 1.0.0 | Version de production (étiquette stable, doc + `schema.sql` alignés) |
 
 ### Prochaines étapes
 
