@@ -7,6 +7,21 @@ Les numéros suivent le [versionnement sémantique](https://semver.org/lang/fr/)
 
 ---
 
+## [0.9.1] — 2026-05-28
+
+Alternative légère à la **phase 10** (export PDF serveur reporté pour YunoHost).
+
+### Ajouté
+
+- **Listes imprimables** : `/imprimer-films.php`, `/imprimer-envies.php` — même filtres et tri que Mes films / Mes envies ; bouton **Version imprimable** sur ces pages.
+- **Impression navigateur** : « Enregistrer en PDF » via la boîte de dialogue du navigateur (aucune librairie PHP PDF).
+
+### Corrigé
+
+- **Bouton d’impression** : script externe `www/assets/js/print-page.js` (la politique CSP `script-src 'self'` bloquait les `onclick` inline).
+
+Documentation : [doc/listes-imprimables.md](doc/listes-imprimables.md).
+
 ## [0.9.0] — 2026-05-28
 
 Phase **9** — stockage de fichiers volumineux hors `www/`. Amélioration de l’usage du **questionnaire du soir**.
