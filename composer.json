@@ -1,7 +1,7 @@
 {
     "name": "moncine/app",
     "description": "Moncine — gestion de collection cinéma (dvdthèque personnelle)",
-    "version": "0.9.5",
+    "version": "0.9.6",
     "type": "project",
     "license": "GPL-3.0-or-later",
     "authors": [

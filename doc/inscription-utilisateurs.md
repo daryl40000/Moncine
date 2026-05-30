@@ -24,7 +24,8 @@ Page **Comptes utilisateurs** (`/utilisateurs.php`) → section **Inscription pu
 ## Règles
 
 - **Une seule demande active** par adresse e-mail (`pending_email` ou `pending_admin`).
-- Mot de passe : 8 à 128 caractères, haché (bcrypt) **pendant** la demande ; le hash est **effacé** dans `inscription_requests` dès que le compte est créé ou la demande refusée (il ne reste que dans `utilisateurs`).
+- Mot de passe : 8 à 128 caractères ; pendant la demande, le hash est **chiffré** en base (clé serveur dans `data/.keys/registration_password.key`) puis **effacé** dès que le compte est créé ou la demande refusée.
+- Lien de confirmation : valable **24 h** ; après le premier clic, le jeton n’est plus affiché dans l’URL (stockage session court).
 - Limite de tentatives d’inscription (session + **fichiers par IP** dans `data/auth_rate_limit/`), comme la connexion et « mot de passe oublié ».
 
 ## E-mails
@@ -39,6 +40,8 @@ Nécessitent un serveur mail fonctionnel (`MONCINE_MAIL_FROM`, `MONCINE_BASE_URL
 | `lib/RegistrationService.php` | Logique métier |
 | `lib/InscriptionRequestRepository.php` | Table `inscription_requests` |
 | `lib/LockoutThrottleStore.php` | Compteurs session + IP (partagé avec connexion / reset MDP) |
+| `lib/RegistrationPasswordCipher.php` | Chiffrement des hash en attente dans `inscription_requests` |
+| `lib/RegistrationConfirmSession.php` | Jeton de confirmation hors URL après le 1er chargement |
 | `www/inscription.php` | Formulaire public |
 | `www/confirmer-inscription.php` | Lien e-mail |
 | `www/demandes-inscription.php` | File admin |

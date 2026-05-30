@@ -7,6 +7,16 @@ Les numéros suivent le [versionnement sémantique](https://semver.org/lang/fr/)
 
 ---
 
+## [0.9.6] — 2026-05-30
+
+### Sécurité
+
+- **Inscription** : mot de passe des demandes en attente **chiffré** en base (`RegistrationPasswordCipher`, clé dans `data/.keys/`) ; validité du lien réduite à **24 h**.
+- **Confirmation inscription** : jeton retiré de l’URL après le premier chargement (session) ; `Referrer-Policy: no-referrer` sur les pages sensibles.
+- **IP / throttle** : en-têtes `X-Forwarded-For` / `X-Real-IP` utilisés seulement si `MONCINE_TRUST_PROXY=1` (recommandé sur YunoHost).
+- **Changement d’e-mail** : confirmation sur la **nouvelle** adresse + notification de l’**ancienne** ; mot de passe requis (migration `029`).
+- **Suppression de compte** : foyers sans autre membre supprimés ; liens de partage révoqués ; demandes de changement d’e-mail effacées.
+
 ## [0.9.5] — 2026-05-30
 
 ### Ajouté
