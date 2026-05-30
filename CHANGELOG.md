@@ -7,6 +7,18 @@ Les numéros suivent le [versionnement sémantique](https://semver.org/lang/fr/)
 
 ---
 
+## [0.9.3] — 2026-05-28
+
+### Ajouté
+
+- **Inscription publique** : réglage admin (désactivée / ouverte / avec approbation), confirmation par e-mail, une demande active par adresse, page `/demandes-inscription.php` — [doc/inscription-utilisateurs.md](doc/inscription-utilisateurs.md) (migration `027`).
+
+### Sécurité
+
+- **Confirmation d’inscription** : le lien e-mail n’active plus le compte en GET ; l’utilisateur doit cliquer sur un bouton (POST + CSRF) pour éviter les confirmations automatiques par les scanners de messagerie.
+- **Connexion / inscription / mot de passe oublié** : limitation de débit **session + IP** (`LockoutThrottleStore`, fichiers sous `data/auth_rate_limit/`) — impossible de contourner en supprimant le cookie de session.
+- **Inscription** : suppression du `password_hash` dans `inscription_requests` après approbation ou refus (migration `028`).
+
 ## [0.9.2] — 2026-05-28
 
 Renforcement **sécurité et robustesse** (revue qualité).

@@ -1,21 +1,21 @@
 <?php
 /**
- * Limite les tentatives de connexion (session + IP serveur).
+ * Limite les tentatives d’inscription publique (session + IP serveur).
  */
 
 declare(strict_types=1);
 
 namespace Moncine;
 
-final class LoginThrottle
+final class RegistrationThrottle
 {
-    private const SCOPE = 'login';
+    private const SCOPE = 'registration';
 
-    private const SESSION_KEY = 'moncine_login_throttle';
+    private const SESSION_KEY = 'moncine_registration_throttle';
 
-    private const MAX_ATTEMPTS = 8;
+    private const MAX_ATTEMPTS = 5;
 
-    private const MAX_ATTEMPTS_PER_IP = 24;
+    private const MAX_ATTEMPTS_PER_IP = 15;
 
     private const WINDOW_SECONDS = 900;
 
@@ -30,17 +30,7 @@ final class LoginThrottle
         return $email !== '' && self::store()->isBlocked(self::bucketKey($email));
     }
 
-    public static function secondsUntilUnblock(string $email): int
-    {
-        $email = self::normalizeEmail($email);
-        if ($email === '') {
-            return 0;
-        }
-
-        return self::store()->secondsUntilUnblock(self::bucketKey($email));
-    }
-
-    public static function recordFailure(string $email): void
+    public static function recordAttempt(string $email): void
     {
         $email = self::normalizeEmail($email);
         if ($email === '') {
@@ -48,16 +38,6 @@ final class LoginThrottle
         }
 
         self::store()->recordAttempt(self::bucketKey($email));
-    }
-
-    public static function clearOnSuccess(string $email): void
-    {
-        $email = self::normalizeEmail($email);
-        if ($email === '') {
-            return;
-        }
-
-        self::store()->clear(self::bucketKey($email));
     }
 
     public static function resetForTests(): void

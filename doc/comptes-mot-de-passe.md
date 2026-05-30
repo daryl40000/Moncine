@@ -2,6 +2,7 @@
 
 ## Pour les utilisateurs
 
+- **Inscription publique** (si activée par l’admin) : voir [inscription-utilisateurs.md](inscription-utilisateurs.md).
 - **Mon compte** (`/mon-compte.php`) : modifier le nom, l’e-mail et le mot de passe.
 - **Mot de passe oublié** (`/mot-de-passe-oublie.php`) : recevoir un lien par e-mail (valable 1 heure).
 - Un administrateur peut aussi vous donner un **mot de passe provisoire** ; changez-le ensuite dans Mon compte.
@@ -31,6 +32,6 @@ Cela crée la table `password_reset_tokens` (migration `004`).
 
 ### Sécurité
 
-- Limite de tentatives sur la connexion et sur « mot de passe oublié ».
+- Limite de tentatives sur la connexion et sur « mot de passe oublié » (session + compteurs **par IP** dans `data/auth_rate_limit/`, non contournables en changeant de navigateur).
 - Jetons stockés **hachés** en base ; usage unique.
 - Message neutre si l’e-mail n’existe pas (pas d’énumération des comptes).
