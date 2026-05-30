@@ -7,6 +7,34 @@ Les numéros suivent le [versionnement sémantique](https://semver.org/lang/fr/)
 
 ---
 
+## [0.9.5] — 2026-05-30
+
+### Ajouté
+
+- **Mon compte** (`/parametres.php`) : section **Supprimer mon compte** (mot de passe requis, confirmation) ; message informatif pour les **administrateurs** (suppression impossible depuis cette page).
+
+### Corrigé
+
+- **Suppression de compte** : nettoyage complet avant suppression (`prepareUserDeletion`) — journal admin, bibliothèque (réattribution des films de collection partagée à un autre membre du groupe), demandes d’inscription, références groupe/foyer ; corrige l’erreur « Suppression impossible » due aux contraintes SQLite.
+- **Mot de passe oublié** : erreurs SQL à la création du jeton gérées sans erreur fatale (`PasswordResetRepository`).
+
+### Tests
+
+- `tests/Integration/AccountDeleteTest.php` — suppression utilisateur, refus admin, mot de passe, foyer partagé.
+
+Documentation : [doc/comptes-mot-de-passe.md](doc/comptes-mot-de-passe.md).
+
+## [0.9.4] — 2026-05-30
+
+Correctifs suite à l’inscription publique (v0.9.3).
+
+### Corrigé
+
+- **Inscription (HTTP 500)** : `LockoutThrottleStore` — les closures `static` n’utilisaient plus `$this` (limiteur de tentatives à l’envoi du formulaire).
+- **Inscription** : erreurs SQLite à l’insertion (`inscription_requests`) affichées ou traitées comme succès neutre (doublon e-mail) au lieu d’une page blanche.
+- **Page inscription** : vérification `RegistrationService::isAvailable()` ; contrôle `isAvailable()` aligné avec la page de confirmation.
+- **Mot de passe oublié** : gestion d’erreur à l’insertion des jetons de reset.
+
 ## [0.9.3] — 2026-05-28
 
 ### Ajouté

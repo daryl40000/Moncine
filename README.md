@@ -1,6 +1,6 @@
 # Moncine
 
-**Version : 0.9.2**
+**Version : 0.9.5**
 
 **Auteur :** Stéphane MATER  
 **Licence :** [GNU General Public License v3.0 ou ultérieure](LICENSE) (GPL-3.0-or-later)
@@ -19,7 +19,8 @@ Application web pour gérer une **dvdthèque personnelle** : films, envies, note
 | Foyers & famille | Collection partagée par foyer ; envies et historique personnels |
 | Catalogue partagé | Fiches œuvres, enrichissement TMDB / OMDB, affiches |
 | Comptes | Connexion, rôles admin/utilisateur, gestion des comptes |
-| Mots de passe | Mon compte, changement, oublié par e-mail, reset admin |
+| Mots de passe & compte | Mon compte, changement, oublié par e-mail, reset admin, **suppression du compte** (utilisateurs) |
+| Inscription publique | Confirmation e-mail, approbation admin optionnelle (si activée) |
 | Exemplaire personnel | Support, format image/son (séparés du catalogue) |
 | Maintenance catalogue | Doublons, fusion, journal admin, nettoyage affiches, sauvegarde / restauration base SQLite |
 | Soumissions catalogue | Proposer une œuvre (utilisateur) ; validation admin ; **notifications** in-app + e-mail |
@@ -165,6 +166,10 @@ Les fichiers dans `sql/migrations_legacy/` ne sont **pas** appliqués (historiqu
 | **v0.8.9** | Prêts entre amis (`018`, `026`) |
 | **v0.9.0** | Stockage médias local (`019_stored_objects`), page `/maintenance-medias.php` ; UX proposition questionnaire (`/resultat.php`) |
 | **v0.9.1** | Listes imprimables `/imprimer-films.php`, `/imprimer-envies.php` (aucune migration SQL) |
+| **v0.9.2** | Sécurité médias et listes imprimables (aucune migration SQL) |
+| **v0.9.3** | Inscription publique (`027`, `028`), throttle auth session + IP |
+| **v0.9.4** | Correctifs inscription / reset MDP (aucune migration SQL) |
+| **v0.9.5** | Suppression du compte depuis Mon compte (aucune migration SQL) |
 
 ---
 
