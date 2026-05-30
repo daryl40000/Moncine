@@ -32,6 +32,11 @@ final class PrintListHelper
         return strtolower($dir) === 'desc' ? 'décroissant' : 'croissant';
     }
 
+    public static function sortSummary(string $sortBy, string $sortDir): string
+    {
+        return self::sortLabel($sortBy) . ' (' . self::sortDirectionLabel($sortDir) . ')';
+    }
+
     public static function collectionFilterSummary(
         string $query,
         string $kindFilter,

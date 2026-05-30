@@ -21,13 +21,33 @@ final class View
             $data['wideLayout'] = true;
         }
         $layout = $data['layout'] ?? 'default';
+        if ($layout === 'print') {
+            self::renderPrintLayout($templateFile, $data);
+
+            return;
+        }
+
         extract($data, EXTR_SKIP);
         $layoutFile = match ($layout) {
             false, 'auth' => 'layout_auth.php',
-            'print' => 'layout_print.php',
             default => 'layout.php',
         };
         require MONCINE_ROOT . '/templates/' . $layoutFile;
+    }
+
+    /**
+     * Layout impression : variables de contenu isolées du layout (évite la pollution de scope).
+     *
+     * @param array<string, mixed> $data
+     */
+    private static function renderPrintLayout(string $templateFile, array $data): void
+    {
+        $pageTitle = (string) ($data['pageTitle'] ?? MONCINE_APP_NAME);
+        $backUrl = (string) ($data['backUrl'] ?? '');
+        $contentData = $data;
+        unset($contentData['layout'], $contentData['pageTitle'], $contentData['backUrl'], $contentData['wideLayout']);
+
+        require MONCINE_ROOT . '/templates/layout_print.php';
     }
 
     /** Pages avec tableaux larges (collection, listes…). */

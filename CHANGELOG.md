@@ -7,6 +7,20 @@ Les numéros suivent le [versionnement sémantique](https://semver.org/lang/fr/)
 
 ---
 
+## [0.9.2] — 2026-05-28
+
+Renforcement **sécurité et robustesse** (revue qualité).
+
+### Sécurité
+
+- **Chemins médias (admin)** : `MediaPathConfig::validateRootPath()` — chemin absolu, dossier lisible/inscriptible, interdiction de préfixes système (`/etc`, `/proc`, …).
+- **Fichiers stockés** : `StoredObjectDelivery` — types MIME sûrs en affichage inline (PDF, images, texte) ; autres types en téléchargement.
+- **Content-Disposition** : `HttpContentDisposition` (nom ASCII + UTF-8 RFC 5987) pour `/media-object.php`.
+
+### Amélioré
+
+- **Listes imprimables** : limite de **500 lignes** + message si la liste est tronquée.
+
 ## [0.9.1] — 2026-05-28
 
 Alternative légère à la **phase 10** (export PDF serveur reporté pour YunoHost).
@@ -19,6 +33,11 @@ Alternative légère à la **phase 10** (export PDF serveur reporté pour YunoHo
 ### Corrigé
 
 - **Bouton d’impression** : script externe `www/assets/js/print-page.js` (la politique CSP `script-src 'self'` bloquait les `onclick` inline).
+
+### Amélioré (maintenance)
+
+- **Listes imprimables** : logique centralisée dans `PrintListService` ; layout print avec scope isolé (`View::renderPrintLayout`).
+- **MediaStorageService** : suppression fichier + métadonnées plus robuste (fichier déjà absent).
 
 Documentation : [doc/listes-imprimables.md](doc/listes-imprimables.md).
 

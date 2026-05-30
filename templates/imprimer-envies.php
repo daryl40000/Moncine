@@ -14,6 +14,8 @@
         — tri : <?= Moncine\View::escape($sortSummary) ?>
     </p>
 
+    <?php require MONCINE_ROOT . '/templates/_print_truncation_notice.php'; ?>
+
     <?php if ($films === []): ?>
         <p class="print-sheet__empty">Aucun titre à afficher avec les filtres actuels.</p>
     <?php elseif ($isGroupScope): ?>

@@ -44,6 +44,12 @@
     color: #555;
 }
 
+.print-sheet__warn {
+    margin: 0 0 1rem;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+}
+
 .print-table {
     width: 100%;
     border-collapse: collapse;

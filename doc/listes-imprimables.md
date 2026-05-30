@@ -1,6 +1,6 @@
 # Listes imprimables (Mes films / Mes envies)
 
-**Version : 0.9.1**
+**Version : 0.9.2**
 
 Alternative **légère** à l’export PDF côté serveur (phase 10 reportée pour compatibilité **YunoHost** : pas de Dompdf ni autre dépendance Composer en production).
 
@@ -13,7 +13,9 @@ Alternative **légère** à l’export PDF côté serveur (phase 10 reportée po
    - cliquez sur **Imprimer / Enregistrer en PDF** ;
    - dans la fenêtre du navigateur, choisissez une imprimante ou **Enregistrer au format PDF** (Chrome, Firefox, Edge…).
 
-La liste imprimée reprend les **mêmes critères** que l’écran d’origine (filtres, tri, nombre de lignes affiché).
+La liste imprimée reprend les **mêmes critères** que l’écran d’origine (filtres, tri).
+
+**Limite :** au plus **500 lignes** par impression (évite les pages trop lourdes). Si vous en avez plus, un message vous invite à affiner les filtres.
 
 ## Pages
 
@@ -47,6 +49,7 @@ Nombre de demandes, titre, année, personnes concernées, réalisateur.
 | `templates/layout_print.php` | Mise en page minimale (sans menu du site) |
 | `www/assets/css/print.css` | Styles écran et `@media print` |
 | `www/assets/js/print-page.js` | Déclenche `window.print()` (obligatoire : voir CSP ci-dessous) |
+| `lib/PrintListService.php` | Préparation des données (filtres, tri, listes) |
 | `lib/PrintListHelper.php` | Libellés des filtres et du tri |
 | `lib/View.php` | `filmsPrintUrl()`, `wishlistPrintUrl()` |
 | `templates/_print_button.php` | Bouton sur Mes films / Mes envies |
