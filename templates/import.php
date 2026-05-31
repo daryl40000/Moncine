@@ -162,6 +162,7 @@
     </p>
 
     <?php if (!$hasTmdbKey): ?>
+        <?php if (!empty($canManageCatalog)): ?>
         <form method="post" action="/enrichir.php" class="import-form">
             <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
             <input type="hidden" name="action" value="save_tmdb_key">
@@ -170,14 +171,46 @@
                    placeholder="ex. a1b2c3d4e5f6…">
             <button type="submit" class="btn btn-secondary">Enregistrer la clé TMDB</button>
         </form>
+        <?php else: ?>
+        <p class="hint">Aucune clé TMDB — demandez à un administrateur de la configurer.</p>
+        <?php endif; ?>
     <?php else: ?>
-        <p class="hint">✓ Clé TMDB configurée.</p>
+        <?php if (!empty($tmdbKeyFromEnvironment)): ?>
+            <p class="hint">✓ Clé TMDB active (variable serveur <code>MONCINE_TMDB_API_KEY</code>).</p>
+        <?php else: ?>
+            <p class="hint">✓ Clé TMDB enregistrée sur le serveur (<code>tmdb_api_key.txt</code>).</p>
+        <?php endif; ?>
         <?php if (!empty($canManageCatalog)): ?>
         <form method="post" action="/enrichir.php" class="inline-form">
             <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
             <input type="hidden" name="action" value="test_tmdb">
             <button type="submit" class="btn btn-secondary btn-sm">Tester la connexion TMDB</button>
         </form>
+        <details class="import-columns-help tmdb-key-manage">
+            <summary>Gérer la clé API TMDB</summary>
+            <?php if (!empty($tmdbKeyFromEnvironment)): ?>
+            <p class="hint">
+                Pour changer ou retirer la clé, modifiez <code>MONCINE_TMDB_API_KEY</code> dans la configuration
+                PHP-FPM (YunoHost), puis rechargez PHP-FPM. Cette page ne peut pas supprimer une clé définie par
+                l’environnement.
+            </p>
+            <?php else: ?>
+            <form method="post" action="/enrichir.php" class="import-form">
+                <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
+                <input type="hidden" name="action" value="save_tmdb_key">
+                <label for="tmdb_api_key_replace">Nouvelle clé API TMDB</label>
+                <input type="password" name="tmdb_api_key" id="tmdb_api_key_replace" required autocomplete="off"
+                       placeholder="Remplace la clé actuelle">
+                <button type="submit" class="btn btn-secondary">Enregistrer une nouvelle clé</button>
+            </form>
+            <form method="post" action="/enrichir.php" class="inline-form tmdb-key-clear-form"
+                  onsubmit="return confirm('Supprimer la clé TMDB enregistrée sur ce serveur ? L’enrichissement ne fonctionnera plus tant qu’une nouvelle clé n’est pas saisie.');">
+                <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
+                <input type="hidden" name="action" value="clear_tmdb_key">
+                <button type="submit" class="btn btn-secondary btn-sm">Supprimer la clé enregistrée</button>
+            </form>
+            <?php endif; ?>
+        </details>
         <form method="post" action="/enrichir.php" class="import-form enrich-actions">
             <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>
             <input type="hidden" name="action" value="enrichir">

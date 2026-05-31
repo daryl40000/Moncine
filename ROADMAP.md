@@ -37,7 +37,7 @@ Fonctionnalités métier visées :
 
 ## État actuel
 
-**Version applicative : 1.0.0** (production)
+**Version applicative : 1.0.3** (production)
 
 Application PHP + SQLite, déployable en local ou sur un serveur web classique (YunoHost : sans dépendance PDF serveur).
 
@@ -81,7 +81,7 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique (
 
 ### Point d’étape — mai 2026
 
-**Version actuelle : 1.0.0 (production).** Cycle 0.9 terminé : inscription, comptes durcis, suppression de compte, listes imprimables, prêts entre amis. **Export PDF serveur (phase 10)** et **comparateur de prix (7 bis.2)** reportés. Prochaine évolution majeure suggérée : **phase 11** (Mes BD).
+**Version actuelle : 1.0.3 (production).** Cycle 0.9 terminé : inscription, comptes durcis, suppression de compte, listes imprimables, prêts entre amis. **Export PDF serveur (phase 10)** et **comparateur de prix (7 bis.2)** reportés. Prochaine évolution majeure suggérée : **phase 11** (Mes BD).
 
 | Version | Contenu principal |
 |---------|-------------------|
@@ -111,6 +111,7 @@ Application PHP + SQLite, déployable en local ou sur un serveur web classique (
 | 0.9.5 | Suppression du compte (Mon compte) |
 | 0.9.6 | Durcissement sécurité : inscription, changement d’e-mail (`029`), proxy |
 | 1.0.0 | Version de production (étiquette stable, doc + `schema.sql` alignés) |
+| 1.0.3 | Admin : gestion clé API TMDB (remplacer / supprimer sur **Importer**) |
 
 ### Prochaines étapes
 

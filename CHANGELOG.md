@@ -7,6 +7,18 @@ Les numéros suivent le [versionnement sémantique](https://semver.org/lang/fr/)
 
 ---
 
+## [1.0.3] — 2026-05-30
+
+### Ajouté
+
+- **Clé API TMDB (admin)** : sur **Importer / exporter**, section « Gérer la clé API TMDB » — enregistrer une **nouvelle** clé, **supprimer** celle stockée dans `tmdb_api_key.txt`, tester la connexion. Si la clé vient de `MONCINE_TMDB_API_KEY`, message pour la modifier côté serveur.
+
+### Tests
+
+- `tests/Unit/TmdbConfigTest.php` — suppression du fichier clé et source `file`.
+
+Aucune migration SQL.
+
 ## [1.0.0] — 2026-05-30
 
 **Première version de production** (dvdthèque films, déploiement YunoHost ou serveur classique).

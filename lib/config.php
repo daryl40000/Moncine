@@ -41,7 +41,7 @@ define('MONCINE_INSTALL_SEED_DATA_DIR', MONCINE_DATA . '/install_seed');
 define('MONCINE_APP_NAME', 'Moncine');
 
 // Version applicative (semver)
-define('MONCINE_PACKAGE_VERSION', '1.0.0');
+define('MONCINE_PACKAGE_VERSION', '1.0.3');
 
 // Derrière un reverse proxy de confiance (YunoHost / Nginx) : 1 pour utiliser X-Real-IP / X-Forwarded-For.
 $trustProxy = getenv('MONCINE_TRUST_PROXY');

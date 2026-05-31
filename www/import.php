@@ -43,6 +43,16 @@ if (isset($_GET['tmdb_key_saved'])) {
 if (isset($_GET['tmdb_key_error'])) {
     $errors[] = 'Impossible d\'enregistrer la clé TMDB (vérifiez les droits sur le dossier data/).';
 }
+if (isset($_GET['tmdb_key_cleared'])) {
+    $tmdbMessage = 'Clé TMDB supprimée du serveur. Vous pouvez en enregistrer une nouvelle ci-dessous.';
+}
+if (isset($_GET['tmdb_key_clear_env'])) {
+    $errors[] = 'La clé TMDB est définie par la variable d’environnement MONCINE_TMDB_API_KEY : '
+        . 'supprimez-la ou modifiez-la dans la configuration PHP-FPM du serveur (pas depuis cette page).';
+}
+if (isset($_GET['tmdb_key_clear_error'])) {
+    $errors[] = 'Impossible de supprimer la clé TMDB (droits sur le dossier data/ ?).';
+}
 if (isset($_GET['tmdb_test'])) {
     $msg = (string) ($_GET['tmdb_test_msg'] ?? '');
     $tmdbMessage = ($_GET['tmdb_test'] === 'ok' ? '✓ ' : '✗ ') . $msg;
@@ -206,6 +216,7 @@ $libraryCount = $repo->usesCatalogModel() ? $repo->countLibraryEntries() : $film
 $catalogCount = CatalogAdmin::canAccess() ? (new ExportCatalog())->catalogEntryCount() : 0;
 $enrichPending = (new FilmEnricher())->countPending();
 $hasTmdbKey = TmdbConfig::hasApiKey();
+$tmdbKeySource = TmdbConfig::getKeySource();
 
 View::render('import', [
     'pageTitle' => 'Importer',
@@ -221,6 +232,8 @@ View::render('import', [
     'canManageCatalog' => CatalogAdmin::canAccess(),
     'enrichPending' => $enrichPending,
     'hasTmdbKey' => $hasTmdbKey,
+    'tmdbKeySource' => $tmdbKeySource,
+    'tmdbKeyFromEnvironment' => $tmdbKeySource === TmdbConfig::SOURCE_ENVIRONMENT,
     'enrichBatchSize' => MONCINE_ENRICH_BATCH_SIZE,
     'phpPostMaxSize' => UploadLimits::postMaxSizeLabel(),
     'phpUploadMaxSize' => UploadLimits::uploadMaxFilesizeLabel(),
