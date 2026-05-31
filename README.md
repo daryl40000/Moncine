@@ -126,6 +126,9 @@ Ouvrir http://localhost:8080 — à la première visite, créez le **compte admi
 | `MONCINE_BASE_URL` | URL publique de l’app (liens dans les e-mails : inscription, reset MDP, changement d’e-mail) |
 | `MONCINE_TRUST_PROXY` | Mettre `1` derrière Nginx/YunoHost pour le limiteur de tentatives (IP client via `X-Real-IP` / `X-Forwarded-For`) |
 | `MONCINE_MAIL_FROM` | Adresse expéditeur des e-mails transactionnels |
+| `MONCINE_TMDB_API_KEY` | Clé API TMDB (enrichissement catalogue). Sinon : fichier `tmdb_api_key.txt` dans `MONCINE_DATA` (voir `data/tmdb_api_key.txt.example`) |
+
+Ne versionnez jamais les fichiers sous `data/.keys/`, `data/sessions/`, `data/auth_rate_limit/` ni les fichiers `*_api_key.txt` (déjà exclus par `.gitignore`).
 
 ---
 

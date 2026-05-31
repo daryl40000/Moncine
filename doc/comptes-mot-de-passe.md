@@ -31,6 +31,9 @@ La réinitialisation utilise la fonction PHP `mail()`. Sur YunoHost, configurez 
 | `MONCINE_BASE_URL` | URL publique de l’app (ex. `https://moncine.example.net`) si le lien dans l’e-mail est incorrect |
 | `MONCINE_TRUST_PROXY` | Mettre `1` derrière Nginx/YunoHost pour que le limiteur de tentatives utilise la vraie IP client (`X-Real-IP` / `X-Forwarded-For`). Sans cela, seule `REMOTE_ADDR` est utilisée. |
 | `MONCINE_DATA_PATH` | Dossier des données (base SQLite, clés, `auth_rate_limit/`) |
+| `MONCINE_TMDB_API_KEY` | Clé TMDB (optionnel) — alternative au fichier `tmdb_api_key.txt` dans ce dossier |
+
+Ces dossiers/fichiers ne doivent **pas** être commités dans Git : `data/.keys/`, `data/sessions/`, `data/auth_rate_limit/`, `tmdb_api_key.txt`.
 
 Sans serveur mail fonctionnel, les utilisateurs peuvent demander à l’admin un **Réinit. MDP** depuis la page Comptes.
 

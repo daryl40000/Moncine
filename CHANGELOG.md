@@ -15,6 +15,11 @@ Les numéros suivent le [versionnement sémantique](https://semver.org/lang/fr/)
 
 - Fonctionnalités des versions **0.7** à **0.9.6** : collection, envies, prêts, partage visiteur, inscription publique, comptes, listes imprimables, stockage médias, etc.
 
+### Sécurité
+
+- **Git** : retrait du dépôt de `data/omdb_api_key.txt` (legacy) et des fichiers `data/sessions/*` ; `.gitignore` étendu (`.keys/`, `auth_rate_limit/`, clés API, sessions).
+- Documentation : variable **`MONCINE_TMDB_API_KEY`** et rappel de ne pas versionner les secrets.
+
 ### Documentation & install
 
 - `sql/schema.sql` : table **`email_change_requests`** incluse (install fraîche alignée avec la migration `029`).

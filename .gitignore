@@ -1,7 +1,14 @@
 # Base de données locale (ne pas versionner vos films)
 /data/*.db
 /data/*.db-journal
+
+# Secrets et données sensibles (hors dépôt Git)
 /data/tmdb_api_key.txt
+/data/omdb_api_key.txt
+/data/.keys/
+/data/auth_rate_limit/
+/data/sessions/*
+!/data/sessions/.gitkeep
 
 # Affiches téléchargées (fichiers générés)
 /www/posters/*
