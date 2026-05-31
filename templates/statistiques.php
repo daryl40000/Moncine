@@ -216,23 +216,22 @@ $totalFilms = (int) ($s['total_films'] ?? 0);
 
     <?php
     $topRated = $s['top_rated'] ?? [];
-    if ($topRated !== []):
+    $bottomRated = $s['bottom_rated'] ?? [];
+    if ($topRated !== [] || $bottomRated !== []):
         ?>
         <section class="stats-panel">
-            <h2>Films les mieux notés</h2>
-            <ol class="stats-ranked-list">
-                <?php foreach ($topRated as $film): ?>
-                    <li>
-                        <a href="/film.php?id=<?= (int) $film['id'] ?>" class="stats-ranked-list__link">
-                            <?= Moncine\View::escape((string) $film['titre']) ?>
-                        </a>
-                        <?php if (trim((string) ($film['realisateur'] ?? '')) !== ''): ?>
-                            <span class="stats-ranked-list__meta">— <?= Moncine\View::escape((string) $film['realisateur']) ?></span>
-                        <?php endif; ?>
-                        <span class="tag tag--note"><?= (int) ($film['best_note'] ?? 0) ?>/10</span>
-                    </li>
-                <?php endforeach; ?>
-            </ol>
+            <h2>Films les mieux et les moins bien notés</h2>
+            <p class="hint">Classement par la meilleure note enregistrée pour chaque film (10 titres de chaque côté).</p>
+            <div class="stats-rated-duo">
+                <?php
+                $columnTitle = 'Les 10 mieux notés';
+                $ratedFilms = $topRated;
+                require MONCINE_ROOT . '/templates/_stats_rated_films_column.php';
+                $columnTitle = 'Les 10 moins bien notés';
+                $ratedFilms = $bottomRated;
+                require MONCINE_ROOT . '/templates/_stats_rated_films_column.php';
+                ?>
+            </div>
         </section>
     <?php endif; ?>
 

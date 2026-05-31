@@ -680,6 +680,10 @@ textarea {
 
 /* —— Statistiques —— */
 
+.stats-rated-duo {
+    grid-template-columns: 1fr;
+}
+
 .stats-grid {
     grid-template-columns: repeat(2, 1fr);
 }
@@ -694,6 +698,10 @@ textarea {
 }
 
 @media (min-width: 640px) {
+    .stats-rated-duo {
+        grid-template-columns: 1fr 1fr;
+    }
+
     .stats-grid {
         grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
     }

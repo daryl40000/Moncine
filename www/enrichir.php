@@ -14,7 +14,7 @@ use Moncine\TmdbClient;
 use Moncine\TmdbConfig;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: /import.php');
+    header('Location: /import.php?tab=admin');
     exit;
 }
 
@@ -29,9 +29,9 @@ if ($action === 'save_tmdb_key') {
     }
     $key = (string) ($_POST['tmdb_api_key'] ?? '');
     if (TmdbConfig::saveApiKey($key)) {
-        header('Location: /import.php?tmdb_key_saved=1');
+        header('Location: /import.php?tab=admin&tmdb_key_saved=1');
     } else {
-        header('Location: /import.php?tmdb_key_error=1');
+        header('Location: /import.php?tab=admin&tmdb_key_error=1');
     }
     exit;
 }
@@ -42,11 +42,11 @@ if ($action === 'clear_tmdb_key') {
         exit;
     }
     if (TmdbConfig::clearStoredApiKey()) {
-        header('Location: /import.php?tmdb_key_cleared=1');
+        header('Location: /import.php?tab=admin&tmdb_key_cleared=1');
     } elseif (TmdbConfig::getKeySource() === TmdbConfig::SOURCE_ENVIRONMENT) {
-        header('Location: /import.php?tmdb_key_clear_env=1');
+        header('Location: /import.php?tab=admin&tmdb_key_clear_env=1');
     } else {
-        header('Location: /import.php?tmdb_key_clear_error=1');
+        header('Location: /import.php?tab=admin&tmdb_key_clear_error=1');
     }
     exit;
 }
@@ -54,6 +54,7 @@ if ($action === 'clear_tmdb_key') {
 if ($action === 'test_tmdb') {
     $test = (new TmdbClient())->testConnection();
     $params = http_build_query([
+        'tab' => 'admin',
         'tmdb_test' => $test['ok'] ? 'ok' : 'fail',
         'tmdb_test_msg' => $test['message'],
     ]);
@@ -69,6 +70,7 @@ if ($action === 'enrichir') {
 
     $_SESSION['enrich_last_errors'] = $result['errors'];
     $params = http_build_query([
+        'tab' => 'admin',
         'enrich_done' => 1,
         'processed' => $result['processed'],
         'enriched' => $result['enriched'],

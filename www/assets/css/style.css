@@ -2329,6 +2329,60 @@ a.support-link:hover {
     border-top: 1px solid var(--border);
 }
 
+.import-page__tabs {
+    margin-bottom: 1.25rem;
+}
+
+.import-page__panels {
+    margin-top: 0.5rem;
+}
+
+.import-panel {
+    display: none;
+}
+
+.import-panel--active {
+    display: block;
+}
+
+.import-panel__title {
+    margin-top: 0;
+}
+
+.import-panel__block {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.import-panel__block:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
+.import-panel__block h3 {
+    margin-top: 0;
+    font-size: 1.05rem;
+}
+
+.import-page__admin-banner {
+    margin-bottom: 1rem;
+}
+
+.import-steps {
+    margin: 0 0 1.25rem;
+    padding-left: 1.35rem;
+}
+
+.import-steps li {
+    margin-bottom: 0.35rem;
+}
+
+.import-page__tech {
+    margin-top: 2rem;
+}
+
 .export-panel h2,
 .enrich-panel h2 {
     margin-top: 0;
@@ -2958,6 +3012,17 @@ textarea {
 .year-chart__meta-extra {
     opacity: 0.75;
     font-size: 0.68rem;
+}
+
+.stats-rated-duo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem 2rem;
+    align-items: start;
+}
+
+.stats-rated-column {
+    min-width: 0;
 }
 
 .stats-ranked-list {

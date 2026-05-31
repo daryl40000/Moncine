@@ -26,6 +26,20 @@ $posterRemapMessage = '';
 $errors = [];
 $tmdbMessage = '';
 $enrichMessage = '';
+$activeTab = 'library';
+
+if (isset($_GET['tab'])) {
+    $tab = (string) $_GET['tab'];
+    if (in_array($tab, ['library', 'posters', 'admin'], true)) {
+        $activeTab = $tab;
+    }
+}
+
+if (isset($_GET['enrich_done']) || isset($_GET['tmdb_key_saved']) || isset($_GET['tmdb_key_cleared'])
+    || isset($_GET['tmdb_test']) || isset($_GET['tmdb_key_error']) || isset($_GET['tmdb_key_clear_env'])
+    || isset($_GET['tmdb_key_clear_error'])) {
+    $activeTab = 'admin';
+}
 
 if (isset($_GET['export_error'])) {
     $exportErr = (string) $_GET['export_error'];
@@ -90,9 +104,13 @@ if (isset($_GET['enrich_done'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (UploadLimits::postBodyWasDiscarded()) {
         $errors[] = UploadLimits::postTooLargeMessage();
+        $activeTab = isset($_POST['action']) && (string) $_POST['action'] === 'import_posters_zip'
+            ? 'posters'
+            : 'library';
     } elseif (($_POST['action'] ?? '') === 'remap_posters') {
+        $activeTab = 'admin';
         if (!Csrf::validateFromPost($_POST)) {
-            header('Location: /import.php?csrf_error=1');
+            header('Location: /import.php?tab=admin&csrf_error=1');
             exit;
         }
 
@@ -118,8 +136,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } elseif (($_POST['action'] ?? '') === 'import_posters_zip') {
+        $activeTab = 'posters';
         if (!Csrf::validateFromPost($_POST)) {
-            header('Location: /import.php?csrf_error=1');
+            header('Location: /import.php?tab=posters&csrf_error=1');
             exit;
         }
 
@@ -157,13 +176,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } elseif (!isset($_POST['action'])) {
+        $importScope = (string) ($_POST['import_scope'] ?? 'library');
+        $activeTab = $importScope === 'catalog' ? 'admin' : 'library';
+
         if (!Csrf::validateFromPost($_POST)) {
-            header('Location: /import.php?csrf_error=1');
+            header('Location: /import.php?csrf_error=1&tab=' . rawurlencode($activeTab));
             exit;
         }
 
-        $replaceAll = isset($_POST['replace_all']);
-        $replaceCatalog = CatalogAdmin::canAccess() && isset($_POST['replace_catalog']);
+        $replaceAll = $importScope === 'library' && isset($_POST['replace_all']);
+        $replaceCatalog = $importScope === 'catalog' && CatalogAdmin::canAccess() && isset($_POST['replace_catalog']);
 
         $uploadError = (int) ($_FILES['csv_file']['error'] ?? UPLOAD_ERR_NO_FILE);
         if (!isset($_FILES['csv_file']) || $uploadError !== UPLOAD_ERR_OK) {
@@ -217,6 +239,11 @@ $catalogCount = CatalogAdmin::canAccess() ? (new ExportCatalog())->catalogEntryC
 $enrichPending = (new FilmEnricher())->countPending();
 $hasTmdbKey = TmdbConfig::hasApiKey();
 $tmdbKeySource = TmdbConfig::getKeySource();
+$canManageCatalog = CatalogAdmin::canAccess();
+
+if ($activeTab === 'admin' && !$canManageCatalog) {
+    $activeTab = 'library';
+}
 
 View::render('import', [
     'pageTitle' => 'Importer',
@@ -229,7 +256,8 @@ View::render('import', [
     'filmCount' => $filmCount,
     'libraryCount' => $libraryCount,
     'catalogCount' => $catalogCount,
-    'canManageCatalog' => CatalogAdmin::canAccess(),
+    'canManageCatalog' => $canManageCatalog,
+    'activeTab' => $activeTab,
     'enrichPending' => $enrichPending,
     'hasTmdbKey' => $hasTmdbKey,
     'tmdbKeySource' => $tmdbKeySource,

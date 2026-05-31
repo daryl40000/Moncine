@@ -11,6 +11,8 @@ use PDO;
 
 final class CollectionStats
 {
+    private const RATED_RANKING_LIMIT = 10;
+
     private PDO $db;
 
     public function __construct(
@@ -59,7 +61,8 @@ final class CollectionStats
             'note_distribution_max' => $noteStats['distribution_max'],
             'views_by_year' => $this->viewsByYear(),
             'support_breakdown' => $this->supportBreakdown($totalFilms),
-            'top_rated' => $this->topRatedFilms(8),
+            'top_rated' => $this->topRatedFilms(self::RATED_RANKING_LIMIT),
+            'bottom_rated' => $this->bottomRatedFilms(self::RATED_RANKING_LIMIT),
             'most_rewatched' => $this->mostRewatchedFilms(6),
         ];
     }
@@ -392,6 +395,27 @@ final class CollectionStats
      */
     private function topRatedFilms(int $limit): array
     {
+        return $this->ratedFilmsByBestNote($limit, 'DESC');
+    }
+
+    /**
+     * Notes les plus basses (meilleure note enregistrée par film).
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function bottomRatedFilms(int $limit): array
+    {
+        return $this->ratedFilmsByBestNote($limit, 'ASC');
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function ratedFilmsByBestNote(int $limit, string $direction): array
+    {
+        $direction = $direction === 'ASC' ? 'ASC' : 'DESC';
+        $limit = max(1, $limit);
+
         if (CatalogSchema::usesCatalogTables($this->db)) {
             $stmt = $this->db->prepare(
                 'SELECT b.id, o.titre, o.realisateur, MAX(h.note) AS best_note
@@ -401,13 +425,13 @@ final class CollectionStats
                  WHERE b.foyer_id = ? AND b.statut = ? AND h.user_id = ?
                    AND h.note IS NOT NULL AND h.note >= 1 AND h.note <= 10
                  GROUP BY b.id
-                 ORDER BY best_note DESC, o.titre COLLATE FRENCH_NOCASE ASC
+                 ORDER BY best_note ' . $direction . ', o.titre COLLATE FRENCH_NOCASE ASC
                  LIMIT ?'
             );
             $stmt->bindValue(1, UserContext::currentFoyerId(), PDO::PARAM_INT);
             $stmt->bindValue(2, LibraryStatut::COLLECTION);
             $stmt->bindValue(3, UserContext::currentUserId(), PDO::PARAM_INT);
-            $stmt->bindValue(4, max(1, $limit), PDO::PARAM_INT);
+            $stmt->bindValue(4, $limit, PDO::PARAM_INT);
             $stmt->execute();
 
             return $stmt->fetchAll();
@@ -419,10 +443,10 @@ final class CollectionStats
              INNER JOIN historique h ON h.film_id = f.id
              WHERE h.note IS NOT NULL AND h.note >= 1 AND h.note <= 10
              GROUP BY f.id
-             ORDER BY best_note DESC, f.titre COLLATE FRENCH_NOCASE ASC
+             ORDER BY best_note ' . $direction . ', f.titre COLLATE FRENCH_NOCASE ASC
              LIMIT ?'
         );
-        $stmt->bindValue(1, max(1, $limit), PDO::PARAM_INT);
+        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
         $stmt->execute();
 
         return $stmt->fetchAll();
