@@ -5,7 +5,7 @@
  * Structure :
  *   www/     racine web
  *   lib/     code PHP
- *   data/    SQLite, clés API, affiches (hors git)
+ *   data/    SQLite, clés API, affiches (posters/), médias (hors git)
  */
 
 declare(strict_types=1);
@@ -25,6 +25,9 @@ define('MONCINE_DATA', $dataPath);
 
 define('MONCINE_DB_FILE', MONCINE_DATA . '/moncine.db');
 
+// Affiches catalogue (même dossier de données que la base SQLite)
+define('MONCINE_POSTERS_DIR', MONCINE_DATA . '/posters');
+
 // Racine des médias volumineux (PDF magazines, livres, exports…) — hors www/.
 // Sous-dossiers créés par Moncine : objects/, magazines/, books/, exports/, tmp/, …
 $mediaPath = getenv('MONCINE_MEDIA_PATH');
@@ -41,7 +44,7 @@ define('MONCINE_INSTALL_SEED_DATA_DIR', MONCINE_DATA . '/install_seed');
 define('MONCINE_APP_NAME', 'Moncine');
 
 // Version applicative (semver)
-define('MONCINE_PACKAGE_VERSION', '1.0.4');
+define('MONCINE_PACKAGE_VERSION', '1.0.5');
 
 // Derrière un reverse proxy de confiance (YunoHost / Nginx) : 1 pour utiliser X-Real-IP / X-Forwarded-For.
 $trustProxy = getenv('MONCINE_TRUST_PROXY');

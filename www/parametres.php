@@ -82,6 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $canDeleteAccount = !UserRole::isAdmin((string) ($user['role'] ?? ''));
+$foyer = (new FoyerRepository())->findForUser($userId);
 $isSoloGroupMember = false;
 if ($foyer !== null && $canDeleteAccount) {
     $foyerId = (int) ($foyer['id'] ?? 0);

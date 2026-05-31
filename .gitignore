@@ -10,7 +10,10 @@
 /data/sessions/*
 !/data/sessions/.gitkeep
 
-# Affiches téléchargées (fichiers générés)
+# Affiches téléchargées (fichiers générés, à côté de la base SQLite)
+/data/posters/
+
+# Ancien emplacement (migration) — fichiers locaux éventuels
 /www/posters/*
 !/www/posters/.gitkeep
 

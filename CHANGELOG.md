@@ -7,6 +7,27 @@ Les numéros suivent le [versionnement sémantique](https://semver.org/lang/fr/)
 
 ---
 
+## [1.0.5] — 2026-06-01
+
+### Ajouté
+
+- **Affiches locales** : stockage dans `{MONCINE_DATA}/posters/` (même dossier que `moncine.db`), servies par `poster.php` (compatible Nginx/YunoHost). Repli de lecture sur l’ancien `www/posters/` pendant la migration.
+
+### Modifié
+
+- **Inscription** : plus de groupe famille créé automatiquement à la création du compte (le premier admin conserve son groupe via `createFirstAdmin`).
+
+### Corrigé
+
+- **Suppression de compte** : ordre de détachement social puis `foyer_id = NULL` avant purge des foyers orphelins — corrige l’échec SQLite pour les utilisateurs encore liés à un foyer solo.
+- **Paramètres** : chargement du foyer avant la détection « membre seul dans un groupe ».
+
+### Tests
+
+- `AccountDeleteTest::testAdminCanDeleteUserInSoloGroupLikeAfterRegistration`
+
+Aucune migration SQL. Après mise à jour : déplacer éventuellement `www/posters/*` vers `{MONCINE_DATA}/posters/`.
+
 ## [1.0.4] — 2026-05-31
 
 ### Corrigé

@@ -228,7 +228,7 @@
 <section class="export-panel">
     <h2>Affiches locales</h2>
     <p class="lead">
-        Les affiches sont stockées par <strong>ID catalogue</strong> dans <code>www/posters/</code>
+        Les affiches sont stockées par <strong>ID catalogue</strong> dans le dossier <code>posters/</code> (données Moncine)
         (fichiers <code>123.jpg</code> = œuvre n°123). Importez le catalogue CSV <strong>avant</strong> le ZIP.
     </p>
     <p>
@@ -245,7 +245,7 @@
             post_max_size = <strong><?= Moncine\View::escape((string) ($phpPostMaxSize ?? '?')) ?></strong>,
             upload_max_filesize = <strong><?= Moncine\View::escape((string) ($phpUploadMaxSize ?? '?')) ?></strong>
             (il faut au moins 85M pour un gros ZIP — mettre à jour le paquet Moncine puis redémarrer PHP-FPM).
-            Vous pouvez aussi copier le dossier <code>posters/</code> en SSH vers <code>www/posters/</code>.
+            Vous pouvez aussi copier le dossier <code>posters/</code> en SSH vers le dossier de données Moncine (<code>posters/</code> à côté de <code>moncine.db</code>).
         </p>
         <form method="post" enctype="multipart/form-data" class="import-form">
             <?php require MONCINE_ROOT . '/templates/_csrf_field.php'; ?>

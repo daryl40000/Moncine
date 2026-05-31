@@ -85,6 +85,37 @@ final class AccountDeleteTest extends MoncineTestCase
         $this->assertSame($adminId, (int) ($row['user_id'] ?? 0));
     }
 
+    public function testAdminCanDeleteUserInSoloGroupLikeAfterRegistration(): void
+    {
+        $db = Database::getInstance();
+        (new SchemaMigrator($db))->runPendingMigrations();
+        SocialMigration::runIfNeeded($db);
+
+        $repo = new UtilisateurRepository();
+        $userId = $repo->create(
+            'Solo Inscrit',
+            'solo-reg-delete@test.local',
+            'TestPass123!',
+            UserRole::USER
+        );
+        $this->assertIsInt($userId);
+
+        $foyerId = (new FoyerRepository())->createDefaultForUser($userId);
+        $this->assertGreaterThan(0, $foyerId);
+
+        $countStmt = $db->prepare('SELECT COUNT(*) FROM group_members WHERE user_id = ?');
+        $countStmt->execute([$userId]);
+        $this->assertSame(1, (int) $countStmt->fetchColumn());
+
+        $result = $repo->delete($userId);
+        $this->assertTrue($result === true, is_string($result) ? $result : 'delete failed');
+        $this->assertNull($repo->findById($userId));
+
+        $foyerCheck = $db->prepare('SELECT COUNT(*) FROM foyers WHERE id = ?');
+        $foyerCheck->execute([$foyerId]);
+        $this->assertSame(0, (int) $foyerCheck->fetchColumn());
+    }
+
     public function testAdminCanDeleteUserWithGroupMembership(): void
     {
         $db = Database::getInstance();

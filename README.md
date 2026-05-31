@@ -1,6 +1,6 @@
 # Moncine
 
-**Version : 1.0.4**
+**Version : 1.0.5**
 
 **Auteur :** Stéphane MATER  
 **Licence :** [GNU General Public License v3.0 ou ultérieure](LICENSE) (GPL-3.0-or-later)
@@ -179,6 +179,7 @@ Les fichiers dans `sql/migrations_legacy/` ne sont **pas** appliqués (historiqu
 | **v1.0.0** | **Version de production** — même schéma que 0.9.6 ; `schema.sql` inclut `email_change_requests` |
 | **v1.0.3** | Admin : remplacer / supprimer la clé API TMDB depuis **Importer** (aucune migration SQL) |
 | **v1.0.4** | Correctif suppression compte membre d’un groupe famille (`group_members`) |
+| **v1.0.5** | Affiches dans `MONCINE_DATA/posters/` + `poster.php` ; suppression compte (foyers) ; inscription sans groupe auto |
 
 ---
 
@@ -198,4 +199,4 @@ composer test
 - **Import** : page `/import.php` (bibliothèque ou catalogue admin)
 - **Impression** : bouton **Version imprimable** sur Mes films et Mes envies → PDF via le navigateur ([doc/listes-imprimables.md](doc/listes-imprimables.md))
 
-Les affiches locales sont stockées dans `data/posters/` (ou le dossier défini par `MONCINE_DATA_PATH`).
+Les affiches locales sont stockées dans `data/posters/` (ou `{MONCINE_DATA_PATH}/posters/`, au même niveau que `moncine.db`). Elles sont affichées via `poster.php` (compatible Nginx/YunoHost). Après une mise à jour depuis une ancienne version, déplacez éventuellement `www/posters/*` vers ce dossier.
