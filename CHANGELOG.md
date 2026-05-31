@@ -7,6 +7,18 @@ Les numéros suivent le [versionnement sémantique](https://semver.org/lang/fr/)
 
 ---
 
+## [1.0.4] — 2026-05-31
+
+### Corrigé
+
+- **Suppression de compte (admin ou Mon compte)** : retrait explicite de `group_members`, invitations de groupe, amis et liens de partage avant suppression de l’utilisateur — corrige « Suppression impossible » (`FOREIGN KEY constraint failed`) pour les membres d’un groupe famille.
+
+### Tests
+
+- `AccountDeleteTest::testAdminCanDeleteUserWithGroupMembership`
+
+Aucune migration SQL.
+
 ## [1.0.3] — 2026-05-30
 
 ### Ajouté

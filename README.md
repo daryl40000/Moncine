@@ -1,6 +1,6 @@
 # Moncine
 
-**Version : 1.0.3**
+**Version : 1.0.4**
 
 **Auteur :** Stéphane MATER  
 **Licence :** [GNU General Public License v3.0 ou ultérieure](LICENSE) (GPL-3.0-or-later)
@@ -178,6 +178,7 @@ Les fichiers dans `sql/migrations_legacy/` ne sont **pas** appliqués (historiqu
 | **v0.9.6** | Durcissement sécurité comptes : inscription chiffrée, changement d’e-mail confirmé (`029`), `MONCINE_TRUST_PROXY` |
 | **v1.0.0** | **Version de production** — même schéma que 0.9.6 ; `schema.sql` inclut `email_change_requests` |
 | **v1.0.3** | Admin : remplacer / supprimer la clé API TMDB depuis **Importer** (aucune migration SQL) |
+| **v1.0.4** | Correctif suppression compte membre d’un groupe famille (`group_members`) |
 
 ---
 
